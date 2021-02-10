@@ -7,6 +7,7 @@ import vars from "../../styles/vars";
 
 export default function Player() {
   const [size, setSize] = React.useState<number>(0);
+  const [zoom] = React.useState<number>(1);
   const { player } = useGame();
   useControls();
   const texture = useTexture(assets.shapes[player.shape]);
@@ -15,6 +16,7 @@ export default function Player() {
     function onResize() {
       setSize(Math.max(window.innerWidth, window.innerHeight));
     }
+
     onResize();
     window.addEventListener("resize", onResize);
     return () => {
@@ -25,14 +27,15 @@ export default function Player() {
   return (
     <group position={[player.position.x, player.position.y, 0]}>
       <mesh>
-        <planeBufferGeometry attach="geometry" args={[0.2, 0.2, 1]} />
+        <planeBufferGeometry attach="geometry" args={[0.1, 0.1, 1]} />
         <meshBasicMaterial
           attach="material"
-          color={vars.color.black}
           map={texture}
+          color={vars.color.healthBar}
+          transparent={true}
         />
       </mesh>
-      <OrthographicCamera makeDefault position={[0, 0, size]} zoom={size} />
+      <OrthographicCamera makeDefault position={[0, 0, size]} zoom={size * zoom} />
     </group>
   );
 }

@@ -1,7 +1,7 @@
 import { Shape, Weapon } from "./types";
 import chunk from "../assets/chunk.svg";
 import circle from "../assets/shapes/circle.svg";
-import triangle from "../assets/shapes/triangle.svg";
+import triangle from "../assets/shapes/triangle.png";
 import square from "../assets/shapes/square.svg";
 
 // eslint-disable-next-line import/no-anonymous-default-export

@@ -1,13 +1,13 @@
+import * as THREE from "three";
 import create from "zustand";
 import { GameState, Player, Shape, Weapon } from "./types";
 
 export const useGame = create<GameState>((set) => {
   return {
     player: {
-      x: 0,
-      y: 0,
+      position: new THREE.Vector3(0, 0, 0),
       health: 0.8,
-      speed: 4,
+      speed: 0.005,
       name: "Enijar",
       shape: Shape.triangle,
       weapon: Weapon.handgun,
@@ -17,10 +17,14 @@ export const useGame = create<GameState>((set) => {
     },
     movePlayer(axis: "x" | "y", direction: number) {
       const { player } = useGame.getState();
-      const x = axis === "x" ? player.x - direction * player.speed : player.x;
-      const y = axis === "y" ? player.y - direction * player.speed : player.y;
-      console.log({ x, y });
-      set({ player: { ...player, x, y } });
+      const { speed } = player;
+      const { x, y } = player.position;
+      player.position.set(
+        axis === "x" ? x - direction * speed : x,
+        axis === "y" ? y - direction * speed : y,
+        0
+      );
+      set({ player });
     },
   };
 });

@@ -7,10 +7,13 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
+    "@react-three/drei": "^3.4.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-router-dom": "^5.2.0",
+    "react-three-fiber": "^5.3.18",
     "styled-components": "^5.2.1",
+    "three": "^0.125.2",
     "zustand": "^3.3.1"
   },
   "devDependencies": {

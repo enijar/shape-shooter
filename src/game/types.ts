@@ -1,3 +1,5 @@
+import type * as THREE from "three";
+
 export enum Shape {
   circle = "circle",
   square = "square",
@@ -12,8 +14,7 @@ export enum Weapon {
 }
 
 export type Player = {
-  x: number;
-  y: number;
+  position: THREE.Vector3;
   health: number;
   speed: number;
   name: string;

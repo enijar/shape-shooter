@@ -40,10 +40,10 @@ export default function useControls() {
         movePlayer("y", 1);
       }
       if (activeKeys.current.includes(Controls.moveLeft)) {
-        movePlayer("x", -1);
+        movePlayer("x", 1);
       }
       if (activeKeys.current.includes(Controls.moveRight)) {
-        movePlayer("x", 1);
+        movePlayer("x", -1);
       }
     }
     update();

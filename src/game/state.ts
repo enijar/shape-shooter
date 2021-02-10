@@ -11,7 +11,8 @@ export const useGame = create<GameState>((set) => {
       name: "Enijar",
       shape: Shape.triangle,
       weapon: Weapon.handgun,
-      color: "#ff0000"
+      color: "#ff0000",
+      firingSpeed: 0.75,
     },
     setPlayer(player: Player) {
       set({ player });

@@ -21,6 +21,7 @@ export type Player = {
   shape: Shape;
   weapon: Weapon;
   color: string;
+  firingSpeed: number;
 };
 
 export type GameState = {

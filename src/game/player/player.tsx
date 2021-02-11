@@ -9,37 +9,21 @@ import { deg2rad } from "../utils";
 import vars from "../../styles/vars";
 
 const box = new THREE.Box3();
-const direction = new THREE.Vector3();
-
-const MAX_PROJECTILES = 5;
-
-type Projectile = {
-  id: number;
-  position: THREE.Vector3;
-  direction: THREE.Vector3;
-  ref: any;
-};
-
-type ProjectileObject = {
-  id: number;
-  position: THREE.Vector3;
-};
 
 export default function Player() {
   const playerGroup = React.useRef<THREE.Group>();
   const playerMesh = React.useRef<THREE.Mesh>();
-  const lastProjectileTime = React.useRef<number>(0);
-  const projectiles = React.useRef<Projectile[]>([]);
-  const [projectileObjects, setProjectileObjects] = React.useState<
-    ProjectileObject[]
-  >([]);
-  const firing = React.useRef<boolean>(false);
+  const lastShootTime = React.useRef<number>(0);
+  const shooting = React.useRef<boolean>(false);
   const [size, setSize] = React.useState<number>(0);
   const [zoom] = React.useState<number>(1);
   const { player } = useGame();
   const texture = useTexture(shape(player.shape, player.color));
   useControls();
   const { raycaster } = useThree();
+  const bulletRefs = React.useMemo<React.RefObject<THREE.Mesh>[]>(() => {
+    return player.bullets.map(() => React.createRef());
+  }, [player.bullets]);
 
   React.useEffect(() => {
     function onResize() {
@@ -72,11 +56,11 @@ export default function Player() {
 
   React.useEffect(() => {
     function onDown() {
-      firing.current = true;
+      shooting.current = true;
     }
 
     function onUp() {
-      firing.current = false;
+      shooting.current = false;
     }
 
     window.addEventListener("pointerdown", onDown);
@@ -87,49 +71,35 @@ export default function Player() {
     };
   }, []);
 
-  useFrame((state) => {
+  useFrame(() => {
+    if (!playerMesh.current) return;
+
     const now = Date.now();
 
     if (
-      firing.current &&
-      now - lastProjectileTime.current >= (1 - player.firingSpeed) * 1000
+      shooting.current &&
+      now - lastShootTime.current >= (1 - player.shootingSpeed) * 1000
     ) {
-      lastProjectileTime.current = now;
-      const position = player.position
-        .clone()
-        .add(new THREE.Vector3(0, 0.1, 0));
-      const id = now;
-      projectiles.current.push({
-        id,
-        position,
-        direction: direction
-          .subVectors(position, state.raycaster.ray.origin)
-          .normalize(),
-        ref: React.createRef(),
-      });
-      setProjectileObjects((projectileObjects) => {
-        return [...projectileObjects, { id, position }];
-      });
+      lastShootTime.current = now;
+      useGame
+        .getState()
+        .shoot(player.position.clone(), playerMesh.current.rotation.clone());
     }
 
-    projectiles.current.forEach((projectile) => {
-      const object = projectile.ref.current;
-      if (!object) return;
-      object.translateY(0.005);
+    const game = useGame.getState();
+    const bullets = [...game.player.bullets];
+    bullets.forEach((bullet, index) => {
+      if (now - bullet.createdAt >= bullet.lifetime) {
+        bullets.splice(index, 1);
+        return;
+      }
+      if (!bulletRefs[index]) return;
+      const ref = bulletRefs[index].current;
+      if (!ref) return;
+      ref.position.z += bullet.speed;
     });
+    game.setPlayer({ ...game.player, bullets });
   });
-
-  React.useEffect(() => {
-    if (projectileObjects.length > MAX_PROJECTILES) {
-      setProjectileObjects((projectileObjects) => {
-        const [first, ...rest] = projectileObjects;
-        projectiles.current = projectiles.current.filter((projectile) => {
-          return projectile.id !== first.id;
-        });
-        return rest;
-      });
-    }
-  }, [projectileObjects]);
 
   return (
     <>
@@ -147,17 +117,9 @@ export default function Player() {
           zoom={size * zoom}
         />
       </group>
-      {projectileObjects.map((projectileObject) => {
-        const projectile = projectiles.current.find((projectile) => {
-          return projectile.id === projectileObject.id;
-        });
-        if (!projectile) return null;
+      {player.bullets.map((bullet, index) => {
         return (
-          <mesh
-            key={projectile.id}
-            position={projectile.position}
-            ref={projectile.ref}
-          >
+          <mesh key={index} ref={bulletRefs[index]}>
             <planeBufferGeometry attach="geometry" args={[0.01, 0.01, 1]} />
             <meshBasicMaterial attach="material" color={vars.color.black} />
           </mesh>

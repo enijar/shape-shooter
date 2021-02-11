@@ -12,7 +12,8 @@ export const useGame = create<GameState>((set) => {
       shape: Shape.triangle,
       weapon: Weapon.handgun,
       color: "#ff0000",
-      firingSpeed: 0.75,
+      shootingSpeed: 0.75,
+      bullets: [],
     },
     setPlayer(player: Player) {
       set({ player });
@@ -27,6 +28,17 @@ export const useGame = create<GameState>((set) => {
         0
       );
       set({ player });
+    },
+    shoot(position: THREE.Vector3, rotation: THREE.Euler) {
+      const bullet = {
+        lifetime: 3500,
+        speed: 0.5,
+        createdAt: Date.now(),
+        position: position.clone(),
+        rotation: rotation.clone(),
+      };
+      const { player, setPlayer } = useGame.getState();
+      setPlayer({ ...player, bullets: [...player.bullets, bullet] });
     },
   };
 });

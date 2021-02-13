@@ -2,7 +2,7 @@ import React from "react";
 import { Controls } from "../types";
 import { useGame } from "../state";
 
-export default function useControls() {
+export default function useControlledPlayer() {
   const { movePlayer } = useGame();
   const nextFrame = React.useRef<number>(-1);
   const activeKeys = React.useRef<string[]>([]);
@@ -34,10 +34,24 @@ export default function useControls() {
       nextFrame.current = requestAnimationFrame(update);
 
       if (activeKeys.current.includes(Controls.moveUp)) {
-        movePlayer("y", -1);
+        let amount = -1;
+        if (
+          activeKeys.current.includes(Controls.moveLeft) ||
+          activeKeys.current.includes(Controls.moveRight)
+        ) {
+          amount *= 0.5;
+        }
+        movePlayer("y", amount);
       }
       if (activeKeys.current.includes(Controls.moveDown)) {
-        movePlayer("y", 1);
+        let amount = 1;
+        if (
+          activeKeys.current.includes(Controls.moveLeft) ||
+          activeKeys.current.includes(Controls.moveRight)
+        ) {
+          amount *= 0.5;
+        }
+        movePlayer("y", amount);
       }
       if (activeKeys.current.includes(Controls.moveLeft)) {
         movePlayer("x", 1);

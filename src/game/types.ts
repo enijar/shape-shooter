@@ -1,5 +1,3 @@
-import type * as THREE from "three";
-
 export enum Shape {
   circle = "circle",
   square = "square",
@@ -17,12 +15,14 @@ export type Bullet = {
   lifetime: number;
   speed: number;
   createdAt: number;
-  position: THREE.Vector3;
-  rotation: THREE.Euler;
+  position: number[];
+  rotation: number[];
 };
 
 export type Player = {
-  position: THREE.Vector3;
+  id: string;
+  position: number[];
+  rotation: number[];
   health: number;
   speed: number;
   name: string;
@@ -34,10 +34,17 @@ export type Player = {
 };
 
 export type GameState = {
-  player: Player;
-  setPlayer: Function;
+  players: Player[];
+  setPlayers: Function;
   movePlayer: Function;
   shoot: Function;
+  update: Function;
+  size: number;
+  setSize: Function;
+  zoom: number;
+  setZoom: Function;
+  currentPlayerId: string;
+  setCurrentPlayerId: Function;
 };
 
 export enum Controls {

@@ -12,7 +12,7 @@ const shapes = {
   },
 };
 
-export default function shape(shape: Shape, color: string): string {
+export default function createShape(shape: Shape, color: string): string {
   // @ts-ignore
   return shapes[shape](color);
 }

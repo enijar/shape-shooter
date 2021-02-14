@@ -2,15 +2,15 @@ import { resolve } from "path";
 import env from "../../env";
 
 export default {
-  port: env.port,
+  port: env.port ?? 3000,
   database: {
-    name: env.database.name,
-    dialect: env.database.dialect,
-    username: env.database.username,
-    password: env.database.password,
+    name: env.database.name ?? "shapes",
+    dialect: env.database.dialect ?? "mysql",
+    username: env.database.username ?? "shapes",
+    password: env.database.password ?? "secret",
     entities: resolve("src", "entities"),
   },
   jwt: {
-    secret: env.jwt.secret,
+    secret: env.jwt.secret ?? "secret",
   },
 };

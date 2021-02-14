@@ -1,4 +1,4 @@
-import { Bullet, Player, Shape, Weapon, Move } from "./types";
+import { Bullet, Move, Player, Shape, Weapon } from "./types";
 import { guid } from "./utils";
 
 type GameEngineState = {
@@ -110,9 +110,18 @@ export default {
         this.state.bullets[i].active = false;
         continue;
       }
-      // Update bullet position
-      const [x, y, z] = this.state.bullets[i].position;
-      this.state.bullets[i].position = [x, y + this.state.bullets[i].speed, z];
+      // Update bullet position using rotation(z) as the angle of direction:
+      // angle = rotation(z)
+      // [x, y, z] = [x + speed * sin(-angle), y + speed * cos(-angle), z]
+      this.state.bullets[i].position = [
+        this.state.bullets[i].position[0] +
+          this.state.bullets[i].speed *
+            Math.sin(-this.state.bullets[i].rotation[2]),
+        this.state.bullets[i].position[1] +
+          this.state.bullets[i].speed *
+            Math.cos(-this.state.bullets[i].rotation[2]),
+        this.state.bullets[i].position[2],
+      ];
     }
 
     return this.state;

@@ -24,7 +24,8 @@ export type Bullet = {
 };
 
 export type Player = {
-  id: string;
+  id: number;
+  active: boolean;
   x: number;
   y: number;
   r: number;
@@ -43,14 +44,10 @@ export type GameState = {
   setPlayer: Function;
   players: Player[];
   setPlayers: Function;
-  bullets: Bullet[];
-  setBullets: Function;
   size: number;
   setSize: Function;
   zoom: number;
   setZoom: Function;
-  currentPlayerId: string;
-  setCurrentPlayerId: Function;
 };
 
 export enum Controls {

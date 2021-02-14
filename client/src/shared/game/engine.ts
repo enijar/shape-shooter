@@ -1,10 +1,9 @@
-import { Bullet, Move, Player, Shape, Weapon } from "../types";
-import { guid } from "../../game/utils";
+import { Move, Player, Shape, Weapon } from "../types";
 
 type GameEngineState = {
   player: null | Player;
   players: Player[];
-  bullets: Bullet[];
+  bullets: Float64Array;
 };
 
 export enum GameEngineContext {
@@ -15,9 +14,59 @@ export enum GameEngineContext {
 let nextFrame: number = -1;
 let nextBulletIndex = 0;
 
+const MAX_PLAYERS = 100; // @todo change to 100
+const MAX_PLAYER_BULLETS = 100; // @todo change to 100
+
+export enum BulletEntityAttributeIndex {
+  id,
+  playerId,
+  active,
+  createdAt,
+  speed,
+  lifetime,
+  x,
+  y,
+  r,
+}
+
+export type Entity = {
+  array: Float64Array;
+  totalAttributes: number;
+  get: (index: number, attributeIndex: number) => number;
+  set: (index: number, attributeIndex: number, value: number) => void;
+};
+
+function createEntities(count: number, attributes: number[]): Entity {
+  const array = new Float64Array(Array(count * attributes.length).fill(0));
+  const totalAttributes = attributes.length;
+  return {
+    array,
+    totalAttributes,
+    get(index, attributeIndex) {
+      return array[index + attributeIndex];
+    },
+    set(index, attributeIndex, value) {
+      array.set([value], index + attributeIndex);
+    },
+  };
+}
+
+export const bulletEntities = createEntities(MAX_PLAYERS * MAX_PLAYER_BULLETS, [
+  0, // id
+  0, // playerId
+  0, // active
+  0, // createdAt
+  0, // speed
+  0, // lifetime
+  0, // x
+  0, // y
+  0, // z
+]);
+
 const state: GameEngineState = {
   player: {
-    id: guid(),
+    id: 1,
+    active: true,
     x: 0,
     y: 0,
     r: 0,
@@ -30,38 +79,17 @@ const state: GameEngineState = {
     lastShotTime: 0,
     shootingSpeed: 0.75,
   },
-  players: [
-    {
-      id: guid(),
-      x: 0.15,
-      y: 0.3,
-      r: 0,
-      health: 1,
-      speed: 0.005,
-      name: "Player 2",
-      shape: Shape.triangle,
-      weapon: Weapon.handgun,
-      color: "#00ff00",
-      lastShotTime: 0,
-      shootingSpeed: 0.75,
-    },
-  ],
-  bullets: Array(100)
-    .fill({})
-    .map(() => {
-      return {
-        id: guid(),
-        ownerId: "",
-        active: false,
-        lifetime: 3500,
-        speed: 0.01,
-        createdAt: 0,
-        x: 0,
-        y: 0,
-        r: 0,
-      };
-    }),
+  players: [],
+  bullets: bulletEntities.array,
 };
+
+for (
+  let i = 0, length = state.bullets.length;
+  i < length;
+  i += bulletEntities.totalAttributes
+) {
+  bulletEntities.set(i, BulletEntityAttributeIndex.id, i + 1);
+}
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
@@ -70,7 +98,7 @@ export default {
   destroy() {
     cancelAnimationFrame(nextFrame);
   },
-  playerMove(move: Move): null | Player {
+  playerMove(move: Move) {
     if (this.state.player === null) return null;
     if (move.x.move) {
       this.state.player.x -= move.x.amount * this.state.player.speed;
@@ -78,42 +106,72 @@ export default {
     if (move.y.move) {
       this.state.player.y -= move.y.amount * this.state.player.speed;
     }
-    return this.state.player;
   },
-  playerShoot(): Bullet[] {
+  playerShoot() {
     if (this.state.player === null) return this.state.bullets;
-    this.state.bullets[nextBulletIndex].ownerId = this.state.player.id;
-    this.state.bullets[nextBulletIndex].active = true;
-    this.state.bullets[nextBulletIndex].createdAt = Date.now();
-    this.state.bullets[nextBulletIndex].x = this.state.player.x;
-    this.state.bullets[nextBulletIndex].y = this.state.player.y;
-    this.state.bullets[nextBulletIndex].r = this.state.player.r;
-    nextBulletIndex++;
+    bulletEntities.set(
+      nextBulletIndex,
+      BulletEntityAttributeIndex.playerId,
+      this.state.player.id
+    );
+    bulletEntities.set(nextBulletIndex, BulletEntityAttributeIndex.active, 1);
+    bulletEntities.set(
+      nextBulletIndex,
+      BulletEntityAttributeIndex.lifetime,
+      3500
+    );
+    bulletEntities.set(nextBulletIndex, BulletEntityAttributeIndex.speed, 0.01);
+    const { x, y, r } = this.state.player;
+    bulletEntities.set(nextBulletIndex, BulletEntityAttributeIndex.x, x);
+    bulletEntities.set(nextBulletIndex, BulletEntityAttributeIndex.y, y);
+    bulletEntities.set(nextBulletIndex, BulletEntityAttributeIndex.r, r);
+    bulletEntities.set(
+      nextBulletIndex,
+      BulletEntityAttributeIndex.createdAt,
+      Date.now()
+    );
+    nextBulletIndex += bulletEntities.totalAttributes;
     if (nextBulletIndex === this.state.bullets.length) {
       nextBulletIndex = 0;
     }
-    return this.state.bullets;
   },
   update() {
     const now = Date.now();
-    for (let i = this.state.bullets.length - 1; i >= 0; i--) {
-      if (!this.state.bullets[i].active) continue;
+
+    for (
+      let i = 0, length = this.state.bullets.length;
+      i < length;
+      i += bulletEntities.totalAttributes
+    ) {
+      if (bulletEntities.get(i, BulletEntityAttributeIndex.active) === 0) {
+        continue;
+      }
       // Remove old bullets
       if (
-        now - this.state.bullets[i].createdAt >=
-        this.state.bullets[i].lifetime
+        now - bulletEntities.get(i, BulletEntityAttributeIndex.createdAt) >=
+        bulletEntities.get(i, BulletEntityAttributeIndex.lifetime)
       ) {
-        this.state.bullets[i].active = false;
+        bulletEntities.set(i, BulletEntityAttributeIndex.active, 0);
         continue;
       }
       // Update bullet position using rotation(z) as the angle of direction:
       // angle = rotation(z)
       // x = x + speed * sin(-angle);
       // y = y + speed * cos(-angle);
-      this.state.bullets[i].x +=
-        this.state.bullets[i].speed * Math.sin(-this.state.bullets[i].r);
-      this.state.bullets[i].y +=
-        this.state.bullets[i].speed * Math.cos(-this.state.bullets[i].r);
+      const speed = bulletEntities.get(i, BulletEntityAttributeIndex.speed);
+      const x = bulletEntities.get(i, BulletEntityAttributeIndex.x);
+      const y = bulletEntities.get(i, BulletEntityAttributeIndex.y);
+      const r = bulletEntities.get(i, BulletEntityAttributeIndex.r);
+      bulletEntities.set(
+        i,
+        BulletEntityAttributeIndex.x,
+        x + speed * Math.sin(-r)
+      );
+      bulletEntities.set(
+        i,
+        BulletEntityAttributeIndex.y,
+        y + speed * Math.cos(-r)
+      );
     }
 
     return this.state;

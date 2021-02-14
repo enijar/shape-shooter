@@ -5,24 +5,17 @@ import { GameWrapper } from "./styles";
 import { useGame } from "./state";
 import engine from "../shared/game/engine";
 import World from "./world/world";
+import Bullets from "./entities/bullets";
 import Player from "./player/player";
-import Bullet from "./bullet/bullet";
 
 export default function Game() {
-  const {
-    player,
-    players,
-    setPlayers,
-    bullets,
-    setSize,
-    setCurrentPlayerId,
-    size,
-    zoom,
-  } = useGame();
+  const { player, size, zoom, players } = useGame();
 
   React.useEffect(() => {
     function onResize() {
-      setSize(Math.max(window.innerWidth, window.innerHeight));
+      useGame
+        .getState()
+        .setSize(Math.max(window.innerWidth, window.innerHeight));
     }
 
     onResize();
@@ -30,21 +23,21 @@ export default function Game() {
     return () => {
       window.removeEventListener("resize", onResize);
     };
-  }, [setSize]);
+  }, []);
 
   React.useEffect(() => {
     const game = useGame.getState();
     game.setPlayer(engine.state.player);
     game.setPlayers(engine.state.players);
     return engine.destroy;
-  }, [setPlayers, setCurrentPlayerId]);
+  }, []);
 
   return (
     <GameWrapper>
       <Canvas>
         <React.Suspense fallback={null}>
           <World>
-            {/* Default camera if there is no current player */}
+            {/*Default camera if there is no current player*/}
             {player === null && (
               <OrthographicCamera
                 makeDefault
@@ -52,17 +45,11 @@ export default function Game() {
                 zoom={size * zoom}
               />
             )}
-
             {player !== null && <Player player={player} currentPlayer={true} />}
-
             {players.map((player) => {
               return <Player key={player.id} player={player} />;
             })}
-
-            {bullets.map((bullet) => {
-              if (!bullet.active) return null;
-              return <Bullet key={bullet.id} bullet={bullet} />;
-            })}
+            <Bullets />
           </World>
         </React.Suspense>
       </Canvas>

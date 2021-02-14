@@ -1,5 +1,5 @@
 import create from "zustand";
-import { Bullet, GameState, Player } from "../shared/types";
+import { GameState, Player } from "../shared/types";
 
 export const useGame = create<GameState>((set) => {
   return {
@@ -7,19 +7,11 @@ export const useGame = create<GameState>((set) => {
     zoom: 1,
     player: null,
     players: [],
-    bullets: [],
-    currentPlayerId: "",
-    setCurrentPlayerId(currentPlayerId: string) {
-      set({ currentPlayerId });
-    },
     setPlayer(player: Player) {
       set({ player });
     },
     setPlayers(players: Player[]) {
       set({ players });
-    },
-    setBullets(bullets: Bullet[]) {
-      set({ bullets });
     },
     setSize(size: number) {
       set({ size });

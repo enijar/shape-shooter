@@ -6,5 +6,7 @@ Battle-Royal, but you're all shapes with weapons!
 
 ```shell
 npm install
-npm start # http://localhost:3000
+npm start
+# Client runs on http://localhost:8080
+# Server runs on http://localhost:3000
 ```

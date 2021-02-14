@@ -1,4 +1,6 @@
+import * as THREE from "three";
 import { Move, Player, Shape, Weapon } from "../types";
+import { deg2rad } from "../../game/utils";
 
 type GameEngineState = {
   player: null | Player;
@@ -16,6 +18,10 @@ let nextBulletIndex = 0;
 
 const MAX_PLAYERS = 100; // @todo change to 100
 const MAX_PLAYER_BULLETS = 100; // @todo change to 100
+
+const raycaster = new THREE.Raycaster();
+const playerObject = new THREE.Vector3();
+const bulletObject = new THREE.Vector3();
 
 export enum BulletEntityAttributeIndex {
   id,
@@ -79,7 +85,23 @@ const state: GameEngineState = {
     lastShotTime: 0,
     shootingSpeed: 0.75,
   },
-  players: [],
+  players: [
+    {
+      id: 2,
+      active: true,
+      x: 0.25,
+      y: 0.25,
+      r: deg2rad(-45),
+      health: 0.8,
+      speed: 0.005,
+      name: "Player 2",
+      shape: Shape.triangle,
+      weapon: Weapon.handgun,
+      color: "#00ff00",
+      lastShotTime: 0,
+      shootingSpeed: 0.75,
+    },
+  ],
   bullets: bulletEntities.array,
 };
 
@@ -154,14 +176,22 @@ export default {
         bulletEntities.set(i, BulletEntityAttributeIndex.active, 0);
         continue;
       }
-      // Update bullet position using rotation(z) as the angle of direction:
-      // angle = rotation(z)
-      // x = x + speed * sin(-angle);
-      // y = y + speed * cos(-angle);
+
       const speed = bulletEntities.get(i, BulletEntityAttributeIndex.speed);
       const x = bulletEntities.get(i, BulletEntityAttributeIndex.x);
       const y = bulletEntities.get(i, BulletEntityAttributeIndex.y);
       const r = bulletEntities.get(i, BulletEntityAttributeIndex.r);
+
+      // for (let j = 0; j < this.state.players.length; j++) {
+      //   playerObject.set(this.state.players[j].x, this.state.players[j].y, 0);
+      //   bulletObject.set(x, y, 0);
+      //   raycaster.ray.set(playerObject, bulletObject);
+      //   raycaster.intersectObjects();
+      // }
+      // Update bullet position using rotation(z) as the angle of direction:
+      // angle = rotation(z)
+      // x = x + speed * sin(-angle);
+      // y = y + speed * cos(-angle);
       bulletEntities.set(
         i,
         BulletEntityAttributeIndex.x,

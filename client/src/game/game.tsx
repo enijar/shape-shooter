@@ -46,8 +46,8 @@ export default function Game() {
               />
             )}
             {player !== null && <Player player={player} currentPlayer={true} />}
-            {players.map((player) => {
-              return <Player key={player.id} player={player} />;
+            {players.map((player, index) => {
+              return <Player key={player.id} index={index} player={player} />;
             })}
             <Bullets />
           </World>

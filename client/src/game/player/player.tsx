@@ -1,7 +1,7 @@
 import React from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "react-three-fiber";
-import { OrthographicCamera, useTexture } from "@react-three/drei";
+import { Html, OrthographicCamera, useTexture } from "@react-three/drei";
 import { Player as PlayerType } from "../../shared/types";
 import { deg2rad } from "../utils";
 import createShape from "../shape";
@@ -10,10 +10,15 @@ import engine from "../../shared/game/engine";
 
 type Props = {
   player: PlayerType;
+  index?: number;
   currentPlayer?: boolean;
 };
 
-export default function Player({ player, currentPlayer = false }: Props) {
+export default function Player({
+  player,
+  index,
+  currentPlayer = false,
+}: Props) {
   const texture = useTexture(createShape(player.shape, player.color));
   const { raycaster } = useThree();
   const { size, zoom } = useGame();
@@ -41,10 +46,17 @@ export default function Player({ player, currentPlayer = false }: Props) {
   }, [raycaster, currentPlayer, player.id, box]);
 
   useFrame(() => {
-    if (!group.current || !mesh.current || !engine.state.player) return;
-    group.current.position.x = engine.state.player.x;
-    group.current.position.y = engine.state.player.y;
-    mesh.current.rotation.z = engine.state.player.r;
+    if (!group.current || !mesh.current) return;
+    if (currentPlayer && engine.state.player) {
+      group.current.position.x = engine.state.player.x;
+      group.current.position.y = engine.state.player.y;
+      mesh.current.rotation.z = engine.state.player.r;
+    }
+    if (!currentPlayer && index !== undefined) {
+      group.current.position.x = engine.state.players[index].x;
+      group.current.position.y = engine.state.players[index].y;
+      mesh.current.rotation.z = engine.state.players[index].r;
+    }
   });
 
   return (
@@ -60,6 +72,13 @@ export default function Player({ player, currentPlayer = false }: Props) {
           zoom={size * zoom}
         />
       )}
+      <Html
+        center
+        position={[0, -0.06, 0]}
+        style={{ pointerEvents: "none", userSelect: "none", width: "5em", textAlign: "center" }}
+      >
+        {player.name}
+      </Html>
     </group>
   );
 }

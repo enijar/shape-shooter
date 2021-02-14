@@ -1,4 +1,4 @@
-import { Shape, Weapon } from "./types";
+import { Shape, Weapon } from "../shared/types";
 import chunk from "../assets/chunk.svg";
 import circle from "../assets/shapes/circle.svg";
 import triangle from "../assets/shapes/triangle.png";

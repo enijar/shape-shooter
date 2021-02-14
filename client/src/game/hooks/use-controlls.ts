@@ -1,5 +1,5 @@
 import React from "react";
-import { Controls } from "../types";
+import { Controls } from "../../shared/types";
 import { useGame } from "../state";
 
 type ControlsState = {

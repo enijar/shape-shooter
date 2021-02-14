@@ -3,7 +3,7 @@ import { Canvas } from "react-three-fiber";
 import { OrthographicCamera } from "@react-three/drei";
 import { GameWrapper } from "./styles";
 import { useGame } from "./state";
-import engine from "./engine";
+import engine from "../shared/game/engine";
 import World from "./world/world";
 import Player from "./player/player";
 import Bullet from "./bullet/bullet";

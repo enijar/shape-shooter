@@ -3,7 +3,7 @@ import { HomeShape, HomeWrapper } from "./styles";
 import Page from "../../components/page/page";
 import { Title } from "../../styles/typeography";
 import { Container, Flex } from "../../styles/layout";
-import { Shape } from "../../game/types";
+import { Shape } from "../../shared/types";
 import createShape from "../../game/shape";
 import vars from "../../styles/vars";
 

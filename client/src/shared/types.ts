@@ -18,14 +18,16 @@ export type Bullet = {
   lifetime: number;
   speed: number;
   createdAt: number;
-  position: [x: number, y: number, z: number];
-  rotation: [x: number, y: number, z: number];
+  x: number;
+  y: number;
+  r: number;
 };
 
 export type Player = {
   id: string;
-  position: [x: number, y: number, z: number];
-  rotation: [x: number, y: number, z: number];
+  x: number;
+  y: number;
+  r: number;
   health: number;
   speed: number;
   name: string;

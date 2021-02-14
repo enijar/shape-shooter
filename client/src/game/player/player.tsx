@@ -2,7 +2,7 @@ import React from "react";
 import * as THREE from "three";
 import { useThree } from "react-three-fiber";
 import { OrthographicCamera, useTexture } from "@react-three/drei";
-import { Player as PlayerType } from "../types";
+import { Player as PlayerType } from "../../shared/types";
 import { deg2rad } from "../utils";
 import createShape from "../shape";
 import { useGame } from "../state";
@@ -32,9 +32,7 @@ export default function Player({ player, currentPlayer = false }: Props) {
       const cX = (box.max.x + box.min.x) / 2;
       const cY = (box.max.y + box.min.y) / 2;
       const { x: oX, y: oY } = raycaster.ray.origin;
-      let [x, y, z] = game.player.rotation;
-      z = Math.atan2(oY - cY, oX - cX) - deg2rad(90);
-      game.player.rotation = [x, y, z];
+      game.player.r = Math.atan2(oY - cY, oX - cX) - deg2rad(90);
       game.setPlayer(game.player);
     }
 
@@ -45,10 +43,10 @@ export default function Player({ player, currentPlayer = false }: Props) {
   }, [raycaster, currentPlayer, player.id, box]);
 
   return (
-    <group ref={group} position={player.position}>
-      <mesh ref={mesh} rotation={player.rotation}>
+    <group ref={group} position={[player.x, player.y, 0]}>
+      <mesh ref={mesh} rotation={[0, 0, player.r]}>
         <planeBufferGeometry attach="geometry" args={[0.1, 0.1, 1]} />
-        <meshBasicMaterial attach="material" map={texture} transparent />
+        <meshBasicMaterial attach="material" map={texture} transparent={true} />
       </mesh>
       {currentPlayer && (
         <OrthographicCamera

@@ -1,5 +1,5 @@
-import { Bullet, Move, Player, Shape, Weapon } from "./types";
-import { guid } from "./utils";
+import { Bullet, Move, Player, Shape, Weapon } from "../types";
+import { guid } from "../../game/utils";
 
 type GameEngineState = {
   player: null | Player;
@@ -18,8 +18,9 @@ let nextBulletIndex = 0;
 const state: GameEngineState = {
   player: {
     id: guid(),
-    position: [0, 0, 0],
-    rotation: [0, 0, 0],
+    x: 0,
+    y: 0,
+    r: 0,
     health: 0.8,
     speed: 0.005,
     name: "Enijar",
@@ -32,8 +33,9 @@ const state: GameEngineState = {
   players: [
     {
       id: guid(),
-      position: [0.15, 0.3, 0],
-      rotation: [0, 0, 0],
+      x: 0.15,
+      y: 0.3,
+      r: 0,
       health: 1,
       speed: 0.005,
       name: "Player 2",
@@ -54,8 +56,9 @@ const state: GameEngineState = {
         lifetime: 3500,
         speed: 0.01,
         createdAt: 0,
-        position: [0, 0, 0],
-        rotation: [0, 0, 0],
+        x: 0,
+        y: 0,
+        r: 0,
       };
     }),
 };
@@ -69,29 +72,22 @@ export default {
   },
   playerMove(move: Move): null | Player {
     if (this.state.player === null) return null;
-    const { speed } = this.state.player;
-    let [x, y, z] = this.state.player.position;
     if (move.x.move) {
-      x = x - move.x.amount * speed;
+      this.state.player.x -= move.x.amount * this.state.player.speed;
     }
     if (move.y.move) {
-      y = y - move.y.amount * speed;
+      this.state.player.y -= move.y.amount * this.state.player.speed;
     }
-    this.state.player.position = [x, y, z];
     return this.state.player;
   },
   playerShoot(): Bullet[] {
     if (this.state.player === null) return this.state.bullets;
-    const { position, rotation } = this.state.player;
     this.state.bullets[nextBulletIndex].ownerId = this.state.player.id;
     this.state.bullets[nextBulletIndex].active = true;
     this.state.bullets[nextBulletIndex].createdAt = Date.now();
-    this.state.bullets[nextBulletIndex].position[0] = position[0];
-    this.state.bullets[nextBulletIndex].position[1] = position[1];
-    this.state.bullets[nextBulletIndex].position[2] = position[2];
-    this.state.bullets[nextBulletIndex].rotation[0] = rotation[0];
-    this.state.bullets[nextBulletIndex].rotation[1] = rotation[1];
-    this.state.bullets[nextBulletIndex].rotation[2] = rotation[2];
+    this.state.bullets[nextBulletIndex].x = this.state.player.x;
+    this.state.bullets[nextBulletIndex].y = this.state.player.y;
+    this.state.bullets[nextBulletIndex].r = this.state.player.r;
     nextBulletIndex++;
     if (nextBulletIndex === this.state.bullets.length) {
       nextBulletIndex = 0;
@@ -112,16 +108,12 @@ export default {
       }
       // Update bullet position using rotation(z) as the angle of direction:
       // angle = rotation(z)
-      // [x, y, z] = [x + speed * sin(-angle), y + speed * cos(-angle), z]
-      this.state.bullets[i].position = [
-        this.state.bullets[i].position[0] +
-          this.state.bullets[i].speed *
-            Math.sin(-this.state.bullets[i].rotation[2]),
-        this.state.bullets[i].position[1] +
-          this.state.bullets[i].speed *
-            Math.cos(-this.state.bullets[i].rotation[2]),
-        this.state.bullets[i].position[2],
-      ];
+      // x = x + speed * sin(-angle);
+      // y = y + speed * cos(-angle);
+      this.state.bullets[i].x +=
+        this.state.bullets[i].speed * Math.sin(-this.state.bullets[i].r);
+      this.state.bullets[i].y +=
+        this.state.bullets[i].speed * Math.cos(-this.state.bullets[i].r);
     }
 
     return this.state;

@@ -1,5 +1,5 @@
 import create from "zustand";
-import { Bullet, GameState, Player } from "./types";
+import { Bullet, GameState, Player } from "../shared/types";
 
 export const useGame = create<GameState>((set) => {
   return {

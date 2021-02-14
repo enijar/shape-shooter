@@ -1,4 +1,4 @@
-import { Shape } from "./types";
+import { Shape } from "../shared/types";
 
 function encode(svg: string): string {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;

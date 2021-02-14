@@ -1,6 +1,7 @@
 import * as express from "express";
 import { json } from "body-parser";
 import * as cors from "cors";
+import router from "./router";
 
 const app = express();
 
@@ -11,13 +12,6 @@ app.use(
     credentials: true,
   })
 );
-
-app.get("/", (req, res) => {
-  res.json({ test: true });
-});
-
-app.all("*", (req, res) => {
-  res.status(404).json({ errors: { server: "Not found" } });
-});
+app.use(router);
 
 export default app;

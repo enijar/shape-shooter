@@ -1,4 +1,4 @@
-import { Bullet, Player, Shape, Weapon } from "./types";
+import { Bullet, Player, Shape, Weapon, Move } from "./types";
 import { guid } from "./utils";
 
 type GameEngineState = {
@@ -54,15 +54,15 @@ export default {
   destroy() {
     cancelAnimationFrame(nextFrame);
   },
-  playerMove(axes: string[], direction: number): null | Player {
+  playerMove(move: Move): null | Player {
     if (this.state.player === null) return null;
     const { speed } = this.state.player;
     let [x, y, z] = this.state.player.position;
-    if (axes.includes("x")) {
-      x -= direction * speed;
+    if (move.x.move) {
+      x = x - move.x.amount * speed;
     }
-    if (axes.includes("y")) {
-      y -= direction * speed;
+    if (move.y.move) {
+      y = y - move.y.amount * speed;
     }
     this.state.player.position = [x, y, z];
     return this.state.player;

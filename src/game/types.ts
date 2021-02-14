@@ -57,10 +57,13 @@ export enum Controls {
   moveRight = "d",
 }
 
-export enum Action {
-  moveUp = "moveUp",
-  moveDown = "moveDown",
-  moveLeft = "moveLeft",
-  moveRight = "moveRight",
-  shoot = "shoot",
-}
+export type Move = {
+  x: {
+    move: boolean;
+    amount: number;
+  };
+  y: {
+    move: boolean;
+    amount: number;
+  };
+};

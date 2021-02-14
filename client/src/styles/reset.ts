@@ -6,6 +6,9 @@ export default createGlobalStyle`
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
   }
 
   html, body, #root {
@@ -15,5 +18,12 @@ export default createGlobalStyle`
   html {
     font-family: ${vars.font.primary};
     font-size: ${vars.rootSize}px;
+    font-weight: 600;
+  }
+
+  svg, img, iframe, canvas {
+    max-width: 100%;
+    align-self: center;
+    flex-shrink: 0;
   }
 `;

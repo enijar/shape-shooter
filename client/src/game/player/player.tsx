@@ -6,7 +6,6 @@ import { Player as PlayerType } from "../types";
 import { deg2rad } from "../utils";
 import createShape from "../shape";
 import { useGame } from "../state";
-import engine from "../engine";
 
 type Props = {
   player: PlayerType;

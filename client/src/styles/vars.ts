@@ -2,12 +2,16 @@
 export default {
   rootSize: 20,
   font: {
-    primary: "Arial, sans-serif",
+    primary: `"Open Sans", sans-serif`,
   },
   color: {
     black: "#000000",
+    black959: "#959595",
     white: "#ffffff",
     healthBar: "#00ff00",
+    blue: "#3399cc",
+    red: "#ff0000",
+    green: "#07930e",
   },
   zIndex: {
     game: 1,

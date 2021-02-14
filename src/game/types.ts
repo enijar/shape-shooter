@@ -14,6 +14,7 @@ export enum Weapon {
 export type Bullet = {
   id: string;
   ownerId: string;
+  active: boolean;
   lifetime: number;
   speed: number;
   createdAt: number;

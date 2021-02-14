@@ -44,7 +44,20 @@ const state: GameEngineState = {
       shootingSpeed: 0.75,
     },
   ],
-  bullets: Array(100).fill(null),
+  bullets: Array(100)
+    .fill({})
+    .map(() => {
+      return {
+        id: guid(),
+        ownerId: "",
+        active: false,
+        lifetime: 3500,
+        speed: 0.01,
+        createdAt: 0,
+        position: [0, 0, 0],
+        rotation: [0, 0, 0],
+      };
+    }),
 };
 
 // eslint-disable-next-line import/no-anonymous-default-export
@@ -70,15 +83,15 @@ export default {
   playerShoot(): Bullet[] {
     if (this.state.player === null) return this.state.bullets;
     const { position, rotation } = this.state.player;
-    this.state.bullets[nextBulletIndex] = {
-      id: guid(),
-      ownerId: this.state.player.id,
-      lifetime: 3500,
-      speed: 0.01,
-      createdAt: Date.now(),
-      position: [...position],
-      rotation: [...rotation],
-    };
+    this.state.bullets[nextBulletIndex].ownerId = this.state.player.id;
+    this.state.bullets[nextBulletIndex].active = true;
+    this.state.bullets[nextBulletIndex].createdAt = Date.now();
+    this.state.bullets[nextBulletIndex].position[0] = position[0];
+    this.state.bullets[nextBulletIndex].position[1] = position[1];
+    this.state.bullets[nextBulletIndex].position[2] = position[2];
+    this.state.bullets[nextBulletIndex].rotation[0] = rotation[0];
+    this.state.bullets[nextBulletIndex].rotation[1] = rotation[1];
+    this.state.bullets[nextBulletIndex].rotation[2] = rotation[2];
     nextBulletIndex++;
     if (nextBulletIndex === this.state.bullets.length) {
       nextBulletIndex = 0;
@@ -88,13 +101,13 @@ export default {
   update() {
     const now = Date.now();
     for (let i = this.state.bullets.length - 1; i >= 0; i--) {
-      if (this.state.bullets[i] === null) continue;
+      if (!this.state.bullets[i].active) continue;
       // Remove old bullets
       if (
         now - this.state.bullets[i].createdAt >=
         this.state.bullets[i].lifetime
       ) {
-        this.state.bullets.splice(i, 1);
+        this.state.bullets[i].active = false;
         continue;
       }
       // Update bullet position

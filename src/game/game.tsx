@@ -60,7 +60,7 @@ export default function Game() {
             })}
 
             {bullets.map((bullet) => {
-              if (bullet === null) return null;
+              if (!bullet.active) return null;
               return <Bullet key={bullet.id} bullet={bullet} />;
             })}
           </World>

@@ -4,22 +4,21 @@ import { OrthographicCamera } from "@react-three/drei";
 import { GameWrapper } from "./styles";
 import { useGame } from "./state";
 import engine from "./engine";
-import useControlledPlayer from "./hooks/use-controlled-player";
 import World from "./world/world";
 import Player from "./player/player";
+import Bullet from "./bullet/bullet";
 
 export default function Game() {
   const {
+    player,
     players,
     setPlayers,
+    bullets,
     setSize,
-    currentPlayerId,
     setCurrentPlayerId,
     size,
     zoom,
   } = useGame();
-
-  useControlledPlayer();
 
   React.useEffect(() => {
     function onResize() {
@@ -34,11 +33,9 @@ export default function Game() {
   }, [setSize]);
 
   React.useEffect(() => {
-    const { players } = engine.getState();
-    const currentPlayerId = players[0].id;
-    setPlayers(players);
-    engine.setState({ currentPlayerId });
-    engine.start();
+    const game = useGame.getState();
+    game.setPlayer(engine.state.player);
+    game.setPlayers(engine.state.players);
     return engine.destroy;
   }, [setPlayers, setCurrentPlayerId]);
 
@@ -47,7 +44,8 @@ export default function Game() {
       <Canvas>
         <React.Suspense fallback={null}>
           <World>
-            {currentPlayerId === "" && (
+            {/* Default camera if there is no current player */}
+            {player === null && (
               <OrthographicCamera
                 makeDefault
                 position={[0, 0, size]}
@@ -55,14 +53,15 @@ export default function Game() {
               />
             )}
 
+            {player !== null && <Player player={player} currentPlayer={true} />}
+
             {players.map((player) => {
-              return (
-                <Player
-                  key={player.id}
-                  {...player}
-                  currentPlayer={player.id === currentPlayerId}
-                />
-              );
+              return <Player key={player.id} player={player} />;
+            })}
+
+            {bullets.map((bullet) => {
+              if (bullet === null) return null;
+              return <Bullet key={bullet.id} bullet={bullet} />;
             })}
           </World>
         </React.Suspense>

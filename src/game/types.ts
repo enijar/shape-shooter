@@ -12,33 +12,36 @@ export enum Weapon {
 }
 
 export type Bullet = {
+  id: string;
+  ownerId: string;
   lifetime: number;
   speed: number;
   createdAt: number;
-  position: number[];
-  rotation: number[];
+  position: [x: number, y: number, z: number];
+  rotation: [x: number, y: number, z: number];
 };
 
 export type Player = {
   id: string;
-  position: number[];
-  rotation: number[];
+  position: [x: number, y: number, z: number];
+  rotation: [x: number, y: number, z: number];
   health: number;
   speed: number;
   name: string;
   shape: Shape;
   weapon: Weapon;
   color: string;
+  lastShotTime: number;
   shootingSpeed: number;
-  bullets: Bullet[];
 };
 
 export type GameState = {
+  player: null | Player;
+  setPlayer: Function;
   players: Player[];
   setPlayers: Function;
-  movePlayer: Function;
-  shoot: Function;
-  update: Function;
+  bullets: Bullet[];
+  setBullets: Function;
   size: number;
   setSize: Function;
   zoom: number;
@@ -52,4 +55,12 @@ export enum Controls {
   moveDown = "s",
   moveLeft = "a",
   moveRight = "d",
+}
+
+export enum Action {
+  moveUp = "moveUp",
+  moveDown = "moveDown",
+  moveLeft = "moveLeft",
+  moveRight = "moveRight",
+  shoot = "shoot",
 }

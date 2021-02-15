@@ -1,12 +1,14 @@
 import React from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "react-three-fiber";
-import { Html, OrthographicCamera, useTexture } from "@react-three/drei";
+import { OrthographicCamera, useTexture } from "@react-three/drei";
+import { PlayerName } from "./styles";
 import { Player as PlayerType } from "../../shared/types";
 import { deg2rad } from "../utils";
 import createShape from "../shape";
 import { useGame } from "../state";
 import engine from "../../shared/game/engine";
+import Html from "../html";
 
 type Props = {
   player: PlayerType;
@@ -72,12 +74,8 @@ export default function Player({
           zoom={size * zoom}
         />
       )}
-      <Html
-        center
-        position={[0, -0.06, 0]}
-        style={{ pointerEvents: "none", userSelect: "none", width: "5em", textAlign: "center" }}
-      >
-        {player.name}
+      <Html center position={[0, -0.06, 0]}>
+        <PlayerName>{player.name}</PlayerName>
       </Html>
     </group>
   );

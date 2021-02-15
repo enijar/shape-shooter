@@ -21,8 +21,9 @@ const BULLET_SPEED = 0.01;
 
 const PLAYER_SPEED = 0.005;
 
-const MAX_PLAYERS = 100;
-const MAX_PLAYER_BULLETS = 100;
+// @todo increase values when compression is in place
+const MAX_PLAYERS = 20;
+const MAX_PLAYER_BULLETS = 5;
 
 export enum BulletEntityAttributeIndex {
   id,

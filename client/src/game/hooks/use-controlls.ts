@@ -37,7 +37,7 @@ export default function useControls(): ControlsState {
         if (
           player &&
           pointerDown.current &&
-          shootingDelta > SHOOTING_DELAY * (1 - player.shootingSpeed)
+          shootingDelta > SHOOTING_DELAY * Math.max(0, 1 - player.shootingSpeed)
         ) {
           lastShootTime.current = now;
           return true;

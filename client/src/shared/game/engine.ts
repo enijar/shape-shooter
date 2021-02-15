@@ -71,21 +71,6 @@ export const bulletEntities = createEntities(MAX_PLAYERS * MAX_PLAYER_BULLETS, [
 const state: GameEngineState = {
   players: [
     {
-      id: 2,
-      active: true,
-      x: 0.25,
-      y: 0.25,
-      r: deg2rad(-45),
-      health: 0.8,
-      speed: 0.005,
-      name: "Player 2",
-      shape: Shape.triangle,
-      weapon: Weapon.handgun,
-      color: "#00ff00",
-      lastShotTime: 0,
-      shootingSpeed: 0.75,
-    },
-    {
       id: 1,
       active: true,
       x: 0,
@@ -97,6 +82,21 @@ const state: GameEngineState = {
       shape: Shape.triangle,
       weapon: Weapon.handgun,
       color: "#ff0000",
+      lastShotTime: 0,
+      shootingSpeed: 0.75,
+    },
+    {
+      id: 2,
+      active: true,
+      x: 0.25,
+      y: 0.25,
+      r: deg2rad(-45),
+      health: 0.8,
+      speed: 0.005,
+      name: "Player 2",
+      shape: Shape.triangle,
+      weapon: Weapon.handgun,
+      color: "#00ff00",
       lastShotTime: 0,
       shootingSpeed: 0.75,
     },
@@ -119,11 +119,11 @@ export type Action = {
 };
 
 function move(playerIndex: number, action: Action, state: GameEngineState) {
-  if (action.payload.x) {
+  if (action.payload.x.move) {
     state.players[playerIndex].x -=
       action.payload.x.amount * state.players[playerIndex].speed;
   }
-  if (action.payload.y) {
+  if (action.payload.y.move) {
     state.players[playerIndex].y -=
       action.payload.y.amount * state.players[playerIndex].speed;
   }

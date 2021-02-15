@@ -3,6 +3,7 @@ import env from "../../env";
 
 export default {
   port: env.port ?? 3000,
+  clientUrl: env.clientUrl,
   database: {
     name: env.database.name ?? "shapes",
     dialect: env.database.dialect ?? "mysql",

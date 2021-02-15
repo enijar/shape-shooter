@@ -1,5 +1,4 @@
-import { Player, Shape, Weapon } from "../types";
-import { deg2rad } from "../../game/utils";
+import { NewPlayer, Player } from "../types";
 
 type GameEngineState = {
   epoch: number;
@@ -14,7 +13,8 @@ export enum GameEngineContext {
 }
 
 let nextFrame: number = -1;
-let nextBulletIndex = 0;
+let nextBulletIndex: number = 0;
+let nextPlayerId: number = 1;
 
 const BULLET_LIFETIME = 3.5;
 const BULLET_SPEED = 0.01;
@@ -72,36 +72,7 @@ export const bulletEntities = createEntities(MAX_PLAYERS * MAX_PLAYER_BULLETS, [
 const state: GameEngineState = {
   epoch: 0,
   elapsed: 0,
-  players: [
-    {
-      id: 1,
-      active: true,
-      x: 0,
-      y: 0,
-      r: 0,
-      health: 0.8,
-      name: "Enijar",
-      shape: Shape.triangle,
-      weapon: Weapon.handgun,
-      color: "#ff0000",
-      lastShotTime: 0,
-      shootingSpeed: 0.75,
-    },
-    {
-      id: 2,
-      active: true,
-      x: 0.25,
-      y: 0.25,
-      r: deg2rad(-45),
-      health: 0.8,
-      name: "Player 2",
-      shape: Shape.triangle,
-      weapon: Weapon.handgun,
-      color: "#00ff00",
-      lastShotTime: 0,
-      shootingSpeed: 0.75,
-    },
-  ],
+  players: [],
   bullets: bulletEntities.array,
 };
 
@@ -154,11 +125,40 @@ function shoot(playerIndex: number, action: Action, state: GameEngineState) {
 export default {
   state,
   context: GameEngineContext.client,
-  destroy() {
-    cancelAnimationFrame(nextFrame);
+  io: null as any,
+  socket: null as any,
+  connect(newPlayer: NewPlayer) {
+    if (this.context === GameEngineContext.client && this.socket !== null) {
+      this.on("connect", () => {
+        this.emit("newPlayer.connect", newPlayer);
+      });
+      this.socket.connect();
+    }
+  },
+  on(event: string, fn: Function) {
+    if (this.context === GameEngineContext.client && this.socket !== null) {
+      this.socket.on(event, fn);
+    }
+  },
+  off(event: string, fn?: Function) {
+    if (this.context === GameEngineContext.client && this.socket !== null) {
+      this.socket.off(event, fn);
+    }
+  },
+  emit(event: string, data?: any) {
+    if (this.context === GameEngineContext.client && this.socket !== null) {
+      this.socket.emit(event, data);
+    }
+  },
+  disconnect() {
+    if (this.context === GameEngineContext.client && this.socket !== null) {
+      cancelAnimationFrame(nextFrame);
+      this.socket.disconnect();
+    }
   },
   action(action: Action) {
     const index = this.state.players.findIndex(
+      // @ts-ignore
       ({ id }) => id === action.playerId
     );
     if (index === -1) return;
@@ -172,6 +172,48 @@ export default {
       case "shoot":
         shoot(index, action, this.state);
         break;
+    }
+  },
+  addNewPlayer(newPlayer: NewPlayer): number {
+    if (
+      this.context === GameEngineContext.server &&
+      this.io !== null &&
+      this.socket !== null
+    ) {
+      const player = {
+        id: nextPlayerId,
+        active: true,
+        x: 0,
+        y: 0,
+        r: 0,
+        health: 0.8,
+        name: newPlayer.name,
+        shape: newPlayer.shape,
+        weapon: newPlayer.weapon,
+        color: "#ff0000",
+        lastShotTime: 0,
+        shootingSpeed: 0.75,
+      };
+      this.state.players.push(player);
+      nextPlayerId++;
+      this.socket.emit("engine.connected", player);
+      this.io.emit("engine.players", this.state.players);
+      return player.id;
+    }
+    return -1;
+  },
+  removePlayer(id: number) {
+    if (
+      this.context === GameEngineContext.server &&
+      this.io !== null &&
+      this.socket !== null
+    ) {
+      for (let i = this.state.players.length - 1; i >= 0; i--) {
+        if (this.state.players[i].id === id) {
+          this.state.players.splice(i, 1);
+        }
+      }
+      this.io.emit("engine.players", this.state.players);
     }
   },
   update() {

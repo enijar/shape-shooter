@@ -7,7 +7,8 @@ import engine from "../shared/game/engine";
 import World from "./world/world";
 import Bullets from "./entities/bullets";
 import Player from "./player/player";
-import { Shape, Weapon } from "../shared/types";
+import { Shape, Weapon, Player as PlayerType } from "../shared/types";
+import socket from "../services/socket";
 
 export default function Game() {
   const { player, size, zoom, players } = useGame();
@@ -28,23 +29,19 @@ export default function Game() {
 
   React.useEffect(() => {
     const game = useGame.getState();
-    game.setPlayer({
-      id: 1,
-      active: true,
-      x: 0,
-      y: 0,
-      r: 0,
-      health: 0.8,
-      speed: 0.005,
+    engine.socket = socket;
+    engine.on("engine.connected", game.setPlayer);
+    engine.on("engine.players", (players: PlayerType[]) => {
+      game.setPlayers(players);
+      engine.state.players = players;
+    });
+    engine.connect({
       name: "Enijar",
       shape: Shape.triangle,
       weapon: Weapon.handgun,
       color: "#ff0000",
-      lastShotTime: 0,
-      shootingSpeed: 0.75,
     });
-    game.setPlayers(engine.state.players);
-    return engine.destroy;
+    return engine.disconnect;
   }, []);
 
   return (

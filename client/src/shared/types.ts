@@ -11,6 +11,13 @@ export enum Weapon {
   handgun = "handgun",
 }
 
+export type NewPlayer = {
+  name: string;
+  shape: Shape;
+  weapon: Weapon;
+  color: string;
+};
+
 export type Player = {
   id: number;
   active: boolean;

@@ -12,7 +12,7 @@ import Html from "../html";
 
 type Props = {
   player: PlayerType;
-  index?: number;
+  index: number;
   currentPlayer?: boolean;
 };
 
@@ -33,12 +33,18 @@ export default function Player({
     if (!currentPlayer) return;
 
     function onMove() {
-      if (!group.current || !mesh.current || !engine.state.player) return;
+      if (!group.current || !mesh.current) return;
       box.setFromObject(group.current);
       const cX = (box.max.x + box.min.x) / 2;
       const cY = (box.max.y + box.min.y) / 2;
       const { x: oX, y: oY } = raycaster.ray.origin;
-      engine.state.player.r = Math.atan2(oY - cY, oX - cX) - deg2rad(90);
+      engine.action({
+        playerId: player.id,
+        type: "rotate",
+        payload: {
+          r: Math.atan2(oY - cY, oX - cX) - deg2rad(90),
+        },
+      });
     }
 
     window.addEventListener("pointermove", onMove);
@@ -49,16 +55,9 @@ export default function Player({
 
   useFrame(() => {
     if (!group.current || !mesh.current) return;
-    if (currentPlayer && engine.state.player) {
-      group.current.position.x = engine.state.player.x;
-      group.current.position.y = engine.state.player.y;
-      mesh.current.rotation.z = engine.state.player.r;
-    }
-    if (!currentPlayer && index !== undefined) {
-      group.current.position.x = engine.state.players[index].x;
-      group.current.position.y = engine.state.players[index].y;
-      mesh.current.rotation.z = engine.state.players[index].r;
-    }
+    group.current.position.x = engine.state.players[index].x;
+    group.current.position.y = engine.state.players[index].y;
+    mesh.current.rotation.z = engine.state.players[index].r;
   });
 
   return (

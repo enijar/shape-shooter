@@ -7,6 +7,7 @@ import engine from "../shared/game/engine";
 import World from "./world/world";
 import Bullets from "./entities/bullets";
 import Player from "./player/player";
+import { Shape, Weapon } from "../shared/types";
 
 export default function Game() {
   const { player, size, zoom, players } = useGame();
@@ -27,7 +28,21 @@ export default function Game() {
 
   React.useEffect(() => {
     const game = useGame.getState();
-    game.setPlayer(engine.state.player);
+    game.setPlayer({
+      id: 1,
+      active: true,
+      x: 0,
+      y: 0,
+      r: 0,
+      health: 0.8,
+      speed: 0.005,
+      name: "Enijar",
+      shape: Shape.triangle,
+      weapon: Weapon.handgun,
+      color: "#ff0000",
+      lastShotTime: 0,
+      shootingSpeed: 0.75,
+    });
     game.setPlayers(engine.state.players);
     return engine.destroy;
   }, []);
@@ -45,9 +60,15 @@ export default function Game() {
                 zoom={size * zoom}
               />
             )}
-            {player !== null && <Player player={player} currentPlayer={true} />}
-            {players.map((player, index) => {
-              return <Player key={player.id} index={index} player={player} />;
+            {players.map((p, index) => {
+              return (
+                <Player
+                  key={p.id}
+                  currentPlayer={p.id === player?.id}
+                  index={index}
+                  player={p}
+                />
+              );
             })}
             <Bullets />
           </World>

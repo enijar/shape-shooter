@@ -7,6 +7,7 @@ import { useFrame } from "react-three-fiber";
 import engine from "../../shared/game/engine";
 import { Controls, Move } from "../../shared/types";
 import useControls from "../hooks/use-controlls";
+import { useGame } from "../state";
 
 type Props = {
   children: any;
@@ -14,6 +15,7 @@ type Props = {
 };
 
 export default function World({ children, size = 2 }: Props) {
+  const { player } = useGame();
   const move = React.useRef<Move>({
     x: {
       move: false,
@@ -58,10 +60,18 @@ export default function World({ children, size = 2 }: Props) {
     }
 
     if (move.current.x.move || move.current.y.move) {
-      engine.playerMove(move.current);
+      engine.action({
+        playerId: player?.id ?? -1,
+        type: "move",
+        payload: move.current,
+      });
     }
     if (controls.shooting()) {
-      engine.playerShoot();
+      engine.action({
+        playerId: player?.id ?? -1,
+        type: "shoot",
+        payload: {},
+      });
     }
 
     move.current.x.move = false;

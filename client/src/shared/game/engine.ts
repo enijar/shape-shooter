@@ -1,9 +1,8 @@
 import * as THREE from "three";
-import { Move, Player, Shape, Weapon } from "../types";
+import { Player, Shape, Weapon } from "../types";
 import { deg2rad } from "../../game/utils";
 
 type GameEngineState = {
-  player: null | Player;
   players: Player[];
   bullets: Float64Array;
 };
@@ -70,21 +69,6 @@ export const bulletEntities = createEntities(MAX_PLAYERS * MAX_PLAYER_BULLETS, [
 ]);
 
 const state: GameEngineState = {
-  player: {
-    id: 1,
-    active: true,
-    x: 0,
-    y: 0,
-    r: 0,
-    health: 0.8,
-    speed: 0.005,
-    name: "Enijar",
-    shape: Shape.triangle,
-    weapon: Weapon.handgun,
-    color: "#ff0000",
-    lastShotTime: 0,
-    shootingSpeed: 0.75,
-  },
   players: [
     {
       id: 2,
@@ -101,6 +85,21 @@ const state: GameEngineState = {
       lastShotTime: 0,
       shootingSpeed: 0.75,
     },
+    {
+      id: 1,
+      active: true,
+      x: 0,
+      y: 0,
+      r: 0,
+      health: 0.8,
+      speed: 0.005,
+      name: "Enijar",
+      shape: Shape.triangle,
+      weapon: Weapon.handgun,
+      color: "#ff0000",
+      lastShotTime: 0,
+      shootingSpeed: 0.75,
+    },
   ],
   bullets: bulletEntities.array,
 };
@@ -113,6 +112,51 @@ for (
   bulletEntities.set(i, BulletEntityAttributeIndex.id, i + 1);
 }
 
+export type Action = {
+  playerId: number;
+  type: "move" | "rotate" | "shoot";
+  payload: any;
+};
+
+function move(playerIndex: number, action: Action, state: GameEngineState) {
+  if (action.payload.x) {
+    state.players[playerIndex].x -=
+      action.payload.x.amount * state.players[playerIndex].speed;
+  }
+  if (action.payload.y) {
+    state.players[playerIndex].y -=
+      action.payload.y.amount * state.players[playerIndex].speed;
+  }
+}
+
+function rotate(playerIndex: number, action: Action, state: GameEngineState) {
+  state.players[playerIndex].r = action.payload.r;
+}
+
+function shoot(playerIndex: number, action: Action, state: GameEngineState) {
+  const { id, x, y, r } = state.players[playerIndex];
+  bulletEntities.set(nextBulletIndex, BulletEntityAttributeIndex.playerId, id);
+  bulletEntities.set(nextBulletIndex, BulletEntityAttributeIndex.active, 1);
+  bulletEntities.set(
+    nextBulletIndex,
+    BulletEntityAttributeIndex.lifetime,
+    3500
+  );
+  bulletEntities.set(nextBulletIndex, BulletEntityAttributeIndex.speed, 0.01);
+  bulletEntities.set(nextBulletIndex, BulletEntityAttributeIndex.x, x);
+  bulletEntities.set(nextBulletIndex, BulletEntityAttributeIndex.y, y);
+  bulletEntities.set(nextBulletIndex, BulletEntityAttributeIndex.r, r);
+  bulletEntities.set(
+    nextBulletIndex,
+    BulletEntityAttributeIndex.createdAt,
+    Date.now()
+  );
+  nextBulletIndex += bulletEntities.totalAttributes;
+  if (nextBulletIndex === state.bullets.length) {
+    nextBulletIndex = 0;
+  }
+}
+
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
   state,
@@ -120,41 +164,21 @@ export default {
   destroy() {
     cancelAnimationFrame(nextFrame);
   },
-  playerMove(move: Move) {
-    if (this.state.player === null) return null;
-    if (move.x.move) {
-      this.state.player.x -= move.x.amount * this.state.player.speed;
-    }
-    if (move.y.move) {
-      this.state.player.y -= move.y.amount * this.state.player.speed;
-    }
-  },
-  playerShoot() {
-    if (this.state.player === null) return this.state.bullets;
-    bulletEntities.set(
-      nextBulletIndex,
-      BulletEntityAttributeIndex.playerId,
-      this.state.player.id
+  action(action: Action) {
+    const index = this.state.players.findIndex(
+      ({ id }) => id === action.playerId
     );
-    bulletEntities.set(nextBulletIndex, BulletEntityAttributeIndex.active, 1);
-    bulletEntities.set(
-      nextBulletIndex,
-      BulletEntityAttributeIndex.lifetime,
-      3500
-    );
-    bulletEntities.set(nextBulletIndex, BulletEntityAttributeIndex.speed, 0.01);
-    const { x, y, r } = this.state.player;
-    bulletEntities.set(nextBulletIndex, BulletEntityAttributeIndex.x, x);
-    bulletEntities.set(nextBulletIndex, BulletEntityAttributeIndex.y, y);
-    bulletEntities.set(nextBulletIndex, BulletEntityAttributeIndex.r, r);
-    bulletEntities.set(
-      nextBulletIndex,
-      BulletEntityAttributeIndex.createdAt,
-      Date.now()
-    );
-    nextBulletIndex += bulletEntities.totalAttributes;
-    if (nextBulletIndex === this.state.bullets.length) {
-      nextBulletIndex = 0;
+    if (index === -1) return;
+    switch (action.type) {
+      case "move":
+        move(index, action, this.state);
+        break;
+      case "rotate":
+        rotate(index, action, this.state);
+        break;
+      case "shoot":
+        shoot(index, action, this.state);
+        break;
     }
   },
   update() {

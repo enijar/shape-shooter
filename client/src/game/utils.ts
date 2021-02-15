@@ -12,9 +12,6 @@ export function guid(): string {
       .toString(16)
       .substring(1);
   }
+
   return `${s4()}${s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
-}
-
-export function getAttributeValueAtIndex(attributeIndex: number, totalAttributes: number = 9) {
-
 }

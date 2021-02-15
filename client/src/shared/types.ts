@@ -11,18 +11,6 @@ export enum Weapon {
   handgun = "handgun",
 }
 
-export type Bullet = {
-  id: string;
-  ownerId: string;
-  active: boolean;
-  lifetime: number;
-  speed: number;
-  createdAt: number;
-  x: number;
-  y: number;
-  r: number;
-};
-
 export type Player = {
   id: number;
   active: boolean;
@@ -30,7 +18,6 @@ export type Player = {
   y: number;
   r: number;
   health: number;
-  speed: number;
   name: string;
   shape: Shape;
   weapon: Weapon;

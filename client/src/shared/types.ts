@@ -18,30 +18,15 @@ export type NewPlayer = {
   color: string;
 };
 
-export type Player = {
-  id: number;
-  active: boolean;
-  x: number;
-  y: number;
-  r: number;
-  health: number;
-  name: string;
-  shape: Shape;
-  weapon: Weapon;
-  color: string;
-  lastShotTime: number;
-  shootingSpeed: number;
-};
-
 export type GameState = {
-  player: null | Player;
-  setPlayer: Function;
+  playerId: number;
+  setPlayerId: (playerId: number) => void;
   players: Player[];
-  setPlayers: Function;
+  setPlayers: (players: Player[]) => void;
   size: number;
-  setSize: Function;
+  setSize: (size: number) => void;
   zoom: number;
-  setZoom: Function;
+  setZoom: (zoom: number) => void;
 };
 
 export enum Controls {
@@ -51,13 +36,44 @@ export enum Controls {
   moveRight = "d",
 }
 
-export type Move = {
-  x: {
-    move: boolean;
-    amount: number;
-  };
-  y: {
-    move: boolean;
-    amount: number;
-  };
+export type Bullet = {
+  id: number;
+  playerId: number;
+  x: number;
+  y: number;
+  r: number;
+};
+
+export type Player = {
+  id: number;
+  name: string;
+  x: number;
+  y: number;
+  r: number;
+  shape: Shape;
+  color: string;
+  bullets: Bullet[];
+};
+
+export enum EngineActionType {
+  connect,
+  move,
+  rotate,
+  shoot,
+}
+
+export type ConnectedPayload = {
+  playerId: number;
+  players: Player[];
+};
+
+export type RotatedPayload = {
+  playerId: number;
+  r: number;
+};
+
+export type MovedPayload = {
+  playerId: number;
+  x: number;
+  y: number;
 };

@@ -4,10 +4,10 @@ import { useTexture } from "@react-three/drei";
 import vars from "../../styles/vars";
 import assets from "../assets";
 import { useFrame } from "react-three-fiber";
-import engine from "../../shared/game/engine";
-import { Controls, Move } from "../../shared/types";
+import { Controls, EngineActionType } from "../../shared/types";
 import useControls from "../hooks/use-controlls";
 import { useGame } from "../state";
+import engine from "../../shared/game/engine";
 
 type Props = {
   children: any;
@@ -15,17 +15,7 @@ type Props = {
 };
 
 export default function World({ children, size = 2 }: Props) {
-  const { player } = useGame();
-  const move = React.useRef<Move>({
-    x: {
-      move: false,
-      amount: 0,
-    },
-    y: {
-      move: false,
-      amount: 0,
-    },
-  });
+  const { playerId } = useGame();
 
   const texture = useTexture(assets.chunk);
   const controls = useControls();
@@ -41,43 +31,19 @@ export default function World({ children, size = 2 }: Props) {
     const moveDown = controls[Controls.moveDown]();
     const moveLeft = controls[Controls.moveLeft]();
     const moveRight = controls[Controls.moveRight]();
+    const shooting = controls.shooting();
 
-    if (moveUp) {
-      move.current.y.move = true;
-      move.current.y.amount = -1;
-    }
-    if (moveDown) {
-      move.current.y.move = true;
-      move.current.y.amount = 1;
-    }
-    if (moveLeft) {
-      move.current.x.move = true;
-      move.current.x.amount = 1;
-    }
-    if (moveRight) {
-      move.current.x.move = true;
-      move.current.x.amount = -1;
-    }
-
-    if (move.current.x.move || move.current.y.move) {
-      engine.action({
-        playerId: player?.id ?? -1,
-        type: "move",
-        payload: move.current,
-      });
-    }
-    if (controls.shooting()) {
-      engine.action({
-        playerId: player?.id ?? -1,
-        type: "shoot",
-        payload: {},
+    if (moveUp || moveDown || moveRight || moveLeft) {
+      engine.emit(EngineActionType.move, {
+        playerId,
+        x: moveLeft ? 1 : moveRight ? -1 : 0,
+        y: moveUp ? -1 : moveDown ? 1 : 0,
       });
     }
 
-    move.current.x.move = false;
-    move.current.y.move = false;
-
-    engine.update();
+    if (shooting) {
+      //
+    }
   });
 
   return (

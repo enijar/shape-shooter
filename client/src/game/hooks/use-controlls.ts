@@ -1,6 +1,5 @@
 import React from "react";
 import { Controls } from "../../shared/types";
-import { useGame } from "../state";
 
 type ControlsState = {
   [Controls.moveUp]: () => boolean;
@@ -11,9 +10,9 @@ type ControlsState = {
 };
 
 const SHOOTING_DELAY = 1000;
+const SHOOTING_SPEED = 0.5;
 
 export default function useControls(): ControlsState {
-  const { player } = useGame();
   const [activeKeys, setActiveKeys] = React.useState<string[]>([]);
   const pointerDown = React.useRef<boolean>(false);
   const lastShootTime = React.useRef<number>(0);
@@ -35,9 +34,8 @@ export default function useControls(): ControlsState {
         const now = Date.now();
         const shootingDelta = now - lastShootTime.current;
         if (
-          player &&
           pointerDown.current &&
-          shootingDelta > SHOOTING_DELAY * Math.max(0, 1 - player.shootingSpeed)
+          shootingDelta > SHOOTING_DELAY * Math.max(0, 1 - SHOOTING_SPEED)
         ) {
           lastShootTime.current = now;
           return true;
@@ -45,7 +43,7 @@ export default function useControls(): ControlsState {
         return false;
       },
     };
-  }, [activeKeys, pointerDown, player]);
+  }, [activeKeys, pointerDown]);
 
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {

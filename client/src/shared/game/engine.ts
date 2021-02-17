@@ -151,6 +151,21 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
     }
   }
 
+  function damagePlayer(bulletIndex: number): number {
+    for (let i = 0, length = state.players.length; i < length; i++) {
+      if (state.players[i].id === state.bullets[bulletIndex].playerId) continue;
+      const a = state.bullets[bulletIndex].x - state.players[i].x;
+      const b = state.bullets[bulletIndex].y - state.players[i].y;
+      const d = Math.sqrt(a * a + b * b);
+      if (d <= playerHitRadius) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  const bulletDamage = 0.1;
+  const playerHitRadius = 0.04;
   const playerMinX = -config.worldW / 2;
   const playerMaxX = config.worldW / 2;
   const playerMinY = -config.worldH / 2;
@@ -199,6 +214,18 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
       if (state.bullets[i].id === -1) continue;
       state.bullets[i].x += bulletVelocity * ts * Math.sin(-state.bullets[i].r);
       state.bullets[i].y += bulletVelocity * ts * Math.cos(-state.bullets[i].r);
+      const playerIndex = damagePlayer(i);
+      if (playerIndex > -1) {
+        state.players[playerIndex].hp = Math.max(
+          0,
+          state.players[playerIndex].hp - bulletDamage
+        );
+        state.bullets[i].id = -1;
+        state.bullets[i].playerId = -1;
+        // Make player entity available
+        state.availableBulletIndices.push(i);
+        continue;
+      }
       const a = state.bullets[i].sX - state.bullets[i].x;
       const b = state.bullets[i].sY - state.bullets[i].y;
       const d = Math.sqrt(a * a + b * b);

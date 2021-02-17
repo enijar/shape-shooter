@@ -187,7 +187,6 @@ function createEngine(tps: number = 60) {
       }
 
       if (action.type === EngineActionType.shoot) {
-        // todo shoot bullet for player
         const payload = action.payload as ShootPayload;
         state.bullets[nextBulletIndex].playerId = payload.playerId;
         state.bullets[nextBulletIndex].id = nextBulletIndex;

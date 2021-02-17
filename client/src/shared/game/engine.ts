@@ -156,12 +156,14 @@ function createEngine(tps: number = 60) {
 
       if (action.type === EngineActionType.shoot) {
         const payload = action.payload as ShootPayload;
+        const { x, y, r } = state.players[payload.playerId];
         state.bullets[nextBulletIndex].playerId = payload.playerId;
         state.bullets[nextBulletIndex].id = nextBulletIndex;
-        state.bullets[nextBulletIndex].x = state.players[payload.playerId].x;
-        state.bullets[nextBulletIndex].y = state.players[payload.playerId].y;
-        state.bullets[nextBulletIndex].r = state.players[payload.playerId].r;
-        state.bullets[nextBulletIndex].createdAt = now;
+        state.bullets[nextBulletIndex].x = x;
+        state.bullets[nextBulletIndex].y = y;
+        state.bullets[nextBulletIndex].r = r;
+        state.bullets[nextBulletIndex].sX = x;
+        state.bullets[nextBulletIndex].sY = y;
         nextBulletIndex++;
         if (nextBulletIndex === state.bullets.length) {
           nextBulletIndex = 0;
@@ -194,15 +196,18 @@ function createEngine(tps: number = 60) {
     // todo move to update function to be iterated over multiple times to improve accuracy (removing the need to rely on exact timeout calls)
     // todo move to consts file
     const bulletVelocity = 0.01;
-    const bulletLifetime = 3500;
+    const bulletMaxDistance = 2;
     for (let i = 0, length = state.bullets.length; i < length; i++) {
       if (state.bullets[i].id === -1) continue;
-      if (now - state.bullets[i].createdAt >= bulletLifetime) {
+      const { sX, sY, r } = state.bullets[i];
+      state.bullets[i].x += bulletVelocity * Math.sin(-r);
+      state.bullets[i].y += bulletVelocity * Math.cos(-r);
+      const x = sX - state.bullets[i].x;
+      const y = sY - state.bullets[i].y;
+      const d = Math.sqrt(x * x + y * y);
+      if (d > bulletMaxDistance) {
         state.bullets[i].id = -1;
-        continue;
       }
-      state.bullets[i].x += bulletVelocity * Math.sin(-state.bullets[i].r);
-      state.bullets[i].y += bulletVelocity * Math.cos(-state.bullets[i].r);
     }
 
     for (let i = 0, length = subscriptions.length; i < length; i++) {
@@ -241,7 +246,6 @@ function createEngine(tps: number = 60) {
       for (let i = 0, length = state.bullets.length; i < length; i++) {
         state.bullets[i].id = -1;
         state.bullets[i].playerId = -1;
-        state.bullets[i].createdAt = 0;
         state.bullets[i].x = 0;
         state.bullets[i].y = 0;
         state.bullets[i].r = 0;

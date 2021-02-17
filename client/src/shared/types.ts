@@ -39,7 +39,8 @@ export enum Controls {
 export type Bullet = {
   id: number;
   playerId: number;
-  createdAt: number;
+  sX: number;
+  sY: number;
   x: number;
   y: number;
   r: number;

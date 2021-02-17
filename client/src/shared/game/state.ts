@@ -17,7 +17,8 @@ const state: State = {
   bullets: createEntityBuffer<Bullet>(MAX_PLAYERS * MAX_PLAYER_BULLETS, {
     id: -1,
     playerId: -1,
-    createdAt: 0,
+    sX: 0,
+    sY: 0,
     x: 0,
     y: 0,
     r: 0,

@@ -7,16 +7,10 @@ import engine from "../shared/game/engine";
 import World from "./world/world";
 import Bullets from "./entities/bullets";
 import Player from "./player/player";
-import {
-  ConnectedPayload,
-  RotatedPayload,
-  EngineActionType,
-  Shape,
-  MovedPayload,
-} from "../shared/types";
+import { ConnectedPayload, EngineActionType, Shape } from "../shared/types";
 
 export default function Game() {
-  const { playerId, size, zoom, players } = useGame();
+  const { playerId, size, zoom, playerIds } = useGame();
 
   React.useEffect(() => {
     engine.start();
@@ -24,27 +18,7 @@ export default function Game() {
     engine.on(EngineActionType.connect, (payload) => {
       const p = payload as ConnectedPayload;
       useGame.getState().setPlayerId(p.playerId);
-      useGame.getState().setPlayers(p.players);
-    });
-
-    engine.on(EngineActionType.rotate, (payload) => {
-      const p = payload as RotatedPayload;
-      const { players, setPlayers } = useGame.getState();
-      players[p.playerId - 1].r = p.r;
-      setPlayers([...players]);
-    });
-
-    engine.on(EngineActionType.move, (payload) => {
-      const p = payload as MovedPayload;
-      const { players, setPlayers } = useGame.getState();
-      players[p.playerId - 1].x = p.x;
-      players[p.playerId - 1].y = p.y;
-      setPlayers([...players]);
-    });
-
-    engine.on(EngineActionType.shoot, (payload) => {
-      const p = payload as MovedPayload;
-      console.log(p);
+      useGame.getState().setPlayerIds(p.players.map((player) => player.id));
     });
 
     engine.emit(EngineActionType.connect, {
@@ -82,15 +56,10 @@ export default function Game() {
                 zoom={size * zoom}
               />
             )}
-            {players.map((player, index) => {
-              if (player.id === -1) return null;
+            {playerIds.map((id) => {
+              if (id === -1) return null;
               return (
-                <Player
-                  key={player.id}
-                  currentPlayer={player.id === playerId}
-                  index={index}
-                  player={player}
-                />
+                <Player key={id} id={id} currentPlayer={id === playerId} />
               );
             })}
             <Bullets />

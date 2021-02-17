@@ -11,15 +11,17 @@ import Html from "../html";
 import engine from "../../shared/game/engine";
 
 type Props = {
-  player: PlayerType;
-  index: number;
+  id: number;
   currentPlayer?: boolean;
 };
 
-export default function Player({ player, currentPlayer = false }: Props) {
+export default function Player({ id, currentPlayer = false }: Props) {
+  const player = React.useMemo<PlayerType>(() => {
+    return engine.state.players[id];
+  }, [id]);
   const texture = useTexture(createShape(player.shape, player.color));
   const { raycaster } = useThree();
-  const { size, zoom, players } = useGame();
+  const { size, zoom } = useGame();
   const group = React.useRef<THREE.Group>();
   const mesh = React.useRef<THREE.Mesh>();
   const box = React.useMemo<THREE.Box3>(() => new THREE.Box3(), []);
@@ -48,13 +50,9 @@ export default function Player({ player, currentPlayer = false }: Props) {
 
   useFrame(() => {
     if (!group.current || !mesh.current) return;
-
-    for (let i = 0, length = players.length; i < length; i++) {
-      if (players[i].id !== player.id) continue;
-      group.current.position.x = players[i].x;
-      group.current.position.y = players[i].y;
-      mesh.current.rotation.z = players[i].r;
-    }
+    group.current.position.x = engine.state.players[id].x;
+    group.current.position.y = engine.state.players[id].y;
+    mesh.current.rotation.z = engine.state.players[id].r;
   });
 
   return (

@@ -10,7 +10,7 @@ type ControlsState = {
 };
 
 const SHOOTING_DELAY = 1000;
-const SHOOTING_SPEED = 0.5;
+const SHOOTING_SPEED = 0.75;
 
 export default function useControls(): ControlsState {
   const [activeKeys, setActiveKeys] = React.useState<string[]>([]);

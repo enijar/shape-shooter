@@ -3,12 +3,10 @@ import * as THREE from "three";
 import { useFrame } from "react-three-fiber";
 import vars from "../../styles/vars";
 import engine from "../../shared/game/engine";
-import { useGame } from "../state";
 
 const obj = new THREE.Object3D();
 
 export default function Bullets() {
-  const { players } = useGame();
   const mesh = React.useRef<THREE.InstancedMesh>();
   const geometry = React.useMemo<THREE.CircleGeometry>(() => {
     return new THREE.CircleGeometry(0.01, 32);
@@ -21,15 +19,12 @@ export default function Bullets() {
 
   useFrame(() => {
     if (!mesh.current) return;
-    for (let i = 0, iLength = players.length; i < iLength; i++) {
-      if (players[i].id === -1) continue;
-      for (let j = 0, jLength = players[i].bullets.length; j < jLength; j++) {
-        if (players[i].bullets[j].id === -1) continue;
-        obj.position.x = players[i].bullets[j].x;
-        obj.position.y = players[i].bullets[j].y;
-        obj.updateMatrix();
-        mesh.current.setMatrixAt(i, obj.matrix.clone());
-      }
+    for (let i = 0, iLength = engine.state.bullets.length; i < iLength; i++) {
+      obj.scale.x = engine.state.bullets[i].id === -1 ? 0 : 1;
+      obj.position.x = engine.state.bullets[i].x;
+      obj.position.y = engine.state.bullets[i].y;
+      obj.updateMatrix();
+      mesh.current.setMatrixAt(i, obj.matrix.clone());
     }
     mesh.current.instanceMatrix.needsUpdate = true;
   });

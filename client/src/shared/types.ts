@@ -21,8 +21,8 @@ export type NewPlayer = {
 export type GameState = {
   playerId: number;
   setPlayerId: (playerId: number) => void;
-  players: Player[];
-  setPlayers: (players: Player[]) => void;
+  playerIds: number[];
+  setPlayerIds: (playerIds: number[]) => void;
   size: number;
   setSize: (size: number) => void;
   zoom: number;
@@ -39,6 +39,7 @@ export enum Controls {
 export type Bullet = {
   id: number;
   playerId: number;
+  createdAt: number;
   x: number;
   y: number;
   r: number;
@@ -52,10 +53,10 @@ export type Player = {
   r: number;
   shape: Shape;
   color: string;
-  bullets: Bullet[];
 };
 
 export enum EngineActionType {
+  idle,
   connect,
   move,
   rotate,
@@ -76,4 +77,9 @@ export type MovedPayload = {
   playerId: number;
   x: number;
   y: number;
+};
+
+export type ShotPayload = {
+  playerId: number;
+  bullets: Bullet[];
 };

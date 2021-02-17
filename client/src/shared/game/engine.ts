@@ -6,6 +6,7 @@ import {
   Player,
   RotatedPayload,
   Shape,
+  ShotPayload,
 } from "../types";
 
 type ConnectPayload = {
@@ -31,16 +32,19 @@ type ShootPayload = {
 
 type ActionQueueItem = {
   type: EngineActionType;
-  payload?: ConnectPayload | RotatePayload | MovePayload;
+  payload?: ConnectPayload | RotatePayload | MovePayload | ShootPayload;
 };
 
 type State = {
   players: Player[];
+  bullets: Bullet[];
 };
 
 type Subscription = {
   type: EngineActionType;
-  fn: (payload: ConnectedPayload | RotatedPayload | MovedPayload) => void;
+  fn: (
+    payload: ConnectedPayload | RotatedPayload | MovedPayload | ShotPayload
+  ) => void;
 };
 
 type TickFn = (state: State) => void;
@@ -57,8 +61,10 @@ function createEntityBuffer<T>(size: number, entity: T): T[] {
 }
 
 // todo change tps to 60 (higher tps is a petter player experience but causes higher CPU usage)
-function createEngine(tps: number = 0) {
+function createEngine(tps: number = 60) {
   let nextPlayerIndex = 0;
+  let nextBulletIndex = 0;
+  let nextQueueIndex = 0;
   const state: State = {
     players: createEntityBuffer<Player>(MAX_PLAYERS, {
       id: -1,
@@ -68,37 +74,46 @@ function createEngine(tps: number = 0) {
       x: 0,
       y: 0,
       r: 0,
-      bullets: createEntityBuffer<Bullet>(MAX_PLAYER_BULLETS, {
-        id: -1,
-        playerId: -1,
-        x: 0,
-        y: 0,
-        r: 0,
-      }),
+    }),
+    bullets: createEntityBuffer<Bullet>(MAX_PLAYERS * MAX_PLAYER_BULLETS, {
+      id: -1,
+      playerId: -1,
+      createdAt: 0,
+      x: 0,
+      y: 0,
+      r: 0,
     }),
   };
   const subscriptions: Subscription[] = [];
-  const actionQueue: ActionQueueItem[] = [];
-  let totalPlayers = 0;
-  let totalPlayerBullets = 0;
-
-  for (let i = 0, length = state.players.length; i < length; i++) {
-    totalPlayers++;
-    totalPlayerBullets += state.players[i].bullets.length;
-  }
+  // todo calculate the array buffer size based off of the max players and bullets
+  const actionQueue: ActionQueueItem[] = createEntityBuffer<ActionQueueItem>(
+    100,
+    {
+      type: EngineActionType.idle,
+    }
+  );
+  const totalPlayers = state.players.length;
+  const totalPlayerBullets = state.bullets.length;
 
   function on(
     type: EngineActionType,
-    fn: (payload: ConnectedPayload | RotatedPayload | MovedPayload) => void
+    fn: (
+      payload: ConnectedPayload | RotatedPayload | MovedPayload | ShotPayload
+    ) => void
   ) {
     subscriptions.push({ type, fn });
   }
 
   function emit(
     type: EngineActionType,
-    payload?: ConnectPayload | RotatePayload | MovePayload
+    payload?: ConnectPayload | RotatePayload | MovePayload | ShootPayload
   ) {
-    actionQueue.unshift({ type, payload });
+    actionQueue[nextQueueIndex].type = type;
+    actionQueue[nextQueueIndex].payload = payload;
+    nextQueueIndex++;
+    if (nextQueueIndex === actionQueue.length) {
+      nextQueueIndex = 0;
+    }
   }
 
   function off(type: EngineActionType, fn: Function) {
@@ -108,6 +123,7 @@ function createEngine(tps: number = 0) {
   let timeout: NodeJS.Timeout;
 
   function tick(fn?: TickFn) {
+    const now = Date.now();
     for (let i = 0, length = actionQueue.length; i < length; i++) {
       const action = actionQueue[i];
 
@@ -120,7 +136,7 @@ function createEngine(tps: number = 0) {
       if (action.type === EngineActionType.connect) {
         const payload = action.payload as ConnectPayload;
         // todo connect player to sockets
-        connectedPlayerId = nextPlayerIndex + 1;
+        connectedPlayerId = nextPlayerIndex;
         if (state.players[nextPlayerIndex].id > -1) {
           // todo re-connect user instead of doing nothing here
           continue;
@@ -131,19 +147,6 @@ function createEngine(tps: number = 0) {
         state.players[nextPlayerIndex].x = 0;
         state.players[nextPlayerIndex].y = 0;
         state.players[nextPlayerIndex].r = 0;
-        for (
-          let i = 0, length = state.players[nextPlayerIndex].bullets.length;
-          i < length;
-          i++
-        ) {
-          state.players[nextPlayerIndex].bullets[i].id = -1;
-          state.players[nextPlayerIndex].bullets[
-            i
-          ].playerId = connectedPlayerId;
-          state.players[nextPlayerIndex].x = 0;
-          state.players[nextPlayerIndex].y = 0;
-          state.players[nextPlayerIndex].r = 0;
-        }
         nextPlayerIndex++;
         // todo refuse to connect (player count is at max)
         if (nextPlayerIndex === state.players.length) {
@@ -168,7 +171,16 @@ function createEngine(tps: number = 0) {
       if (action.type === EngineActionType.shoot) {
         // todo shoot bullet for player
         const payload = action.payload as ShootPayload;
-        // state.players[payload.playerId].bullets = [];
+        state.bullets[nextBulletIndex].playerId = payload.playerId;
+        state.bullets[nextBulletIndex].id = nextBulletIndex;
+        state.bullets[nextBulletIndex].x = state.players[payload.playerId].x;
+        state.bullets[nextBulletIndex].y = state.players[payload.playerId].y;
+        state.bullets[nextBulletIndex].r = state.players[payload.playerId].r;
+        state.bullets[nextBulletIndex].createdAt = now;
+        nextBulletIndex++;
+        if (nextBulletIndex === state.bullets.length) {
+          nextBulletIndex = 0;
+        }
       }
 
       for (let i = 0, length = subscriptions.length; i < length; i++) {
@@ -181,32 +193,25 @@ function createEngine(tps: number = 0) {
             players: state.players,
           });
         }
-        if (action.type === EngineActionType.rotate) {
-          const payload = action.payload as RotatePayload;
-          subscriptions[i].fn({
-            playerId: payload.playerId,
-            r: state.players[payload.playerId].r,
-          });
-        }
-        if (action.type === EngineActionType.move) {
-          const payload = action.payload as MovePayload;
-          subscriptions[i].fn({
-            playerId: payload.playerId,
-            x: state.players[payload.playerId].x,
-            y: state.players[payload.playerId].y,
-          });
-        }
-        if (action.type === EngineActionType.shoot) {
-          const payload = action.payload as ShootPayload;
-          subscriptions[i].fn({
-            playerId: payload.playerId,
-            players: state.players,
-          });
-        }
       }
 
       connectedPlayerId = -1;
-      actionQueue.splice(i, 1);
+      actionQueue[i].type = EngineActionType.idle;
+      actionQueue[i].payload = undefined;
+    }
+
+    // todo move to update function to be iterated over multiple times to improve accuracy (removing the need to rely on exact timeout calls)
+    // todo move to consts file
+    const bulletVelocity = 0.01;
+    const bulletLifetime = 3500;
+    for (let i = 0, length = state.bullets.length; i < length; i++) {
+      if (state.bullets[i].id === -1) continue;
+      if (now - state.bullets[i].createdAt >= bulletLifetime) {
+        state.bullets[i].id = -1;
+        continue;
+      }
+      state.bullets[i].x += bulletVelocity * Math.sin(-state.bullets[i].r);
+      state.bullets[i].y += bulletVelocity * Math.cos(-state.bullets[i].r);
     }
 
     timeout = setTimeout(() => {
@@ -220,6 +225,7 @@ function createEngine(tps: number = 0) {
   return {
     totalPlayers,
     totalPlayerBullets,
+    state,
     on,
     emit,
     off,

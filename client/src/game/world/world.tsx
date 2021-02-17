@@ -42,7 +42,7 @@ export default function World({ children, size = 2 }: Props) {
     }
 
     if (shooting) {
-      //
+      engine.emit(EngineActionType.shoot, { playerId });
     }
   });
 

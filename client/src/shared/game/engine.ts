@@ -1,3 +1,5 @@
+import { clamp } from "./utils";
+
 export enum EngineContext {
   client,
   server,
@@ -8,6 +10,8 @@ export type EngineConfig = {
   maxBulletsPerPlayer: number;
   context: EngineContext;
   tps: number;
+  worldW: number;
+  worldH: number;
 };
 
 export type EngineSubscription = {
@@ -25,6 +29,8 @@ export type EngineState = {
   players: EnginePlayer[];
   bullets: EngineBullet[];
   subscriptions: EngineSubscription[];
+  availablePlayerIndices: number[];
+  availableBulletIndices: number[];
 };
 
 export enum ActionType {
@@ -74,6 +80,8 @@ const defaultConfig = {
   maxBulletsPerPlayer: 100,
   context: EngineContext.client,
   tps: 60,
+  worldW: 2,
+  worldH: 2,
 };
 
 export default (function createEngine(config: EngineConfig = defaultConfig) {
@@ -88,6 +96,32 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
     return buffer;
   }
 
+  const playersBuffer = createEntityBuffer<EnginePlayer>(config.maxPlayers, {
+    id: -1,
+    name: "",
+    shape: EnginePlayerShape.triangle,
+    color: "#ff0000",
+    firing: false,
+    lastFireTime: 0,
+    moveX: 0,
+    moveY: 0,
+    x: 0,
+    y: 0,
+    r: 0,
+  });
+  const bulletsBuffer = createEntityBuffer<EngineBullet>(
+    config.maxPlayers * config.maxBulletsPerPlayer,
+    {
+      id: -1,
+      playerId: -1,
+      sX: 0,
+      sY: 0,
+      x: 0,
+      y: 0,
+      r: 0,
+    }
+  );
+
   const state: EngineState = {
     // Actions sent in by players
     actions: createEntityBuffer<EngineAction>(config.maxPlayers * 10, {
@@ -95,33 +129,12 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
       type: ActionType.idle,
     }),
     // Currently connected players with their states
-    players: createEntityBuffer<EnginePlayer>(config.maxPlayers, {
-      id: -1,
-      name: "",
-      shape: EnginePlayerShape.triangle,
-      color: "#ff0000",
-      firing: false,
-      lastFireTime: 0,
-      moveX: 0,
-      moveY: 0,
-      x: 0,
-      y: 0,
-      r: 0,
-    }),
+    players: playersBuffer,
     // Bullets fired by players
-    bullets: createEntityBuffer<EngineBullet>(
-      config.maxPlayers * config.maxBulletsPerPlayer,
-      {
-        id: -1,
-        playerId: -1,
-        sX: 0,
-        sY: 0,
-        x: 0,
-        y: 0,
-        r: 0,
-      }
-    ),
+    bullets: bulletsBuffer,
     subscriptions: [],
+    availablePlayerIndices: playersBuffer.map((_, index) => index),
+    availableBulletIndices: bulletsBuffer.map((_, index) => index),
   };
 
   // Emit updates to all players
@@ -136,49 +149,59 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
     }
   }
 
-  let nextPlayerIndex = 0;
-  let nextBulletIndex = 0;
+  const playerMinX = -config.worldW / 2;
+  const playerMaxX = config.worldW / 2;
+  const playerMinY = -config.worldH / 2;
+  const playerMaxY = config.worldH / 2;
   const playerFireInterval = 250; // ms
   const maxBulletDistance = 2;
-  const playerVelocity = 0.0075;
-  const bulletVelocity = 0.01;
+  const playerVelocity = 0.003;
+  const bulletVelocity = 0.006;
+  let lastUpdateTime = Date.now();
   function update(now: number): EngineEvent[] {
+    const delta = Math.max(1, now - lastUpdateTime);
+    lastUpdateTime = now;
+    // For skipped frames or on slower machines this will be used to move forward in time.
+    // 1 is the default time step if the timeout calls are in sync with the tps.
+    // This number will be higher the more out of time drift there is between timeout calls.
+    const ts = Math.ceil(delta / tps);
     const events: EngineEvent[] = [];
     // Apply updates
     for (let i = 0, length = state.players.length; i < length; i++) {
       // Handle player movement
-      // todo clamp player x,y to ensure they stay within the bounds of the arena
       let velocity = playerVelocity;
       if (state.players[i].moveX !== 0 && state.players[i].moveY !== 0) {
         // Move slower if this player is moving diagonally
         velocity *= 0.75;
       }
-      state.players[i].x += velocity * state.players[i].moveX;
-      state.players[i].y -= velocity * state.players[i].moveY;
+      state.players[i].x += velocity * ts * state.players[i].moveX;
+      state.players[i].y -= velocity * ts * state.players[i].moveY;
+      state.players[i].x = clamp(state.players[i].x, playerMinX, playerMaxX);
+      state.players[i].y = clamp(state.players[i].y, playerMinY, playerMaxY);
       // Handle player firing
       const canFire = now - state.players[i].lastFireTime >= playerFireInterval;
       if (state.players[i].firing && canFire) {
+        const index = state.availableBulletIndices[0];
+        state.availableBulletIndices.splice(0, 1);
         state.players[i].lastFireTime = now;
-        state.bullets[nextBulletIndex].id = nextBulletIndex;
-        state.bullets[nextBulletIndex].sX = state.players[i].x;
-        state.bullets[nextBulletIndex].sY = state.players[i].y;
-        state.bullets[nextBulletIndex].x = state.players[i].x;
-        state.bullets[nextBulletIndex].y = state.players[i].y;
-        state.bullets[nextBulletIndex].r = state.players[i].r;
-        // Re-use existing bullet objects by cycling through them
-        if (++nextBulletIndex === state.bullets.length) {
-          nextBulletIndex = 0;
-        }
+        state.bullets[index].id = index;
+        state.bullets[index].sX = state.players[i].x;
+        state.bullets[index].sY = state.players[i].y;
+        state.bullets[index].x = state.players[i].x;
+        state.bullets[index].y = state.players[i].y;
+        state.bullets[index].r = state.players[i].r;
       }
     }
     for (let i = 0, length = state.bullets.length; i < length; i++) {
-      state.bullets[i].x += bulletVelocity * Math.sin(-state.bullets[i].r);
-      state.bullets[i].y += bulletVelocity * Math.cos(-state.bullets[i].r);
+      state.bullets[i].x += bulletVelocity * ts * Math.sin(-state.bullets[i].r);
+      state.bullets[i].y += bulletVelocity * ts * Math.cos(-state.bullets[i].r);
       const a = state.bullets[i].sX - state.bullets[i].x;
       const b = state.bullets[i].sY - state.bullets[i].y;
       const d = Math.sqrt(a * a + b * b);
       if (d > maxBulletDistance) {
         state.bullets[i].id = -1;
+        // Make player entity available
+        state.availableBulletIndices.push(i);
       }
       // todo check for bullet collisions with players and reduce player hp
     }
@@ -195,6 +218,7 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
 
   return {
     state,
+    config,
     start: tick,
     stop() {
       clearTimeout(nextTimeout);
@@ -217,27 +241,27 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
       state.players[playerId].firing = firing;
     },
     connect(playerName: string, shape: EnginePlayerShape, color: string) {
-      if (state.players[nextPlayerIndex].id > -1) {
+      if (state.availablePlayerIndices.length === 0) {
         // todo emit error informing player that the server is full
         return;
       }
-      state.players[nextPlayerIndex].id = nextPlayerIndex;
-      state.players[nextPlayerIndex].name = playerName;
-      state.players[nextPlayerIndex].shape = shape;
-      state.players[nextPlayerIndex].color = color;
+      const index = state.availablePlayerIndices[0];
+      state.availablePlayerIndices.splice(0, 1);
+      state.players[index].id = index;
+      state.players[index].name = playerName;
+      state.players[index].shape = shape;
+      state.players[index].color = color;
       emit([
         {
           event: "connected",
           payload: {
-            player: { ...state.players[nextPlayerIndex] },
+            player: { ...state.players[index] },
             players: [...state.players],
           },
         },
       ]);
-      // Re-use existing player objects by cycling through them
-      if (++nextPlayerIndex === state.players.length) {
-        nextPlayerIndex = 0;
-      }
+      // Make player entity available
+      state.availablePlayerIndices.push(index);
     },
   };
 })();

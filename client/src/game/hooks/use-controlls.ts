@@ -9,13 +9,9 @@ type ControlsState = {
   shooting: () => boolean;
 };
 
-const SHOOTING_DELAY = 1000;
-const SHOOTING_SPEED = 0.75;
-
 export default function useControls(): ControlsState {
   const [activeKeys, setActiveKeys] = React.useState<string[]>([]);
   const pointerDown = React.useRef<boolean>(false);
-  const lastShootTime = React.useRef<number>(0);
   const controlsState = React.useMemo<ControlsState>(() => {
     return {
       [Controls.moveUp]() {
@@ -31,16 +27,7 @@ export default function useControls(): ControlsState {
         return activeKeys.includes(Controls.moveRight);
       },
       shooting() {
-        const now = Date.now();
-        const shootingDelta = now - lastShootTime.current;
-        if (
-          pointerDown.current &&
-          shootingDelta > SHOOTING_DELAY * Math.max(0, 1 - SHOOTING_SPEED)
-        ) {
-          lastShootTime.current = now;
-          return true;
-        }
-        return false;
+        return pointerDown.current;
       },
     };
   }, [activeKeys, pointerDown]);

@@ -4,7 +4,7 @@ import { useTexture } from "@react-three/drei";
 import vars from "../../styles/vars";
 import assets from "../assets";
 import { useFrame } from "react-three-fiber";
-import { Controls, EngineActionType } from "../../shared/types";
+import { Controls } from "../../shared/types";
 import useControls from "../hooks/use-controlls";
 import { useGame } from "../state";
 import engine from "../../shared/game/engine";

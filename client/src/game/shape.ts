@@ -26,6 +26,5 @@ export default function createShape(
   shape: EnginePlayerShape,
   color: string
 ): string {
-  // @ts-ignore
   return shapes[shape](color);
 }

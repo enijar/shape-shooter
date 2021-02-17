@@ -1,6 +1,6 @@
 import { createGlobalStyle } from "styled-components";
 
-// @todo reduce number of fonts used
+// todo reduce number of fonts used
 export default createGlobalStyle`
   @font-face {
     font-family: "Open Sans";

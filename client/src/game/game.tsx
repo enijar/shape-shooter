@@ -3,10 +3,9 @@ import { Canvas } from "react-three-fiber";
 import { OrthographicCamera } from "@react-three/drei";
 import { GameWrapper } from "./styles";
 import { useGame } from "./state";
-import World from "./world/world";
-// import Bullets from "./entities/bullets";
-import Player from "./player/player";
 import engine, { EnginePlayerShape } from "../shared/game/engine";
+import World from "./world/world";
+import Player from "./player/player";
 import Bullets from "./entities/bullets";
 
 export default function Game() {
@@ -15,7 +14,6 @@ export default function Game() {
   React.useEffect(() => {
     engine.start();
     const listener = engine.subscribe("connected", (payload: any) => {
-      console.log("connected");
       const game = useGame.getState();
       game.setPlayer(payload.player);
       game.setPlayers(payload.players);
@@ -28,24 +26,6 @@ export default function Game() {
   }, []);
 
   React.useEffect(() => {
-    // engine.on(EngineActionType.connect, (payload) => {
-    //   const p = payload as ConnectedPayload;
-    //   useGame.getState().setPlayerId(p.playerId);
-    //   useGame.getState().setPlayerIds(p.players.map((player) => player.id));
-    // });
-    //
-    // engine.on(EngineActionType.tick, (payload) => {
-    //   const p = payload as TickedPayload;
-    //   state.players = p.players;
-    //   state.bullets = p.bullets;
-    // });
-    //
-    // engine.emit(EngineActionType.connect, {
-    //   name: "Enijar",
-    //   shape: Shape.triangle,
-    //   color: "#ff0000",
-    // });
-
     function onResize() {
       useGame
         .getState()

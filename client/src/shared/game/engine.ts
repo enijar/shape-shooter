@@ -57,8 +57,6 @@ type Subscription = {
   ) => void;
 };
 
-type TickFn = (state: State) => void;
-
 const MAX_PLAYERS = 20;
 const MAX_PLAYER_BULLETS = 5;
 
@@ -142,7 +140,7 @@ function createEngine(tps: number = 60) {
 
   let timeout: NodeJS.Timeout;
 
-  function tick(fn?: TickFn) {
+  function tick() {
     const now = Date.now();
     for (let i = 0, length = actionQueue.length; i < length; i++) {
       const action = actionQueue[i];
@@ -241,12 +239,7 @@ function createEngine(tps: number = 60) {
       state.bullets[i].y += bulletVelocity * Math.cos(-state.bullets[i].r);
     }
 
-    timeout = setTimeout(() => {
-      if (fn) {
-        fn(state);
-      }
-      tick(fn);
-    }, 1000 / tps);
+    timeout = setTimeout(tick, 1000 / tps);
   }
 
   return {
@@ -256,8 +249,8 @@ function createEngine(tps: number = 60) {
     on,
     emit,
     off,
-    start(fn?: TickFn) {
-      tick(fn);
+    start() {
+      tick();
     },
     destroy() {
       clearTimeout(timeout);

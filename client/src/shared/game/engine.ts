@@ -164,10 +164,11 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
     // For skipped frames or on slower machines this will be used to move forward in time.
     // 1 is the default time step if the timeout calls are in sync with the tps.
     // This number will be higher the more out of time drift there is between timeout calls.
-    const ts = Math.ceil(delta / tps);
+    const ts = delta / tps;
     const events: EngineEvent[] = [];
     // Apply updates
     for (let i = 0, length = state.players.length; i < length; i++) {
+      if (state.players[i].id === -1) continue;
       // Handle player movement
       let velocity = playerVelocity;
       if (state.players[i].moveX !== 0 && state.players[i].moveY !== 0) {
@@ -193,6 +194,7 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
       }
     }
     for (let i = 0, length = state.bullets.length; i < length; i++) {
+      if (state.bullets[i].id === -1) continue;
       state.bullets[i].x += bulletVelocity * ts * Math.sin(-state.bullets[i].r);
       state.bullets[i].y += bulletVelocity * ts * Math.cos(-state.bullets[i].r);
       const a = state.bullets[i].sX - state.bullets[i].x;

@@ -1,3 +1,5 @@
+import { EnginePlayer } from "./game/engine";
+
 export enum Shape {
   circle = "circle",
   square = "square",
@@ -16,17 +18,6 @@ export type NewPlayer = {
   shape: Shape;
   weapon: Weapon;
   color: string;
-};
-
-export type GameState = {
-  playerId: number;
-  setPlayerId: (playerId: number) => void;
-  playerIds: number[];
-  setPlayerIds: (playerIds: number[]) => void;
-  size: number;
-  setSize: (size: number) => void;
-  zoom: number;
-  setZoom: (zoom: number) => void;
 };
 
 export enum Controls {

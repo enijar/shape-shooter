@@ -1,257 +1,243 @@
-import {
-  ConnectedPayload,
-  DisconnectedPayload,
-  EngineActionType,
-  MovedPayload,
-  RotatedPayload,
-  Shape,
-  ShotPayload,
-  TickedPayload,
-} from "../types";
-import state from "./state";
-import { createEntityBuffer } from "./utils";
+export enum EngineContext {
+  client,
+  server,
+}
 
-type ConnectPayload = {
+export type EngineConfig = {
+  maxPlayers: number;
+  maxBulletsPerPlayer: number;
+  context: EngineContext;
+  tps: number;
+};
+
+export type EngineSubscription = {
+  event: string;
+  fn: (payload?: any) => void;
+};
+
+export type EngineEvent = {
+  event: string;
+  payload?: any;
+};
+
+export type EngineState = {
+  actions: EngineAction[];
+  players: EnginePlayer[];
+  bullets: EngineBullet[];
+  subscriptions: EngineSubscription[];
+};
+
+export enum ActionType {
+  move,
+  rotate,
+  shoot,
+  idle,
+}
+
+export type EngineAction = {
+  playerId: number;
+  type: ActionType;
+};
+
+export enum EnginePlayerShape {
+  circle = "circle",
+  square = "square",
+  triangle = "triangle",
+}
+
+export type EnginePlayer = {
+  id: number;
   name: string;
-  shape: Shape;
+  shape: EnginePlayerShape;
   color: string;
-};
-
-type DisconnectPayload = {
-  playerId: number;
-};
-
-type MovePayload = {
-  playerId: number;
+  firing: boolean;
+  lastFireTime: number;
+  moveX: -1 | 0 | 1; // direction of movement along the X axis
+  moveY: -1 | 0 | 1; // direction of movement along the Y axis
   x: number;
   y: number;
-};
-
-type RotatePayload = {
-  playerId: number;
   r: number;
 };
 
-type ShootPayload = {
+export type EngineBullet = {
+  id: number;
   playerId: number;
+  sX: number; // starting X position
+  sY: number; // starting Y position
+  x: number;
+  y: number;
+  r: number;
 };
 
-type ActionQueueItem = {
-  type: EngineActionType;
-  payload?: ConnectPayload | RotatePayload | MovePayload | ShootPayload;
+const defaultConfig = {
+  maxPlayers: 20,
+  maxBulletsPerPlayer: 100,
+  context: EngineContext.client,
+  tps: 60,
 };
 
-type Subscription = {
-  type: EngineActionType;
-  fn: (
-    payload?:
-      | ConnectedPayload
-      | TickedPayload
-      | RotatedPayload
-      | MovedPayload
-      | ShotPayload
-      | DisconnectedPayload
-  ) => void;
-};
+export default (function createEngine(config: EngineConfig = defaultConfig) {
+  config = Object.assign(config ?? {}, defaultConfig);
 
-// todo change tps to 60 (higher tps is a petter player experience but causes higher CPU usage)
-function createEngine(tps: number = 60) {
+  // Create a fixed length array of entity objects (avoids heavy GC calls)
+  function createEntityBuffer<T>(size: number, entity: T): T[] {
+    const buffer: T[] = [];
+    for (let i = 0; i < size; i++) {
+      buffer.push({ ...entity });
+    }
+    return buffer;
+  }
+
+  const state: EngineState = {
+    // Actions sent in by players
+    actions: createEntityBuffer<EngineAction>(config.maxPlayers * 10, {
+      playerId: -1,
+      type: ActionType.idle,
+    }),
+    // Currently connected players with their states
+    players: createEntityBuffer<EnginePlayer>(config.maxPlayers, {
+      id: -1,
+      name: "",
+      shape: EnginePlayerShape.triangle,
+      color: "#ff0000",
+      firing: false,
+      lastFireTime: 0,
+      moveX: 0,
+      moveY: 0,
+      x: 0,
+      y: 0,
+      r: 0,
+    }),
+    // Bullets fired by players
+    bullets: createEntityBuffer<EngineBullet>(
+      config.maxPlayers * config.maxBulletsPerPlayer,
+      {
+        id: -1,
+        playerId: -1,
+        sX: 0,
+        sY: 0,
+        x: 0,
+        y: 0,
+        r: 0,
+      }
+    ),
+    subscriptions: [],
+  };
+
+  // Emit updates to all players
+  function emit(events: EngineEvent[] = []) {
+    // todo emit socket event to players
+    for (let i = 0, iLength = events.length; i < iLength; i++) {
+      for (let j = 0, jLength = state.subscriptions.length; j < jLength; j++) {
+        if (events[i].event === state.subscriptions[j].event) {
+          state.subscriptions[j].fn(events[i].payload);
+        }
+      }
+    }
+  }
+
   let nextPlayerIndex = 0;
   let nextBulletIndex = 0;
-  let nextQueueIndex = 0;
-  const subscriptions: Subscription[] = [];
-  // todo calculate the array buffer size based off of the max players and bullets
-  const actionQueue: ActionQueueItem[] = createEntityBuffer<ActionQueueItem>(
-    100,
-    {
-      type: EngineActionType.idle,
-    }
-  );
-  const totalPlayers = state.players.length;
-  const totalPlayerBullets = state.bullets.length;
-
-  function on(
-    type: EngineActionType,
-    fn: (
-      payload?:
-        | ConnectedPayload
-        | TickedPayload
-        | RotatedPayload
-        | MovedPayload
-        | ShotPayload
-        | DisconnectedPayload
-    ) => void
-  ) {
-    subscriptions.push({ type, fn });
-  }
-
-  function emit(
-    type: EngineActionType,
-    payload?:
-      | ConnectPayload
-      | DisconnectPayload
-      | RotatePayload
-      | MovePayload
-      | ShootPayload
-  ) {
-    actionQueue[nextQueueIndex].type = type;
-    actionQueue[nextQueueIndex].payload = payload;
-    nextQueueIndex++;
-    if (nextQueueIndex === actionQueue.length) {
-      nextQueueIndex = 0;
-    }
-  }
-
-  function off(type: EngineActionType, fn: Function) {
-    // todo remove subscription
-  }
-
-  let timeout: NodeJS.Timeout;
-
-  function tick() {
-    const now = Date.now();
-    for (let i = 0, length = actionQueue.length; i < length; i++) {
-      const action = actionQueue[i];
-
-      if (!action) {
-        continue;
+  const playerFireInterval = 250; // ms
+  const maxBulletDistance = 2;
+  const playerVelocity = 0.0075;
+  const bulletVelocity = 0.01;
+  function update(now: number): EngineEvent[] {
+    const events: EngineEvent[] = [];
+    // Apply updates
+    for (let i = 0, length = state.players.length; i < length; i++) {
+      // Handle player movement
+      // todo clamp player x,y to ensure they stay within the bounds of the arena
+      let velocity = playerVelocity;
+      if (state.players[i].moveX !== 0 && state.players[i].moveY !== 0) {
+        // Move slower if this player is moving diagonally
+        velocity *= 0.75;
       }
-
-      let connectedPlayerId: number = -1;
-
-      if (action.type === EngineActionType.connect) {
-        const payload = action.payload as ConnectPayload;
-        // todo connect player to sockets
-        connectedPlayerId = nextPlayerIndex;
-        if (state.players[nextPlayerIndex].id > -1) {
-          // todo re-connect user instead of doing nothing here
-          continue;
-        }
-        state.players[nextPlayerIndex].id = connectedPlayerId;
-        state.players[nextPlayerIndex].name = payload.name;
-        // todo place player in a random location (within the bounds of the arena)
-        state.players[nextPlayerIndex].x = 0;
-        state.players[nextPlayerIndex].y = 0;
-        state.players[nextPlayerIndex].r = 0;
-        nextPlayerIndex++;
-        // todo refuse to connect (player count is at max)
-        if (nextPlayerIndex === state.players.length) {
-          nextPlayerIndex = 0;
-        }
-      }
-
-      if (action.type === EngineActionType.move) {
-        const payload = action.payload as MovePayload;
-        const velocity = 0.0075; // todo move to consts file
-        const delta =
-          payload.x !== 0 && payload.y !== 0 ? velocity * 0.75 : velocity;
-        state.players[payload.playerId].x -= payload.x * delta;
-        state.players[payload.playerId].y -= payload.y * delta;
-      }
-
-      if (action.type === EngineActionType.rotate) {
-        const payload = action.payload as RotatePayload;
-        state.players[payload.playerId].r = payload.r;
-      }
-
-      if (action.type === EngineActionType.shoot) {
-        const payload = action.payload as ShootPayload;
-        const { x, y, r } = state.players[payload.playerId];
-        state.bullets[nextBulletIndex].playerId = payload.playerId;
+      state.players[i].x += velocity * state.players[i].moveX;
+      state.players[i].y -= velocity * state.players[i].moveY;
+      // Handle player firing
+      const canFire = now - state.players[i].lastFireTime >= playerFireInterval;
+      if (state.players[i].firing && canFire) {
+        state.players[i].lastFireTime = now;
         state.bullets[nextBulletIndex].id = nextBulletIndex;
-        state.bullets[nextBulletIndex].x = x;
-        state.bullets[nextBulletIndex].y = y;
-        state.bullets[nextBulletIndex].r = r;
-        state.bullets[nextBulletIndex].sX = x;
-        state.bullets[nextBulletIndex].sY = y;
-        nextBulletIndex++;
-        if (nextBulletIndex === state.bullets.length) {
+        state.bullets[nextBulletIndex].sX = state.players[i].x;
+        state.bullets[nextBulletIndex].sY = state.players[i].y;
+        state.bullets[nextBulletIndex].x = state.players[i].x;
+        state.bullets[nextBulletIndex].y = state.players[i].y;
+        state.bullets[nextBulletIndex].r = state.players[i].r;
+        // Re-use existing bullet objects by cycling through them
+        if (++nextBulletIndex === state.bullets.length) {
           nextBulletIndex = 0;
         }
       }
-
-      for (let i = 0, length = subscriptions.length; i < length; i++) {
-        if (subscriptions[i].type !== action.type) {
-          continue;
-        }
-        if (action.type === EngineActionType.connect) {
-          subscriptions[i].fn({
-            playerId: connectedPlayerId,
-            players: state.players,
-          });
-        }
-        if (action.type === EngineActionType.disconnect) {
-          const payload = action.payload as DisconnectPayload;
-          const playerId = state.players[payload.playerId].id;
-          state.players[payload.playerId].id = -1;
-          subscriptions[i].fn({ playerId, players: state.players });
-        }
-      }
-
-      connectedPlayerId = -1;
-      actionQueue[i].type = EngineActionType.idle;
-      actionQueue[i].payload = undefined;
     }
-
-    // todo move to update function to be iterated over multiple times to improve accuracy (removing the need to rely on exact timeout calls)
-    // todo move to consts file
-    const bulletVelocity = 0.01;
-    const bulletMaxDistance = 2;
     for (let i = 0, length = state.bullets.length; i < length; i++) {
-      if (state.bullets[i].id === -1) continue;
-      const { sX, sY, r } = state.bullets[i];
-      state.bullets[i].x += bulletVelocity * Math.sin(-r);
-      state.bullets[i].y += bulletVelocity * Math.cos(-r);
-      const x = sX - state.bullets[i].x;
-      const y = sY - state.bullets[i].y;
-      const d = Math.sqrt(x * x + y * y);
-      if (d > bulletMaxDistance) {
+      state.bullets[i].x += bulletVelocity * Math.sin(-state.bullets[i].r);
+      state.bullets[i].y += bulletVelocity * Math.cos(-state.bullets[i].r);
+      const a = state.bullets[i].sX - state.bullets[i].x;
+      const b = state.bullets[i].sY - state.bullets[i].y;
+      const d = Math.sqrt(a * a + b * b);
+      if (d > maxBulletDistance) {
         state.bullets[i].id = -1;
       }
+      // todo check for bullet collisions with players and reduce player hp
     }
+    return events;
+  }
 
-    for (let i = 0, length = subscriptions.length; i < length; i++) {
-      if (subscriptions[i].type === EngineActionType.tick) {
-        // todo optimise the amount of data sent (when sending from server to client)
-        subscriptions[i].fn({
-          players: state.players,
-          bullets: state.bullets,
-        });
-      }
-    }
-
-    timeout = setTimeout(tick, 1000 / tps);
+  const tps = 1000 / config.tps;
+  let nextTimeout: NodeJS.Timeout;
+  function tick() {
+    const now = Date.now();
+    emit(update(now));
+    nextTimeout = setTimeout(tick, tps);
   }
 
   return {
-    totalPlayers,
-    totalPlayerBullets,
-    on,
-    emit,
-    off,
-    start() {
-      tick();
+    state,
+    start: tick,
+    stop() {
+      clearTimeout(nextTimeout);
     },
-    destroy() {
-      clearTimeout(timeout);
-      for (let i = 0, length = state.players.length; i < length; i++) {
-        state.players[i].id = -1;
-        state.players[i].shape = Shape.triangle;
-        state.players[i].color = "#ff0000";
-        state.players[i].name = "";
-        state.players[i].x = 0;
-        state.players[i].y = 0;
-        state.players[i].r = 0;
+    subscribe(event: string, fn: (payload?: any) => void): Function {
+      state.subscriptions.push({ event, fn });
+      const subscriptionIndex = state.subscriptions.length - 1;
+      return () => {
+        state.subscriptions.splice(subscriptionIndex, 1);
+      };
+    },
+    playerRotate(playerId: number, r: number) {
+      state.players[playerId].r = r;
+    },
+    playerMove(playerId: number, moveX: -1 | 0 | 1, moveY: -1 | 0 | 1) {
+      state.players[playerId].moveX = moveX;
+      state.players[playerId].moveY = moveY;
+    },
+    playerFire(playerId: number, firing: boolean) {
+      state.players[playerId].firing = firing;
+    },
+    connect(playerName: string, shape: EnginePlayerShape, color: string) {
+      if (state.players[nextPlayerIndex].id > -1) {
+        // todo emit error informing player that the server is full
+        return;
       }
-      for (let i = 0, length = state.bullets.length; i < length; i++) {
-        state.bullets[i].id = -1;
-        state.bullets[i].playerId = -1;
-        state.bullets[i].x = 0;
-        state.bullets[i].y = 0;
-        state.bullets[i].r = 0;
+      state.players[nextPlayerIndex].id = nextPlayerIndex;
+      state.players[nextPlayerIndex].name = playerName;
+      state.players[nextPlayerIndex].shape = shape;
+      state.players[nextPlayerIndex].color = color;
+      emit([
+        {
+          event: "connected",
+          payload: {
+            player: { ...state.players[nextPlayerIndex] },
+            players: [...state.players],
+          },
+        },
+      ]);
+      // Re-use existing player objects by cycling through them
+      if (++nextPlayerIndex === state.players.length) {
+        nextPlayerIndex = 0;
       }
     },
   };
-}
-
-export default createEngine();
+})();

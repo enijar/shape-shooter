@@ -15,7 +15,7 @@ type Props = {
 };
 
 export default function World({ children, size = 2 }: Props) {
-  const { playerId } = useGame();
+  const { player } = useGame();
 
   const texture = useTexture(assets.chunk);
   const controls = useControls();
@@ -27,23 +27,23 @@ export default function World({ children, size = 2 }: Props) {
   }, [texture, size]);
 
   useFrame(() => {
+    if (player === null) return;
     const moveUp = controls[Controls.moveUp]();
     const moveDown = controls[Controls.moveDown]();
     const moveLeft = controls[Controls.moveLeft]();
     const moveRight = controls[Controls.moveRight]();
     const shooting = controls.shooting();
 
-    if (moveUp || moveDown || moveRight || moveLeft) {
-      engine.emit(EngineActionType.move, {
-        playerId,
-        x: moveLeft ? 1 : moveRight ? -1 : 0,
-        y: moveUp ? -1 : moveDown ? 1 : 0,
-      });
-    }
+    let moveX: -1 | 0 | 1 = 0;
+    let moveY: -1 | 0 | 1 = 0;
 
-    if (shooting) {
-      engine.emit(EngineActionType.shoot, { playerId });
-    }
+    if (moveUp) moveY = -1;
+    if (moveDown) moveY = 1;
+    if (moveLeft) moveX = -1;
+    if (moveRight) moveX = 1;
+
+    engine.playerMove(player.id, moveX, moveY);
+    engine.playerFire(player.id, shooting);
   });
 
   return (

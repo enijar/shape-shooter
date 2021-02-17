@@ -6,18 +6,19 @@ import { Container, Flex } from "../../styles/layout";
 import { Shape } from "../../shared/types";
 import createShape from "../../game/shape";
 import vars from "../../styles/vars";
+import { EnginePlayerShape } from "../../shared/game/engine";
 
 export default function Home() {
   const [name, setName] = React.useState<string>("");
-  const [shape, setShape] = React.useState<null | Shape>(null);
+  const [shape, setShape] = React.useState<null | EnginePlayerShape>(null);
   const disabled = React.useMemo<boolean>(() => {
     return name.trim().length === 0 || shape === null;
   }, [name, shape]);
   const shapes = React.useMemo(() => {
     return [
-      createShape(Shape.circle, vars.color.blue),
-      createShape(Shape.square, vars.color.green),
-      createShape(Shape.triangle, vars.color.red),
+      createShape(EnginePlayerShape.circle, vars.color.blue),
+      createShape(EnginePlayerShape.square, vars.color.green),
+      createShape(EnginePlayerShape.triangle, vars.color.red),
     ];
   }, []);
 
@@ -39,20 +40,20 @@ export default function Home() {
           </Title>
           <Flex align="center" justify="space-between">
             <HomeShape
-              selected={shape === Shape.circle}
-              onClick={() => setShape(Shape.circle)}
+              selected={shape === EnginePlayerShape.circle}
+              onClick={() => setShape(EnginePlayerShape.circle)}
             >
               <img src={shapes[0]} alt="Circle" />
             </HomeShape>
             <HomeShape
-              selected={shape === Shape.triangle}
-              onClick={() => setShape(Shape.triangle)}
+              selected={shape === EnginePlayerShape.triangle}
+              onClick={() => setShape(EnginePlayerShape.triangle)}
             >
               <img src={shapes[1]} alt="Triangle" />
             </HomeShape>
             <HomeShape
-              selected={shape === Shape.square}
-              onClick={() => setShape(Shape.square)}
+              selected={shape === EnginePlayerShape.square}
+              onClick={() => setShape(EnginePlayerShape.square)}
             >
               <img src={shapes[2]} alt="Square" />
             </HomeShape>

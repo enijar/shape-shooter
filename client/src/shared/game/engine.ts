@@ -162,7 +162,6 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
     const delta = Math.max(1, now - lastUpdateTime);
     lastUpdateTime = now;
     // For skipped frames or on slower machines this will be used to move forward in time.
-    // 1 is the default time step if the timeout calls are in sync with the tps.
     // This number will be higher the more out of time drift there is between timeout calls.
     const ts = delta / tps;
     const events: EngineEvent[] = [];

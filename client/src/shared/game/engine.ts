@@ -185,6 +185,7 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
         state.availableBulletIndices.splice(0, 1);
         state.players[i].lastFireTime = now;
         state.bullets[index].id = index;
+        state.bullets[index].playerId = state.players[i].id;
         state.bullets[index].sX = state.players[i].x;
         state.bullets[index].sY = state.players[i].y;
         state.bullets[index].x = state.players[i].x;
@@ -201,6 +202,7 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
       const d = Math.sqrt(a * a + b * b);
       if (d > maxBulletDistance) {
         state.bullets[i].id = -1;
+        state.bullets[i].playerId = -1;
         // Make player entity available
         state.availableBulletIndices.push(i);
       }
@@ -252,6 +254,7 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
       state.players[index].name = playerName;
       state.players[index].shape = shape;
       state.players[index].color = color;
+      state.players[index].firing = false;
       emit([
         {
           event: "connected",

@@ -89,3 +89,8 @@ export type ShotPayload = {
   playerId: number;
   bullets: Bullet[];
 };
+
+export type State = {
+  players: Player[];
+  bullets: Bullet[];
+};

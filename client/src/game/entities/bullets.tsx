@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { useFrame } from "react-three-fiber";
 import vars from "../../styles/vars";
 import engine from "../../shared/game/engine";
+import state from "../../shared/game/state";
 
 const obj = new THREE.Object3D();
 
@@ -19,10 +20,10 @@ export default function Bullets() {
 
   useFrame(() => {
     if (!mesh.current) return;
-    for (let i = 0, iLength = engine.state.bullets.length; i < iLength; i++) {
-      obj.scale.x = engine.state.bullets[i].id === -1 ? 0 : 1;
-      obj.position.x = engine.state.bullets[i].x;
-      obj.position.y = engine.state.bullets[i].y;
+    for (let i = 0, iLength = state.bullets.length; i < iLength; i++) {
+      obj.scale.x = state.bullets[i].id === -1 ? 0 : 1;
+      obj.position.x = state.bullets[i].x;
+      obj.position.y = state.bullets[i].y;
       obj.updateMatrix();
       mesh.current.setMatrixAt(i, obj.matrix.clone());
     }

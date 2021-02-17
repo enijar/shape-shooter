@@ -9,6 +9,7 @@ import createShape from "../shape";
 import { useGame } from "../state";
 import Html from "../html";
 import engine from "../../shared/game/engine";
+import state from "../../shared/game/state";
 
 type Props = {
   id: number;
@@ -17,7 +18,7 @@ type Props = {
 
 export default function Player({ id, currentPlayer = false }: Props) {
   const player = React.useMemo<PlayerType>(() => {
-    return engine.state.players[id];
+    return state.players[id];
   }, [id]);
   const texture = useTexture(createShape(player.shape, player.color));
   const { raycaster } = useThree();
@@ -50,9 +51,9 @@ export default function Player({ id, currentPlayer = false }: Props) {
 
   useFrame(() => {
     if (!group.current || !mesh.current) return;
-    group.current.position.x = engine.state.players[id].x;
-    group.current.position.y = engine.state.players[id].y;
-    mesh.current.rotation.z = engine.state.players[id].r;
+    group.current.position.x = state.players[id].x;
+    group.current.position.y = state.players[id].y;
+    mesh.current.rotation.z = state.players[id].r;
   });
 
   return (

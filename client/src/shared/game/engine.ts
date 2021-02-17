@@ -9,6 +9,8 @@ import {
   Shape,
   ShotPayload,
 } from "../types";
+import state from "./state";
+import { createEntityBuffer } from "./utils";
 
 type ConnectPayload = {
   name: string;
@@ -40,11 +42,6 @@ type ActionQueueItem = {
   payload?: ConnectPayload | RotatePayload | MovePayload | ShootPayload;
 };
 
-type State = {
-  players: Player[];
-  bullets: Bullet[];
-};
-
 type Subscription = {
   type: EngineActionType;
   fn: (
@@ -57,41 +54,11 @@ type Subscription = {
   ) => void;
 };
 
-const MAX_PLAYERS = 20;
-const MAX_PLAYER_BULLETS = 5;
-
-function createEntityBuffer<T>(size: number, entity: T): T[] {
-  const buffer: T[] = [];
-  for (let i = 0; i < size; i++) {
-    buffer.push({ ...entity });
-  }
-  return buffer;
-}
-
 // todo change tps to 60 (higher tps is a petter player experience but causes higher CPU usage)
 function createEngine(tps: number = 60) {
   let nextPlayerIndex = 0;
   let nextBulletIndex = 0;
   let nextQueueIndex = 0;
-  const state: State = {
-    players: createEntityBuffer<Player>(MAX_PLAYERS, {
-      id: -1,
-      shape: Shape.triangle,
-      color: "#ff0000",
-      name: "",
-      x: 0,
-      y: 0,
-      r: 0,
-    }),
-    bullets: createEntityBuffer<Bullet>(MAX_PLAYERS * MAX_PLAYER_BULLETS, {
-      id: -1,
-      playerId: -1,
-      createdAt: 0,
-      x: 0,
-      y: 0,
-      r: 0,
-    }),
-  };
   const subscriptions: Subscription[] = [];
   // todo calculate the array buffer size based off of the max players and bullets
   const actionQueue: ActionQueueItem[] = createEntityBuffer<ActionQueueItem>(
@@ -244,7 +211,6 @@ function createEngine(tps: number = 60) {
   return {
     totalPlayers,
     totalPlayerBullets,
-    state,
     on,
     emit,
     off,

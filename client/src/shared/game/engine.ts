@@ -58,6 +58,7 @@ export type EnginePlayer = {
   color: string;
   firing: boolean;
   lastFireTime: number;
+  hp: number;
   moveX: -1 | 0 | 1; // direction of movement along the X axis
   moveY: -1 | 0 | 1; // direction of movement along the Y axis
   x: number;
@@ -103,6 +104,7 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
     color: "#ff0000",
     firing: false,
     lastFireTime: 0,
+    hp: 1,
     moveX: 0,
     moveY: 0,
     x: 0,
@@ -251,6 +253,7 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
       const index = state.availablePlayerIndices[0];
       state.availablePlayerIndices.splice(0, 1);
       state.players[index].id = index;
+      state.players[index].hp = 1;
       state.players[index].name = playerName;
       state.players[index].shape = shape;
       state.players[index].color = color;

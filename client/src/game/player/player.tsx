@@ -2,7 +2,7 @@ import React from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "react-three-fiber";
 import { OrthographicCamera, useTexture } from "@react-three/drei";
-import { PlayerName } from "./styles";
+import { PlayerName, PlayerHp, PlayerHpBar } from "./styles";
 import { deg2rad } from "../utils";
 import createShape from "../shape";
 import { useGame } from "../state";
@@ -76,6 +76,9 @@ export default function Player({
       )}
       <Html center position={[0, -0.06, 0]}>
         <PlayerName>{player.name}</PlayerName>
+        <PlayerHp hp={player.hp}>
+          <PlayerHpBar />
+        </PlayerHp>
       </Html>
     </group>
   );

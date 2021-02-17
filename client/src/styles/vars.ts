@@ -12,6 +12,7 @@ export default {
     blue: "#3399cc",
     red: "#ff0000",
     green: "#07930e",
+    hp: "#00ff00",
   },
   zIndex: {
     game: 1,

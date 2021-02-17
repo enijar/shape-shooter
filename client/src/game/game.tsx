@@ -18,7 +18,12 @@ export default function Game() {
       game.setPlayer(payload.player);
       game.setPlayers(payload.players);
     });
+
+    // todo remove when client is connected to server
+    engine.connect("Test Player", EnginePlayerShape.triangle, "#00ff00");
+
     engine.connect("Enijar", EnginePlayerShape.triangle, "#ff0000");
+
     return () => {
       listener();
       engine.stop();

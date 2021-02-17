@@ -4,6 +4,9 @@ import vars from "../../styles/vars";
 export const PlayerTag = styled.div`
   font-size: 0.75em;
   margin-top: 1em;
+  width: 150px;
+  display: flex;
+  flex-direction: column;
 `;
 
 export const PlayerName = styled.div`
@@ -11,10 +14,12 @@ export const PlayerName = styled.div`
   margin-left: auto;
   margin-right: auto;
   text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
   letter-spacing: 0.05em;
-  width: 5em;
-  padding: 0.25em;
-  line-height: 1em;
+  padding: 0.25em 0.5em;
   color: ${vars.color.white};
   background-color: ${vars.color.black};
 `;

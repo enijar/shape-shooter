@@ -123,7 +123,6 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
       r: 0,
     }
   );
-
   const state: EngineState = {
     // Actions sent in by players
     actions: createEntityBuffer<EngineAction>(config.maxPlayers * 10, {
@@ -139,6 +138,18 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
     availableBulletIndices: bulletsBuffer.map((_, index) => index),
   };
 
+  const bulletDamage = 0.1;
+  const playerHitRadius = 0.04;
+  const playerEventRadius = 1;
+  const playerMinX = -config.worldW / 2;
+  const playerMaxX = config.worldW / 2;
+  const playerMinY = -config.worldH / 2;
+  const playerMaxY = config.worldH / 2;
+  const playerFireInterval = 250; // ms
+  const maxBulletDistance = 2;
+  const playerVelocity = 0.003;
+  const bulletVelocity = 0.006;
+
   // Emit updates to all players
   function emit(events: EngineEvent[] = []) {
     // todo emit socket event to players
@@ -151,29 +162,16 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
     }
   }
 
-  function damagePlayer(bulletIndex: number): number {
-    for (let i = 0, length = state.players.length; i < length; i++) {
-      if (state.players[i].id === state.bullets[bulletIndex].playerId) continue;
-      const a = state.bullets[bulletIndex].x - state.players[i].x;
-      const b = state.bullets[bulletIndex].y - state.players[i].y;
-      const d = Math.sqrt(a * a + b * b);
-      if (d <= playerHitRadius) {
-        return i;
-      }
+  function isPlayerHit(bulletIndex: number, playerIndex: number): boolean {
+    if (state.players[playerIndex].id === state.bullets[bulletIndex].playerId) {
+      return false;
     }
-    return -1;
+    const a = state.bullets[bulletIndex].x - state.players[playerIndex].x;
+    const b = state.bullets[bulletIndex].y - state.players[playerIndex].y;
+    const d = Math.sqrt(a * a + b * b);
+    return d <= playerHitRadius;
   }
 
-  const bulletDamage = 0.1;
-  const playerHitRadius = 0.04;
-  const playerMinX = -config.worldW / 2;
-  const playerMaxX = config.worldW / 2;
-  const playerMinY = -config.worldH / 2;
-  const playerMaxY = config.worldH / 2;
-  const playerFireInterval = 250; // ms
-  const maxBulletDistance = 2;
-  const playerVelocity = 0.003;
-  const bulletVelocity = 0.006;
   let lastUpdateTime = Date.now();
   function update(now: number): EngineEvent[] {
     const delta = Math.max(1, now - lastUpdateTime);
@@ -182,57 +180,67 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
     // This number will be higher the more time drift there is between timeout calls.
     const ts = delta / tps;
     const events: EngineEvent[] = [];
-    // Apply updates
-    for (let i = 0, length = state.players.length; i < length; i++) {
-      if (state.players[i].id === -1) continue;
-      // Handle player movement
-      let velocity = playerVelocity;
-      if (state.players[i].moveX !== 0 && state.players[i].moveY !== 0) {
-        // Move slower if this player is moving diagonally
-        velocity *= 0.75;
-      }
-      state.players[i].x += velocity * ts * state.players[i].moveX;
-      state.players[i].y -= velocity * ts * state.players[i].moveY;
-      state.players[i].x = clamp(state.players[i].x, playerMinX, playerMaxX);
-      state.players[i].y = clamp(state.players[i].y, playerMinY, playerMaxY);
-      // Handle player firing
-      const canFire = now - state.players[i].lastFireTime >= playerFireInterval;
-      if (state.players[i].firing && canFire) {
-        const index = state.availableBulletIndices[0];
-        state.availableBulletIndices.splice(0, 1);
-        state.players[i].lastFireTime = now;
-        state.bullets[index].id = index;
-        state.bullets[index].playerId = state.players[i].id;
-        state.bullets[index].sX = state.players[i].x;
-        state.bullets[index].sY = state.players[i].y;
-        state.bullets[index].x = state.players[i].x;
-        state.bullets[index].y = state.players[i].y;
-        state.bullets[index].r = state.players[i].r;
-      }
-    }
+    // Bullets array is fixed and will always be large than players array.
+    // This is an optimisation to perform all calculations in a single loop.
     for (let i = 0, length = state.bullets.length; i < length; i++) {
+      /**
+       * Update players
+       */
+      if (state.players[i] && state.players[i].id !== -1) {
+        // Handle player movement
+        let velocity = playerVelocity;
+        if (state.players[i].moveX !== 0 && state.players[i].moveY !== 0) {
+          // Move slower if this player is moving diagonally
+          velocity *= 0.75;
+        }
+        state.players[i].x += velocity * ts * state.players[i].moveX;
+        state.players[i].y -= velocity * ts * state.players[i].moveY;
+        state.players[i].x = clamp(state.players[i].x, playerMinX, playerMaxX);
+        state.players[i].y = clamp(state.players[i].y, playerMinY, playerMaxY);
+        // Handle player firing
+        const canFire =
+          now - state.players[i].lastFireTime >= playerFireInterval;
+        if (state.players[i].firing && canFire) {
+          const index = state.availableBulletIndices[0];
+          state.availableBulletIndices.splice(0, 1);
+          state.players[i].lastFireTime = now;
+          state.bullets[index].id = index;
+          state.bullets[index].playerId = state.players[i].id;
+          state.bullets[index].sX = state.players[i].x;
+          state.bullets[index].sY = state.players[i].y;
+          state.bullets[index].x = state.players[i].x;
+          state.bullets[index].y = state.players[i].y;
+          state.bullets[index].r = state.players[i].r;
+        }
+      }
+
+      /**
+       * Update bullets
+       */
       if (state.bullets[i].id === -1) continue;
+      // Check if bullets are hitting this player
+      let playerHit = false;
+      for (let j = 0, jLength = state.players.length; j < jLength; j++) {
+        if (isPlayerHit(i, j)) {
+          state.players[j].hp = Math.max(0, state.players[j].hp - bulletDamage);
+          state.bullets[i].id = -1;
+          state.bullets[i].playerId = -1;
+          // Make player entity available
+          state.availableBulletIndices.push(i);
+          playerHit = true;
+          events.push({
+            event: "player.damaged",
+            payload: {
+              playerId: state.players[j].id,
+              hp: state.players[j].hp,
+            },
+          });
+          break;
+        }
+      }
+      if (playerHit) continue;
       state.bullets[i].x += bulletVelocity * ts * Math.sin(-state.bullets[i].r);
       state.bullets[i].y += bulletVelocity * ts * Math.cos(-state.bullets[i].r);
-      const playerIndex = damagePlayer(i);
-      if (playerIndex > -1) {
-        state.players[playerIndex].hp = Math.max(
-          0,
-          state.players[playerIndex].hp - bulletDamage
-        );
-        state.bullets[i].id = -1;
-        state.bullets[i].playerId = -1;
-        // Make player entity available
-        state.availableBulletIndices.push(i);
-        events.push({
-          event: "player.damage",
-          payload: {
-            playerId: state.players[playerIndex].id,
-            hp: state.players[playerIndex].hp,
-          },
-        });
-        continue;
-      }
       const a = state.bullets[i].sX - state.bullets[i].x;
       const b = state.bullets[i].sY - state.bullets[i].y;
       const d = Math.sqrt(a * a + b * b);
@@ -242,7 +250,6 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
         // Make player entity available
         state.availableBulletIndices.push(i);
       }
-      // todo check for bullet collisions with players and reduce player hp
     }
     return events;
   }

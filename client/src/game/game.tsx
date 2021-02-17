@@ -29,7 +29,7 @@ export default function Game() {
   }, []);
 
   React.useEffect(() => {
-    const listener = engine.subscribe("player.damage", (payload: any) => {
+    const listener = engine.subscribe("player.damaged", (payload: any) => {
       const { players, setPlayers } = useGame.getState();
       setPlayers(
         players.map((p) => {

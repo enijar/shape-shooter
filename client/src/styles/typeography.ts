@@ -14,7 +14,6 @@ export const Title = styled.div<TitleProps>`
       `;
     }
   }}
-
   h1 {
     font-size: 5em;
   }

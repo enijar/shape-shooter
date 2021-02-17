@@ -1,10 +1,8 @@
 import {
-  Bullet,
   ConnectedPayload,
   DisconnectedPayload,
   EngineActionType,
   MovedPayload,
-  Player,
   RotatedPayload,
   Shape,
   ShotPayload,

@@ -15,6 +15,6 @@ npm start
 
 # Screens
 
-![Create Screen](artwork/pages/create.jpg)
-
-![Play Screen](artwork/pages/play.jpg)
+Create | Play
+:----: | :----:
+![](artwork/pages/create.jpg) | ![](artwork/pages/play.jpg)

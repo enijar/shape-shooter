@@ -13,13 +13,17 @@ export default function Game() {
   const { playerId, size, zoom, playerIds } = useGame();
 
   React.useEffect(() => {
-    engine.start();
-
     engine.on(EngineActionType.connect, (payload) => {
       const p = payload as ConnectedPayload;
       useGame.getState().setPlayerId(p.playerId);
       useGame.getState().setPlayerIds(p.players.map((player) => player.id));
     });
+
+    // engine.on(EngineActionType.disconnect, (payload) => {
+    //   const p = payload as ConnectedPayload;
+    //   useGame.getState().setPlayerId(p.playerId);
+    //   useGame.getState().setPlayerIds(p.players.map((player) => player.id));
+    // });
 
     engine.emit(EngineActionType.connect, {
       name: "Enijar",
@@ -41,6 +45,11 @@ export default function Game() {
     return () => {
       window.removeEventListener("resize", onResize);
     };
+  }, []);
+
+  React.useEffect(() => {
+    engine.start();
+    return engine.destroy;
   }, []);
 
   return (

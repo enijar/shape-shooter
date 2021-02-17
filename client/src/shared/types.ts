@@ -58,12 +58,18 @@ export type Player = {
 export enum EngineActionType {
   idle,
   connect,
+  disconnect,
   move,
   rotate,
   shoot,
 }
 
 export type ConnectedPayload = {
+  playerId: number;
+  players: Player[];
+};
+
+export type DisconnectedPayload = {
   playerId: number;
   players: Player[];
 };

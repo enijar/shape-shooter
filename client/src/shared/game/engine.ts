@@ -1,6 +1,7 @@
 import {
   Bullet,
   ConnectedPayload,
+  DisconnectedPayload,
   EngineActionType,
   MovedPayload,
   Player,
@@ -13,6 +14,10 @@ type ConnectPayload = {
   name: string;
   shape: Shape;
   color: string;
+};
+
+type DisconnectPayload = {
+  playerId: number;
 };
 
 type MovePayload = {
@@ -43,7 +48,12 @@ type State = {
 type Subscription = {
   type: EngineActionType;
   fn: (
-    payload: ConnectedPayload | RotatedPayload | MovedPayload | ShotPayload
+    payload?:
+      | ConnectedPayload
+      | RotatedPayload
+      | MovedPayload
+      | ShotPayload
+      | DisconnectedPayload
   ) => void;
 };
 
@@ -98,7 +108,12 @@ function createEngine(tps: number = 60) {
   function on(
     type: EngineActionType,
     fn: (
-      payload: ConnectedPayload | RotatedPayload | MovedPayload | ShotPayload
+      payload?:
+        | ConnectedPayload
+        | RotatedPayload
+        | MovedPayload
+        | ShotPayload
+        | DisconnectedPayload
     ) => void
   ) {
     subscriptions.push({ type, fn });
@@ -106,7 +121,12 @@ function createEngine(tps: number = 60) {
 
   function emit(
     type: EngineActionType,
-    payload?: ConnectPayload | RotatePayload | MovePayload | ShootPayload
+    payload?:
+      | ConnectPayload
+      | DisconnectPayload
+      | RotatePayload
+      | MovePayload
+      | ShootPayload
   ) {
     actionQueue[nextQueueIndex].type = type;
     actionQueue[nextQueueIndex].payload = payload;
@@ -193,6 +213,13 @@ function createEngine(tps: number = 60) {
             players: state.players,
           });
         }
+        if (action.type === EngineActionType.disconnect) {
+          console.log("disconnect");
+          const payload = action.payload as DisconnectPayload;
+          const playerId = state.players[payload.playerId].id;
+          state.players[payload.playerId].id = -1;
+          subscriptions[i].fn({ playerId, players: state.players });
+        }
       }
 
       connectedPlayerId = -1;
@@ -234,6 +261,23 @@ function createEngine(tps: number = 60) {
     },
     destroy() {
       clearTimeout(timeout);
+      for (let i = 0, length = state.players.length; i < length; i++) {
+        state.players[i].id = -1;
+        state.players[i].shape = Shape.triangle;
+        state.players[i].color = "#ff0000";
+        state.players[i].name = "";
+        state.players[i].x = 0;
+        state.players[i].y = 0;
+        state.players[i].r = 0;
+      }
+      for (let i = 0, length = state.bullets.length; i < length; i++) {
+        state.bullets[i].id = -1;
+        state.bullets[i].playerId = -1;
+        state.bullets[i].createdAt = 0;
+        state.bullets[i].x = 0;
+        state.bullets[i].y = 0;
+        state.bullets[i].r = 0;
+      }
     },
   };
 }

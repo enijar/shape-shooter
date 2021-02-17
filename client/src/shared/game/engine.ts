@@ -6,6 +6,7 @@ import {
   RotatedPayload,
   Shape,
   ShotPayload,
+  TickedPayload,
 } from "../types";
 import state from "./state";
 import { createEntityBuffer } from "./utils";
@@ -45,6 +46,7 @@ type Subscription = {
   fn: (
     payload?:
       | ConnectedPayload
+      | TickedPayload
       | RotatedPayload
       | MovedPayload
       | ShotPayload
@@ -73,6 +75,7 @@ function createEngine(tps: number = 60) {
     fn: (
       payload?:
         | ConnectedPayload
+        | TickedPayload
         | RotatedPayload
         | MovedPayload
         | ShotPayload
@@ -176,7 +179,6 @@ function createEngine(tps: number = 60) {
           });
         }
         if (action.type === EngineActionType.disconnect) {
-          console.log("disconnect");
           const payload = action.payload as DisconnectPayload;
           const playerId = state.players[payload.playerId].id;
           state.players[payload.playerId].id = -1;
@@ -201,6 +203,16 @@ function createEngine(tps: number = 60) {
       }
       state.bullets[i].x += bulletVelocity * Math.sin(-state.bullets[i].r);
       state.bullets[i].y += bulletVelocity * Math.cos(-state.bullets[i].r);
+    }
+
+    for (let i = 0, length = subscriptions.length; i < length; i++) {
+      if (subscriptions[i].type === EngineActionType.tick) {
+        // todo optimise the amount of data sent (when sending from server to client)
+        subscriptions[i].fn({
+          players: state.players,
+          bullets: state.bullets,
+        });
+      }
     }
 
     timeout = setTimeout(tick, 1000 / tps);

@@ -7,7 +7,13 @@ import engine from "../shared/game/engine";
 import World from "./world/world";
 import Bullets from "./entities/bullets";
 import Player from "./player/player";
-import { ConnectedPayload, EngineActionType, Shape } from "../shared/types";
+import {
+  ConnectedPayload,
+  EngineActionType,
+  Shape,
+  TickedPayload,
+} from "../shared/types";
+import state from "../shared/game/state";
 
 export default function Game() {
   const { playerId, size, zoom, playerIds } = useGame();
@@ -19,11 +25,11 @@ export default function Game() {
       useGame.getState().setPlayerIds(p.players.map((player) => player.id));
     });
 
-    // engine.on(EngineActionType.disconnect, (payload) => {
-    //   const p = payload as ConnectedPayload;
-    //   useGame.getState().setPlayerId(p.playerId);
-    //   useGame.getState().setPlayerIds(p.players.map((player) => player.id));
-    // });
+    engine.on(EngineActionType.tick, (payload) => {
+      const p = payload as TickedPayload;
+      state.players = p.players;
+      state.bullets = p.bullets;
+    });
 
     engine.emit(EngineActionType.connect, {
       name: "Enijar",

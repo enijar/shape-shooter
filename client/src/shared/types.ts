@@ -57,12 +57,18 @@ export type Player = {
 
 export enum EngineActionType {
   idle,
+  tick,
   connect,
   disconnect,
   move,
   rotate,
   shoot,
 }
+
+export type TickedPayload = {
+  players: Player[];
+  bullets: Bullet[];
+};
 
 export type ConnectedPayload = {
   playerId: number;

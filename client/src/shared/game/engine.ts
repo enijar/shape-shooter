@@ -224,6 +224,13 @@ export default (function createEngine(config: EngineConfig = defaultConfig) {
         state.bullets[i].playerId = -1;
         // Make player entity available
         state.availableBulletIndices.push(i);
+        events.push({
+          event: "player.damage",
+          payload: {
+            playerId: state.players[playerIndex].id,
+            hp: state.players[playerIndex].hp,
+          },
+        });
         continue;
       }
       const a = state.bullets[i].sX - state.bullets[i].x;

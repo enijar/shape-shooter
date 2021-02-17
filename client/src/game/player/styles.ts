@@ -27,6 +27,7 @@ export const PlayerName = styled.div`
 export const PlayerHpBar = styled.div`
   height: 100%;
   background-color: ${vars.color.hp};
+  transition: width 0.25s ease;
 `;
 
 type PlayerHpProps = {

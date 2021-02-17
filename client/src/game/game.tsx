@@ -13,21 +13,34 @@ export default function Game() {
 
   React.useEffect(() => {
     engine.start();
+    return () => engine.stop();
+  }, []);
+
+  React.useEffect(() => {
     const listener = engine.subscribe("connected", (payload: any) => {
       const game = useGame.getState();
       game.setPlayer(payload.player);
       game.setPlayers(payload.players);
     });
-
     // todo remove when client is connected to server
     engine.connect("Test Player", EnginePlayerShape.triangle, "#00ff00");
-
     engine.connect("Enijar", EnginePlayerShape.triangle, "#ff0000");
+    return () => listener();
+  }, []);
 
-    return () => {
-      listener();
-      engine.stop();
-    };
+  React.useEffect(() => {
+    const listener = engine.subscribe("player.damage", (payload: any) => {
+      const { players, setPlayers } = useGame.getState();
+      setPlayers(
+        players.map((p) => {
+          if (p.id === payload.playerId) {
+            p.hp = payload.hp;
+          }
+          return p;
+        })
+      );
+    });
+    return () => listener();
   }, []);
 
   React.useEffect(() => {

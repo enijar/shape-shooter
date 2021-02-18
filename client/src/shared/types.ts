@@ -1,5 +1,3 @@
-import { EnginePlayer } from "./game/engine";
-
 export enum Shape {
   circle = "circle",
   square = "square",

@@ -7,7 +7,6 @@ import { useFrame } from "react-three-fiber";
 import { Controls } from "../../shared/types";
 import useControls from "../hooks/use-controlls";
 import { useGame } from "../state";
-import engine from "../../shared/game/engine";
 
 type Props = {
   children: any;
@@ -32,7 +31,6 @@ export default function World({ children, size = 2 }: Props) {
     const moveDown = controls[Controls.moveDown]();
     const moveLeft = controls[Controls.moveLeft]();
     const moveRight = controls[Controls.moveRight]();
-    const shooting = controls.shooting();
 
     let moveX: -1 | 0 | 1 = 0;
     let moveY: -1 | 0 | 1 = 0;
@@ -42,8 +40,8 @@ export default function World({ children, size = 2 }: Props) {
     if (moveLeft) moveX = -1;
     if (moveRight) moveX = 1;
 
-    engine.playerMove(player.id, moveX, moveY);
-    engine.playerFire(player.id, shooting);
+    player.move(moveX, moveY);
+    player.firing = controls.firing();
   });
 
   return (

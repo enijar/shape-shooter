@@ -2,33 +2,26 @@ import React from "react";
 import * as THREE from "three";
 import { useFrame, useThree } from "react-three-fiber";
 import { OrthographicCamera, useTexture } from "@react-three/drei";
-import { PlayerTag, PlayerName, PlayerHp, PlayerHpBar } from "./styles";
+import { PlayerHp, PlayerHpBar, PlayerName, PlayerTag } from "./styles";
 import { deg2rad } from "../utils";
 import createShape from "../shape";
 import { useGame } from "../state";
 import Html from "../html";
-import engine, {
-  EnginePlayer,
-  EnginePlayerShape,
-} from "../../shared/game/engine";
+import PlayerEntity from "../../shared/game/entities/player";
+import state from "../../shared/game/state";
 
 type Props = {
-  id: number;
-  shape: EnginePlayerShape;
-  color: string;
+  player: PlayerEntity;
+  index: number;
   currentPlayer?: boolean;
 };
 
 export default function Player({
-  id,
-  shape,
-  color,
+  player,
+  index,
   currentPlayer = false,
 }: Props) {
-  const player = React.useMemo<EnginePlayer>(() => {
-    return engine.state.players[id];
-  }, [id]);
-  const texture = useTexture(createShape(shape, color));
+  const texture = useTexture(createShape(player.shape, player.color));
   const { raycaster } = useThree();
   const { size, zoom } = useGame();
   const group = React.useRef<THREE.Group>();
@@ -45,24 +38,24 @@ export default function Player({
       const cX = (box.max.x + box.min.x) / 2;
       const cY = (box.max.y + box.min.y) / 2;
       const { x: oX, y: oY } = raycaster.ray.origin;
-      engine.playerRotate(id, Math.atan2(oY - cY, oX - cX) - deg2rad(90));
+      player.rotate(Math.atan2(oY - cY, oX - cX) - deg2rad(90));
     }
 
     window.addEventListener("pointermove", onMove);
     return () => {
       window.removeEventListener("pointermove", onMove);
     };
-  }, [raycaster, currentPlayer, id, box]);
+  }, [raycaster, currentPlayer, player, box]);
 
   useFrame(() => {
     if (!group.current || !mesh.current) return;
-    group.current.position.x = engine.state.players[id].x;
-    group.current.position.y = engine.state.players[id].y;
-    mesh.current.rotation.z = engine.state.players[id].r;
+    group.current.position.x = state.players[index].x;
+    group.current.position.y = state.players[index].y;
+    mesh.current.rotation.z = state.players[index].r;
   });
 
   return (
-    <group ref={group} visible={player.id > -1}>
+    <group ref={group}>
       <mesh ref={mesh}>
         <planeBufferGeometry attach="geometry" args={[0.1, 0.1, 1]} />
         <meshBasicMaterial attach="material" map={texture} transparent={true} />

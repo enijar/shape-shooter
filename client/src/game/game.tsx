@@ -3,7 +3,8 @@ import { Canvas } from "react-three-fiber";
 import { OrthographicCamera } from "@react-three/drei";
 import { GameWrapper } from "./styles";
 import { useGame } from "./state";
-import engine, { EnginePlayerShape } from "../shared/game/engine";
+import { Shape } from "../shared/types";
+import game from "../shared/game/game";
 import World from "./world/world";
 import Player from "./player/player";
 import Bullets from "./entities/bullets";
@@ -12,35 +13,13 @@ export default function Game() {
   const { size, zoom, player, players } = useGame();
 
   React.useEffect(() => {
-    engine.start();
-    return () => engine.stop();
-  }, []);
-
-  React.useEffect(() => {
-    const listener = engine.subscribe("connected", (payload: any) => {
-      const game = useGame.getState();
-      game.setPlayer(payload.player);
-      game.setPlayers(payload.players);
-    });
-    // todo remove when client is connected to server
-    engine.connect("Test Player", EnginePlayerShape.triangle, "#00ff00");
-    engine.connect("Enijar", EnginePlayerShape.triangle, "#ff0000");
-    return () => listener();
-  }, []);
-
-  React.useEffect(() => {
-    const listener = engine.subscribe("player.damaged", (payload: any) => {
-      const { players, setPlayers } = useGame.getState();
-      setPlayers(
-        players.map((p) => {
-          if (p.id === payload.playerId) {
-            p.hp = payload.hp;
-          }
-          return p;
-        })
-      );
-    });
-    return () => listener();
+    game.start();
+    const player = game.addPlayer("Enijar", Shape.triangle, "#ff0000");
+    useGame.getState().setPlayer(player);
+    useGame.getState().setPlayers(game.players);
+    return () => {
+      game.stop();
+    };
   }, []);
 
   React.useEffect(() => {
@@ -70,14 +49,13 @@ export default function Game() {
                 zoom={size * zoom}
               />
             )}
-            {players.map((p) => {
+            {players.map((p, index) => {
               if (p.id === -1) return null;
               return (
                 <Player
                   key={p.id}
-                  id={p.id}
-                  shape={p.shape}
-                  color={p.color}
+                  index={index}
+                  player={p}
                   currentPlayer={p.id === player?.id}
                 />
               );

@@ -6,7 +6,7 @@ type ControlsState = {
   [Controls.moveDown]: () => boolean;
   [Controls.moveLeft]: () => boolean;
   [Controls.moveRight]: () => boolean;
-  shooting: () => boolean;
+  firing: () => boolean;
 };
 
 export default function useControls(): ControlsState {
@@ -26,7 +26,7 @@ export default function useControls(): ControlsState {
       [Controls.moveRight]() {
         return activeKeys.includes(Controls.moveRight);
       },
-      shooting() {
+      firing() {
         return pointerDown.current;
       },
     };

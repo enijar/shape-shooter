@@ -1,11 +1,11 @@
 import create from "zustand";
-import { EnginePlayer } from "../shared/game/engine";
+import Player from "../shared/game/entities/player";
 
 export type GameState = {
-  player: null | EnginePlayer;
-  setPlayer: (player: null | EnginePlayer) => void;
-  players: EnginePlayer[];
-  setPlayers: (players: EnginePlayer[]) => void;
+  player: Player | null;
+  setPlayer: (player: Player | null) => void;
+  players: Player[];
+  setPlayers: (players: Player[]) => void;
   size: number;
   setSize: (size: number) => void;
   zoom: number;
@@ -18,10 +18,10 @@ export const useGame = create<GameState>((set) => {
     zoom: 1,
     player: null,
     players: [],
-    setPlayer(player: null | EnginePlayer) {
+    setPlayer(player: Player | null) {
       set({ player });
     },
-    setPlayers(players: EnginePlayer[]) {
+    setPlayers(players: Player[]) {
       set({ players });
     },
     setSize(size: number) {

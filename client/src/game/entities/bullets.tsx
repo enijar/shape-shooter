@@ -2,7 +2,7 @@ import React from "react";
 import * as THREE from "three";
 import { useFrame } from "react-three-fiber";
 import vars from "../../styles/vars";
-import engine from "../../shared/game/engine";
+import state from "../../shared/game/state";
 
 const obj = new THREE.Object3D();
 
@@ -19,20 +19,18 @@ export default function Bullets() {
 
   useFrame(() => {
     if (!mesh.current) return;
-    for (let i = 0, iLength = engine.state.bullets.length; i < iLength; i++) {
-      obj.scale.x = engine.state.bullets[i].id === -1 ? 0 : 1;
-      obj.position.x = engine.state.bullets[i].x;
-      obj.position.y = engine.state.bullets[i].y;
-      obj.updateMatrix();
-      mesh.current.setMatrixAt(i, obj.matrix.clone());
+    let index = 0;
+    for (let i = state.players.length - 1; i >= 0; i--) {
+      for (let j = state.players[i].bullets.length - 1; j >= 0; j--) {
+        obj.position.x = state.players[i].bullets[j].x;
+        obj.position.y = state.players[i].bullets[j].y;
+        obj.updateMatrix();
+        mesh.current.setMatrixAt(index, obj.matrix.clone());
+        index++;
+      }
     }
     mesh.current.instanceMatrix.needsUpdate = true;
   });
 
-  return (
-    <instancedMesh
-      ref={mesh}
-      args={[geometry, material, engine.state.bullets.length]}
-    />
-  );
+  return <instancedMesh ref={mesh} args={[geometry, material, 10000]} />;
 }

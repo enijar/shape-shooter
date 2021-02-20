@@ -45,42 +45,6 @@ export type Player = {
   color: string;
 };
 
-export enum EngineActionType {
-  idle,
-  tick,
-  connect,
-  disconnect,
-  move,
-  rotate,
-  shoot,
-}
-
-export type TickedPayload = {
-  players: Player[];
-  bullets: Bullet[];
-};
-
-export type ConnectedPayload = {
-  playerId: number;
-  players: Player[];
-};
-
-export type DisconnectedPayload = {
-  playerId: number;
-  players: Player[];
-};
-
-export type RotatedPayload = {
-  playerId: number;
-  r: number;
-};
-
-export type MovedPayload = {
-  playerId: number;
-  x: number;
-  y: number;
-};
-
 export type ShotPayload = {
   playerId: number;
   bullets: Bullet[];
@@ -89,4 +53,27 @@ export type ShotPayload = {
 export type State = {
   players: Player[];
   bullets: Bullet[];
+};
+
+export enum GameActionType {
+  playerRotate,
+}
+
+export type GameAction = {
+  type: GameActionType;
+  payload: any;
+};
+
+export enum GameEventType {
+  playerConnected,
+  playerDisconnected,
+  playerHp,
+  playerFire,
+  playerRotate,
+  playerMove,
+}
+
+export type GameEvent = {
+  type: GameEventType;
+  payload: any;
 };

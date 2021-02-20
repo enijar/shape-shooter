@@ -1,7 +1,7 @@
-import { Shape } from "../../types";
+import { GameEventType, Shape } from "../../types";
 import { clamp } from "../utils";
 import Bullet from "./bullet";
-import state from "../state";
+import { Game } from "../game";
 
 export default class Player {
   id: number = -1;
@@ -12,7 +12,12 @@ export default class Player {
   x: number = 0;
   y: number = 0;
   r: number = 0;
-  bullets: Bullet[] = [];
+  bullets: Bullet[] = Array(100)
+    .fill({})
+    .map(() => {
+      return new Bullet();
+    });
+  private availableBulletIndices = this.bullets.map((_, i) => i);
   moveX: -1 | 0 | 1 = 0;
   moveY: -1 | 0 | 1 = 0;
   lastFireTime: number = 0;
@@ -25,6 +30,11 @@ export default class Player {
   maxY: number = 1;
   now: number = 0;
   steps: number = 1;
+  game: Game;
+
+  constructor(game: Game) {
+    this.game = game;
+  }
 
   rotate(r: number) {
     this.r = r;
@@ -33,6 +43,17 @@ export default class Player {
   move(moveX: -1 | 0 | 1 = 0, moveY: -1 | 0 | 1 = 0) {
     this.moveX = moveX;
     this.moveY = moveY;
+  }
+
+  private static bulletHit(
+    player: Player,
+    bullet: Bullet,
+    r: number = 0.05
+  ): boolean {
+    const a = bullet.x - player.x;
+    const b = bullet.y - player.y;
+    const d = Math.sqrt(a * a + b * b);
+    return d <= r;
   }
 
   update() {
@@ -48,24 +69,47 @@ export default class Player {
 
     if (this.firing && this.now - this.lastFireTime >= this.fireRate) {
       this.lastFireTime = this.now;
-      const bullet = new Bullet();
-      bullet.sX = this.x;
-      bullet.sY = this.y;
-      bullet.x = this.x;
-      bullet.y = this.y;
-      bullet.r = this.r;
-      this.bullets.push(bullet);
-      state.totalBullets++;
+      const index = this.availableBulletIndices[0];
+      this.availableBulletIndices.splice(0, 1);
+      this.bullets[index].sX = this.x;
+      this.bullets[index].sY = this.y;
+      this.bullets[index].x = this.x;
+      this.bullets[index].y = this.y;
+      this.bullets[index].r = this.r;
+      this.bullets[index].alive = true;
     }
 
     for (let i = this.bullets.length - 1; i >= 0; i--) {
+      if (!this.bullets[i].alive) continue;
       this.bullets[i].now = this.now;
       this.bullets[i].steps = this.steps;
       this.bullets[i].update();
 
+      for (let j = this.game.players.length - 1; j >= 0; j--) {
+        if (this.game.players[j].id === this.id) continue;
+        if (Player.bulletHit(this.game.players[j], this.bullets[i])) {
+          this.bullets[i].alive = false;
+          this.game.players[j].hp = Math.max(
+            0,
+            this.game.players[j].hp - this.bullets[i].damage
+          );
+          this.game.events.push({
+            type: GameEventType.playerHp,
+            payload: {
+              playerId: this.game.players[j].id,
+              hp: this.game.players[j].hp,
+            },
+          });
+          break;
+        }
+      }
+
       if (this.bullets[i].distance >= this.bullets[i].maxDistance) {
-        this.bullets.splice(i, 1);
-        state.totalBullets--;
+        this.bullets[i].alive = false;
+      }
+
+      if (!this.bullets[i].alive) {
+        this.availableBulletIndices.push(i);
       }
     }
   }

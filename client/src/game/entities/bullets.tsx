@@ -2,9 +2,11 @@ import React from "react";
 import * as THREE from "three";
 import { useFrame } from "react-three-fiber";
 import vars from "../../styles/vars";
-import state from "../../shared/game/state";
+import game from "../../shared/game/game";
 
 const obj = new THREE.Object3D();
+
+const MAX_BULLETS = 500;
 
 export default function Bullets() {
   const mesh = React.useRef<THREE.InstancedMesh>();
@@ -20,17 +22,18 @@ export default function Bullets() {
   useFrame(() => {
     if (!mesh.current) return;
     let index = 0;
-    for (let i = state.players.length - 1; i >= 0; i--) {
-      for (let j = state.players[i].bullets.length - 1; j >= 0; j--) {
-        obj.position.x = state.players[i].bullets[j].x;
-        obj.position.y = state.players[i].bullets[j].y;
+    for (let i = game.players.length - 1; i >= 0; i--) {
+      for (let j = 0; j < game.players[i].bullets.length; j++) {
+        obj.scale.x = game.players[i].bullets[j].alive ? 1 : 0;
+        obj.position.x = game.players[i].bullets[j].x;
+        obj.position.y = game.players[i].bullets[j].y;
         obj.updateMatrix();
-        mesh.current.setMatrixAt(index, obj.matrix.clone());
+        mesh.current.setMatrixAt(index, obj.matrix);
         index++;
       }
     }
     mesh.current.instanceMatrix.needsUpdate = true;
   });
 
-  return <instancedMesh ref={mesh} args={[geometry, material, 10000]} />;
+  return <instancedMesh ref={mesh} args={[geometry, material, MAX_BULLETS]} />;
 }

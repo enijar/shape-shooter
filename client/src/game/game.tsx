@@ -5,6 +5,8 @@ import { GameWrapper } from "./styles";
 import { useGame } from "./state";
 import { Shape } from "../shared/types";
 import game from "../shared/game/game";
+import { GameEventType } from "../shared/types";
+import PlayerType from "../shared/game/entities/player";
 import World from "./world/world";
 import Player from "./player/player";
 import Bullets from "./entities/bullets";
@@ -14,9 +16,14 @@ export default function Game() {
 
   React.useEffect(() => {
     game.start();
+    game.subscribe(GameEventType.playerConnected, (player: PlayerType) => {
+      const { players, setPlayers } = useGame.getState();
+      setPlayers(players.concat([player]));
+      console.log("playerConnected->payload", player);
+    });
     const player = game.addPlayer("Enijar", Shape.triangle, "#ff0000");
+    game.addPlayer("Test Player", Shape.triangle, "#00ff00");
     useGame.getState().setPlayer(player);
-    useGame.getState().setPlayers(game.players);
     return () => {
       game.stop();
     };
@@ -49,12 +56,11 @@ export default function Game() {
                 zoom={size * zoom}
               />
             )}
-            {players.map((p, index) => {
+            {players.map((p) => {
               if (p.id === -1) return null;
               return (
                 <Player
                   key={p.id}
-                  index={index}
                   player={p}
                   currentPlayer={p.id === player?.id}
                 />

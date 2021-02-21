@@ -4,7 +4,6 @@ import { OrthographicCamera } from "@react-three/drei";
 import { GameWrapper } from "./styles";
 import { useGame } from "./state";
 import { Shape } from "../shared/types";
-import game from "../shared/game/game";
 import { GameEventType } from "../shared/types";
 import PlayerType from "../shared/game/entities/player";
 import World from "./world/world";
@@ -12,33 +11,50 @@ import Player from "./player/player";
 import Bullets from "./entities/bullets";
 
 export default function Game() {
-  const { size, zoom, player, players } = useGame();
+  const { size, zoom, player, players, instance } = useGame();
 
   React.useEffect(() => {
-    game.start();
+    console.log("instance");
+    instance.start();
     return () => {
-      game.stop();
+      instance.stop();
       const { setPlayer, setPlayers } = useGame.getState();
       setPlayer(null);
       setPlayers([]);
     };
-  }, []);
+  }, [instance]);
 
   React.useEffect(() => {
-    return game.subscribe(
+    return instance.subscribe(
       GameEventType.playerConnected,
       (player: PlayerType) => {
         const { players, setPlayers } = useGame.getState();
         setPlayers(players.concat([player]));
-        console.log("playerConnected->payload", player);
+        console.log("playerConnected->player", player);
       }
     );
-  }, []);
+  }, [instance]);
 
   React.useEffect(() => {
-    const player = game.addPlayer("Enijar", Shape.triangle, "#ff0000");
+    return instance.subscribe(
+      GameEventType.playerDisconnected,
+      (playerId: number) => {
+        const { players, setPlayers } = useGame.getState();
+        setPlayers(players.filter((player) => player.id !== playerId));
+        console.log("playerDisconnected->playerId", playerId);
+      }
+    );
+  }, [instance]);
+
+  React.useEffect(() => {
+    const player = instance.addPlayer("Enijar", Shape.triangle, "#ff0000");
     useGame.getState().setPlayer(player);
-  }, []);
+  }, [instance]);
+
+  React.useEffect(() => {
+    instance.addPlayer("Test Player 1", Shape.triangle, "#00ff00");
+    instance.addPlayer("Test Player 2", Shape.triangle, "#0000ff");
+  }, [instance]);
 
   React.useEffect(() => {
     function onResize() {
@@ -58,7 +74,7 @@ export default function Game() {
     <GameWrapper>
       <Canvas>
         <React.Suspense fallback={null}>
-          <World size={game.mapSize}>
+          <World size={instance.mapSize}>
             {/*Default camera if there is no current player*/}
             {player === null && (
               <OrthographicCamera

@@ -1,15 +1,14 @@
 import React from "react";
 import * as THREE from "three";
-import {useFrame, useThree} from "react-three-fiber";
-import {OrthographicCamera, useTexture} from "@react-three/drei";
-import {PlayerHp, PlayerHpBar, PlayerName, PlayerTag} from "./styles";
-import {deg2rad} from "../utils";
+import { useFrame, useThree } from "react-three-fiber";
+import { OrthographicCamera, useTexture } from "@react-three/drei";
+import { PlayerHp, PlayerHpBar, PlayerName, PlayerTag } from "./styles";
+import { deg2rad } from "../utils";
 import createShape from "../shape";
-import {useGame} from "../state";
+import { useGame } from "../state";
 import Html from "../html";
 import PlayerEntity from "../../shared/game/entities/player";
-import game from "../../shared/game/game";
-import {GameActionType, GameEventType} from "../../shared/types";
+import { GameActionType, GameEventType } from "../../shared/types";
 
 type Props = {
   player: PlayerEntity;
@@ -19,19 +18,19 @@ type Props = {
 export default function Player({ player, currentPlayer = false }: Props) {
   const texture = useTexture(createShape(player.shape, player.color));
   const { raycaster } = useThree();
-  const { size, zoom } = useGame();
+  const { size, zoom, instance } = useGame();
   const group = React.useRef<THREE.Group>();
   const mesh = React.useRef<THREE.Mesh>();
   const box = React.useMemo<THREE.Box3>(() => new THREE.Box3(), []);
   const [hp, setHp] = React.useState(player.hp);
 
   React.useEffect(() => {
-    game.subscribe(GameEventType.playerHp, payload => {
+    instance.subscribe(GameEventType.playerHp, (payload: any) => {
       if (payload.playerId === player.id) {
         setHp(payload.hp);
       }
     });
-  }, [player]);
+  }, [player, instance]);
 
   // Update current player's rotation
   React.useEffect(() => {
@@ -43,7 +42,7 @@ export default function Player({ player, currentPlayer = false }: Props) {
       const cX = (box.max.x + box.min.x) / 2;
       const cY = (box.max.y + box.min.y) / 2;
       const { x: oX, y: oY } = raycaster.ray.origin;
-      game.action(GameActionType.playerRotate, {
+      instance.action(GameActionType.playerRotate, {
         playerId: player.id,
         r: Math.atan2(oY - cY, oX - cX) - deg2rad(90),
       });
@@ -53,7 +52,7 @@ export default function Player({ player, currentPlayer = false }: Props) {
     return () => {
       window.removeEventListener("pointermove", onMove);
     };
-  }, [raycaster, currentPlayer, player, box]);
+  }, [raycaster, currentPlayer, player, box, instance]);
 
   useFrame(() => {
     if (!group.current || !mesh.current) return;

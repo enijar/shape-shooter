@@ -7,8 +7,6 @@ import { useFrame } from "react-three-fiber";
 import { Controls, GameActionType } from "../../shared/types";
 import useControls from "../hooks/use-controlls";
 import { useGame } from "../state";
-import game from "../../shared/game/game";
-import { deg2rad } from "../utils";
 
 type Props = {
   children: any;
@@ -16,7 +14,7 @@ type Props = {
 };
 
 export default function World({ children, size = { w: 2, h: 2 } }: Props) {
-  const { player } = useGame();
+  const { player, instance } = useGame();
 
   const texture = useTexture(assets.chunk);
   const controls = useControls();
@@ -43,14 +41,14 @@ export default function World({ children, size = { w: 2, h: 2 } }: Props) {
     if (moveLeft) moveX = -1;
     if (moveRight) moveX = 1;
 
-    game.action(GameActionType.playerMove, {
+    instance.action(GameActionType.playerMove, {
       playerId: player.id,
       moveX,
       moveY,
     });
 
     if (player.firing !== firing) {
-      game.action(GameActionType.playerFire, { playerId: player.id, firing });
+      instance.action(GameActionType.playerFire, { playerId: player.id, firing });
     }
   });
 

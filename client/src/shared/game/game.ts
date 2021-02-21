@@ -18,7 +18,7 @@ type MapSize = {
   h: number;
 };
 
-export class Game {
+export default class Game {
   public players: Player[] = [];
   public events: GameEvent[] = [];
   public actions: GameAction[] = [];
@@ -156,5 +156,3 @@ export class Game {
     this.timeoutId = setTimeout(() => this.tick(), this.tps);
   }
 }
-
-export default new Game();

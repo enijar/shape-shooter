@@ -1,7 +1,7 @@
-import { GameActionType, GameEventType, Shape } from "../../types";
+import { GameEventType, Shape } from "../../types";
 import { clamp } from "../utils";
 import Bullet from "./bullet";
-import { Game } from "../game";
+import Game from "../game";
 
 export default class Player {
   id: number = -1;

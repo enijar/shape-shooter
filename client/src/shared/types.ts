@@ -79,3 +79,8 @@ export type GameEvent = {
   type: GameEventType;
   payload: any;
 };
+
+export enum GameContext {
+  client,
+  server,
+}

@@ -1,6 +1,6 @@
 import React from "react";
 import * as THREE from "three";
-import { useFrame, useThree } from "react-three-fiber";
+import { useThree } from "react-three-fiber";
 import { OrthographicCamera, useTexture } from "@react-three/drei";
 import { PlayerHp, PlayerHpBar, PlayerName, PlayerTag } from "./styles";
 import { deg2rad } from "../utils";
@@ -25,9 +25,32 @@ export default function Player({ player, currentPlayer = false }: Props) {
   const [hp, setHp] = React.useState(player.hp);
 
   React.useEffect(() => {
-    instance.subscribe(GameEventType.playerHp, (payload: any) => {
+    return instance.subscribe(GameEventType.playerHp, (payload: any) => {
       if (payload.playerId === player.id) {
         setHp(payload.hp);
+      }
+    });
+  }, [player, instance]);
+
+  React.useEffect(() => {
+    return instance.subscribe(GameEventType.playerRotate, (payload: any) => {
+      if (!mesh.current) return;
+      if (payload.playerId === player.id) {
+        mesh.current.rotation.z = payload.r;
+      }
+    });
+  }, [player, instance]);
+
+  React.useEffect(() => {
+    if (group.current) {
+      group.current.position.x = player.x;
+      group.current.position.y = player.y;
+    }
+    return instance.subscribe(GameEventType.playerMove, (payload: any) => {
+      if (!group.current) return;
+      if (payload.playerId === player.id) {
+        group.current.position.x = player.x;
+        group.current.position.y = player.y;
       }
     });
   }, [player, instance]);
@@ -54,15 +77,8 @@ export default function Player({ player, currentPlayer = false }: Props) {
     };
   }, [raycaster, currentPlayer, player, box, instance]);
 
-  useFrame(() => {
-    if (!group.current || !mesh.current) return;
-    group.current.position.x = player.x;
-    group.current.position.y = player.y;
-    mesh.current.rotation.z = player.r;
-  });
-
   return (
-    <group ref={group}>
+    <group ref={group} visible={hp > 0}>
       <mesh ref={mesh}>
         <planeBufferGeometry attach="geometry" args={[0.1, 0.1, 1]} />
         <meshBasicMaterial attach="material" map={texture} transparent={true} />
@@ -74,14 +90,16 @@ export default function Player({ player, currentPlayer = false }: Props) {
           zoom={size * zoom}
         />
       )}
-      <Html center position={[0, -0.06, 0]}>
-        <PlayerTag>
-          <PlayerName>{player.name}</PlayerName>
-          <PlayerHp hp={hp}>
-            <PlayerHpBar />
-          </PlayerHp>
-        </PlayerTag>
-      </Html>
+      {hp > 0 && (
+        <Html center position={[0, -0.06, 0]}>
+          <PlayerTag>
+            <PlayerName>{player.name}</PlayerName>
+            <PlayerHp hp={hp}>
+              <PlayerHpBar />
+            </PlayerHp>
+          </PlayerTag>
+        </Html>
+      )}
     </group>
   );
 }

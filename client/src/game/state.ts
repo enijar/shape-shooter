@@ -1,6 +1,7 @@
 import create from "zustand";
 import Player from "../shared/game/entities/player";
 import Game from "../shared/game/game";
+import { GameContext } from "../shared/types";
 
 export type GameState = {
   player: Player | null;
@@ -20,7 +21,7 @@ export const useGame = create<GameState>((set) => {
     zoom: 1,
     player: null,
     players: [],
-    instance: new Game(),
+    instance: new Game(GameContext.client),
     setPlayer(player: Player | null) {
       set({ player });
     },

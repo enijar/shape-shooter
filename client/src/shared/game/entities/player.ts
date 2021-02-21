@@ -5,6 +5,8 @@ import Game from "../game";
 
 export default class Player {
   id: number = -1;
+  ai: boolean = false;
+  alive: boolean = false;
   name: string = "";
   shape: Shape = Shape.triangle;
   color: string = "#ff0000";
@@ -21,7 +23,7 @@ export default class Player {
   moveX: -1 | 0 | 1 = 0;
   moveY: -1 | 0 | 1 = 0;
   lastFireTime: number = 0;
-  fireRate: number = 250;
+  fireRate: number = 150;
   firing: boolean = false;
   velocity: number = 0.003;
   minX: number = 0;
@@ -45,6 +47,7 @@ export default class Player {
     bullet: Bullet,
     r: number = 0.05
   ): boolean {
+    if (!player.alive) return false;
     const a = bullet.x - player.x;
     const b = bullet.y - player.y;
     const d = Math.sqrt(a * a + b * b);
@@ -52,6 +55,15 @@ export default class Player {
   }
 
   update() {
+    if (!this.alive) {
+      this.bullets = Array(100)
+        .fill({})
+        .map(() => {
+          return new Bullet();
+        });
+      this.bullets.map((_, i) => i);
+      return;
+    }
     let velocity = this.velocity;
     if (this.moveX !== 0 && this.moveY !== 0) {
       // Move slower if moving diagonally
@@ -72,6 +84,17 @@ export default class Player {
       this.bullets[index].y = this.y;
       this.bullets[index].r = this.r;
       this.bullets[index].alive = true;
+    }
+
+    if (this.hp === 0) {
+      this.alive = false;
+      this.firing = false;
+      this.moveX = 0;
+      this.moveY = 0;
+
+      for (let i = this.bullets.length - 1; i >= 0; i--) {
+        this.bullets[i].alive = false;
+      }
     }
 
     for (let i = this.bullets.length - 1; i >= 0; i--) {

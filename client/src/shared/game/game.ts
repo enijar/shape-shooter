@@ -1,12 +1,15 @@
+import io from "socket.io-client";
 import {
   GameAction,
   GameActionType,
+  GameContext,
   GameEvent,
   GameEventType,
   Shape,
 } from "../types";
 import Player from "./entities/player";
 import { map } from "./utils";
+import { deg2rad } from "../../game/utils";
 
 type Subscription = {
   event: GameEventType;
@@ -23,15 +26,29 @@ export default class Game {
   public events: GameEvent[] = [];
   public actions: GameAction[] = [];
   public mapSize: MapSize = { w: 0.5, h: 0.5 };
+  public context: GameContext;
+  public socket: SocketIOClient.Socket;
   private tps: number = 1000 / 60;
   private lastTickTime: number = 0;
   private timeoutId: NodeJS.Timeout | null = null;
   private nextPlayerId = 1;
   private subscriptions: Subscription[] = [];
 
-  addPlayer(name: string, shape: Shape, color: string): Player {
+  constructor(context: GameContext) {
+    this.context = context;
+    this.socket = io();
+  }
+
+  addPlayer(
+    name: string,
+    shape: Shape,
+    color: string,
+    ai: boolean = false
+  ): Player {
     const player = new Player(this);
     player.id = this.nextPlayerId;
+    player.alive = true;
+    player.ai = ai;
     player.name = name;
     player.shape = shape;
     player.color = color;
@@ -50,6 +67,16 @@ export default class Game {
       -this.mapSize.h / 2,
       this.mapSize.h / 2
     );
+    if (player.ai) {
+      this.actions.push({
+        type: GameActionType.playerMove,
+        payload: {
+          playerId: player.id,
+          moveX: Math.random() > 0.5 ? -1 : 1,
+          moveY: Math.random() > 0.5 ? -1 : 1,
+        },
+      });
+    }
     this.nextPlayerId++;
     this.players.push(player);
     this.events.push({
@@ -59,36 +86,12 @@ export default class Game {
     return player;
   }
 
-  removePlayer(id: number) {
-    for (let i = this.players.length - 1; i >= 0; i--) {
-      if (this.players[i].id === id) {
-        this.players.splice(i, 1);
-        break;
-      }
-    }
-  }
-
-  rotatePlayer(id: number, r: number) {
-    for (let i = this.players.length - 1; i >= 0; i--) {
-      if (this.players[i].id === id) {
-        this.players[i].r = r;
-        break;
-      }
-    }
-  }
-
-  movePlayer(id: number, moveX: -1 | 0 | 1, moveY: -1 | 0 | 1) {
-    for (let i = this.players.length - 1; i >= 0; i--) {
-      if (this.players[i].id === id) {
-        this.players[i].moveX = moveX;
-        this.players[i].moveY = moveY;
-        break;
-      }
-    }
-  }
-
   start(tps: number = 60) {
     this.tps = 1000 / tps;
+
+    this.addPlayer("Bot 1", Shape.triangle, "#00ff00", true);
+    this.addPlayer("Bot 2", Shape.triangle, "#0000ff", true);
+
     this.tick();
   }
 
@@ -114,6 +117,38 @@ export default class Game {
     this.actions.push({ type: action, payload });
   }
 
+  private updateAi() {
+    for (let i = this.players.length - 1; i >= 0; i--) {
+      if (!this.players[i].ai) continue;
+      let { moveX, moveY, x, y, minX, minY, maxX, maxY } = this.players[i];
+      if (x <= minX + 0.05) {
+        moveX = 1;
+      }
+      if (y <= minY + 0.05) {
+        moveY = -1;
+      }
+      if (x >= maxX - 0.05) {
+        moveX = -1;
+      }
+      if (y >= maxY - 0.05) {
+        moveY = 1;
+      }
+      // Look at random player
+      this.actions.push({
+        type: GameActionType.playerRotate,
+        payload: {
+          playerId: this.players[i].id,
+          r: this.players[i].r + map(Math.random(), 0, 0.2, 0.01, -0.01),
+        },
+      });
+      this.players[i].firing = Math.random() >= 0.5;
+      this.actions.push({
+        type: GameActionType.playerMove,
+        payload: { playerId: this.players[i].id, moveX, moveY },
+      });
+    }
+  }
+
   private tick() {
     const now = Date.now();
     const delta = Math.max(1, now - this.lastTickTime);
@@ -125,6 +160,47 @@ export default class Game {
       this.players[i].update();
     }
 
+    for (let i = this.actions.length - 1; i >= 0; i--) {
+      const index = this.players.findIndex(
+        (player) => player.id === this.actions[i].payload.playerId
+      );
+      if (!this.players[index].alive) continue;
+      switch (this.actions[i].type) {
+        case GameActionType.playerRotate:
+          this.players[index].r = this.actions[i].payload.r;
+          this.events.push({
+            type: GameEventType.playerRotate,
+            payload: {
+              playerId: this.players[index].id,
+              r: this.players[index].r,
+            },
+          });
+          break;
+        case GameActionType.playerMove:
+          this.players[index].moveX = this.actions[i].payload.moveX;
+          this.players[index].moveY = this.actions[i].payload.moveY;
+          this.events.push({
+            type: GameEventType.playerMove,
+            payload: {
+              playerId: this.players[index].id,
+              moveX: this.players[index].moveX,
+              moveY: this.players[index].moveY,
+            },
+          });
+          break;
+        case GameActionType.playerFire:
+          this.players[index].firing = this.actions[i].payload.firing;
+          this.events.push({
+            type: GameEventType.playerMove,
+            payload: {
+              playerId: this.players[index].id,
+              firing: this.players[index].firing,
+            },
+          });
+      }
+      this.actions.splice(i, 1);
+    }
+
     for (let i = this.events.length - 1; i >= 0; i--) {
       for (let j = this.subscriptions.length - 1; j >= 0; j--) {
         if (this.events[i].type === this.subscriptions[j].event) {
@@ -134,23 +210,7 @@ export default class Game {
       this.events.splice(i, 1);
     }
 
-    for (let i = this.actions.length - 1; i >= 0; i--) {
-      const index = this.players.findIndex(
-        (player) => player.id === this.actions[i].payload.playerId
-      );
-      switch (this.actions[i].type) {
-        case GameActionType.playerRotate:
-          this.players[index].r = this.actions[i].payload.r;
-          break;
-        case GameActionType.playerMove:
-          this.players[index].moveX = this.actions[i].payload.moveX;
-          this.players[index].moveY = this.actions[i].payload.moveY;
-          break;
-        case GameActionType.playerFire:
-          this.players[index].firing = this.actions[i].payload.firing;
-      }
-      this.actions.splice(i, 1);
-    }
+    this.updateAi();
 
     this.lastTickTime = now;
     this.timeoutId = setTimeout(() => this.tick(), this.tps);

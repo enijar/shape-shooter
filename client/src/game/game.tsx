@@ -3,8 +3,7 @@ import { Canvas } from "react-three-fiber";
 import { OrthographicCamera } from "@react-three/drei";
 import { GameWrapper } from "./styles";
 import { useGame } from "./state";
-import { Shape } from "../shared/types";
-import { GameEventType } from "../shared/types";
+import { GameEventType, Shape } from "../shared/types";
 import PlayerType from "../shared/game/entities/player";
 import World from "./world/world";
 import Player from "./player/player";
@@ -12,17 +11,6 @@ import Bullets from "./entities/bullets";
 
 export default function Game() {
   const { size, zoom, player, players, instance } = useGame();
-
-  React.useEffect(() => {
-    console.log("instance");
-    instance.start();
-    return () => {
-      instance.stop();
-      const { setPlayer, setPlayers } = useGame.getState();
-      setPlayer(null);
-      setPlayers([]);
-    };
-  }, [instance]);
 
   React.useEffect(() => {
     return instance.subscribe(
@@ -51,9 +39,15 @@ export default function Game() {
     useGame.getState().setPlayer(player);
   }, [instance]);
 
+
   React.useEffect(() => {
-    instance.addPlayer("Test Player 1", Shape.triangle, "#00ff00");
-    instance.addPlayer("Test Player 2", Shape.triangle, "#0000ff");
+    instance.start();
+    return () => {
+      instance.stop();
+      const { setPlayer, setPlayers } = useGame.getState();
+      setPlayer(null);
+      setPlayers([]);
+    };
   }, [instance]);
 
   React.useEffect(() => {

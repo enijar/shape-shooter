@@ -1,13 +1,13 @@
-// Create a fixed length array of entity objects (avoids heavy GC calls)
-
-export function createEntityBuffer<T>(size: number, entity: T): T[] {
-  const buffer: T[] = [];
-  for (let i = 0; i < size; i++) {
-    buffer.push({ ...entity });
-  }
-  return buffer;
-}
-
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
+}
+
+export function map(
+  value: number,
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number
+): number {
+  return ((value - x1) * (y2 - x2)) / (y1 - x1) + x2;
 }

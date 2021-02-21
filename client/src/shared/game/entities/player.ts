@@ -1,4 +1,4 @@
-import { GameEventType, Shape } from "../../types";
+import { GameActionType, GameEventType, Shape } from "../../types";
 import { clamp } from "../utils";
 import Bullet from "./bullet";
 import { Game } from "../game";
@@ -24,25 +24,20 @@ export default class Player {
   fireRate: number = 250;
   firing: boolean = false;
   velocity: number = 0.003;
-  minX: number = -1;
-  maxX: number = 1;
-  minY: number = -1;
-  maxY: number = 1;
+  minX: number = 0;
+  maxX: number = 0;
+  minY: number = 0;
+  maxY: number = 0;
   now: number = 0;
   steps: number = 1;
   game: Game;
 
   constructor(game: Game) {
     this.game = game;
-  }
-
-  rotate(r: number) {
-    this.r = r;
-  }
-
-  move(moveX: -1 | 0 | 1 = 0, moveY: -1 | 0 | 1 = 0) {
-    this.moveX = moveX;
-    this.moveY = moveY;
+    this.minX = -game.mapSize.w / 2;
+    this.maxX = game.mapSize.w / 2;
+    this.minY = -game.mapSize.h / 2;
+    this.maxY = game.mapSize.h / 2;
   }
 
   private static bulletHit(

@@ -57,6 +57,8 @@ export type State = {
 
 export enum GameActionType {
   playerRotate,
+  playerMove,
+  playerFire,
 }
 
 export type GameAction = {

@@ -16,17 +16,28 @@ export default function Game() {
 
   React.useEffect(() => {
     game.start();
-    game.subscribe(GameEventType.playerConnected, (player: PlayerType) => {
-      const { players, setPlayers } = useGame.getState();
-      setPlayers(players.concat([player]));
-      console.log("playerConnected->payload", player);
-    });
-    const player = game.addPlayer("Enijar", Shape.triangle, "#ff0000");
-    game.addPlayer("Test Player", Shape.triangle, "#00ff00");
-    useGame.getState().setPlayer(player);
     return () => {
       game.stop();
+      const { setPlayer, setPlayers } = useGame.getState();
+      setPlayer(null);
+      setPlayers([]);
     };
+  }, []);
+
+  React.useEffect(() => {
+    return game.subscribe(
+      GameEventType.playerConnected,
+      (player: PlayerType) => {
+        const { players, setPlayers } = useGame.getState();
+        setPlayers(players.concat([player]));
+        console.log("playerConnected->payload", player);
+      }
+    );
+  }, []);
+
+  React.useEffect(() => {
+    const player = game.addPlayer("Enijar", Shape.triangle, "#ff0000");
+    useGame.getState().setPlayer(player);
   }, []);
 
   React.useEffect(() => {
@@ -47,7 +58,7 @@ export default function Game() {
     <GameWrapper>
       <Canvas>
         <React.Suspense fallback={null}>
-          <World>
+          <World size={game.mapSize}>
             {/*Default camera if there is no current player*/}
             {player === null && (
               <OrthographicCamera

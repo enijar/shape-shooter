@@ -56,12 +56,12 @@ export default class Player {
 
   update() {
     if (!this.alive) {
-      this.bullets = Array(100)
-        .fill({})
-        .map(() => {
-          return new Bullet();
-        });
-      this.bullets.map((_, i) => i);
+      for (let i = this.bullets.length - 1; i >= 0; i--) {
+        this.bullets[i].alive = false;
+      }
+      this.availableBulletIndices = this.availableBulletIndices.map(
+        (_, i) => i
+      );
       return;
     }
     let velocity = this.velocity;

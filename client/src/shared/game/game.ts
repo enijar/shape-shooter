@@ -9,7 +9,6 @@ import {
 } from "../types";
 import Player from "./entities/player";
 import { map } from "./utils";
-import { deg2rad } from "../../game/utils";
 
 type Subscription = {
   event: GameEventType;
@@ -25,7 +24,7 @@ export default class Game {
   public players: Player[] = [];
   public events: GameEvent[] = [];
   public actions: GameAction[] = [];
-  public mapSize: MapSize = { w: 0.5, h: 0.5 };
+  public mapSize: MapSize = { w: 2, h: 2 };
   public context: GameContext;
   public socket: SocketIOClient.Socket;
   private tps: number = 1000 / 60;
@@ -33,10 +32,17 @@ export default class Game {
   private timeoutId: NodeJS.Timeout | null = null;
   private nextPlayerId = 1;
   private subscriptions: Subscription[] = [];
+  private availablePlayerIndices: number[] = [];
 
   constructor(context: GameContext) {
     this.context = context;
     this.socket = io();
+    this.players = Array(100)
+      .fill({})
+      .map(() => {
+        return new Player(this);
+      });
+    this.availablePlayerIndices = this.players.map((_, i) => i);
   }
 
   addPlayer(
@@ -45,45 +51,46 @@ export default class Game {
     color: string,
     ai: boolean = false
   ): Player {
-    const player = new Player(this);
-    player.id = this.nextPlayerId;
-    player.alive = true;
-    player.ai = ai;
-    player.name = name;
-    player.shape = shape;
-    player.color = color;
+    const index = this.availablePlayerIndices[0];
+    this.availablePlayerIndices.splice(0, 1);
+    this.players[index].id = this.nextPlayerId;
+    this.players[index].alive = true;
+    this.players[index].ai = ai;
+    this.players[index].name = name;
+    this.players[index].shape = shape;
+    this.players[index].color = color;
     // todo place player in random location that is not already occupied by another player
-    player.x = map(
+    this.players[index].x = map(
       Math.random(),
       0,
       1,
       -this.mapSize.w / 2,
       this.mapSize.w / 2
     );
-    player.y = map(
+    this.players[index].y = map(
       Math.random(),
       0,
       1,
       -this.mapSize.h / 2,
       this.mapSize.h / 2
     );
-    if (player.ai) {
+    if (this.players[index].ai) {
       this.actions.push({
         type: GameActionType.playerMove,
         payload: {
-          playerId: player.id,
+          playerId: this.players[index].id,
           moveX: Math.random() > 0.5 ? -1 : 1,
           moveY: Math.random() > 0.5 ? -1 : 1,
         },
       });
     }
     this.nextPlayerId++;
-    this.players.push(player);
+    this.players.push(this.players[index]);
     this.events.push({
       type: GameEventType.playerConnected,
-      payload: player,
+      payload: this.players[index],
     });
-    return player;
+    return this.players[index];
   }
 
   start(tps: number = 60) {
@@ -91,6 +98,8 @@ export default class Game {
 
     this.addPlayer("Bot 1", Shape.triangle, "#00ff00", true);
     this.addPlayer("Bot 2", Shape.triangle, "#0000ff", true);
+    this.addPlayer("Bot 3", Shape.triangle, "#0000ff", true);
+    this.addPlayer("Bot 4", Shape.triangle, "#0000ff", true);
 
     this.tick();
   }
@@ -164,7 +173,10 @@ export default class Game {
       const index = this.players.findIndex(
         (player) => player.id === this.actions[i].payload.playerId
       );
-      if (!this.players[index].alive) continue;
+      if (!this.players[index].alive) {
+        this.availablePlayerIndices.push(index);
+        continue;
+      }
       switch (this.actions[i].type) {
         case GameActionType.playerRotate:
           this.players[index].r = this.actions[i].payload.r;

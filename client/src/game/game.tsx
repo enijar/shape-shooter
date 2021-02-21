@@ -39,7 +39,6 @@ export default function Game() {
     useGame.getState().setPlayer(player);
   }, [instance]);
 
-
   React.useEffect(() => {
     instance.start();
     return () => {
@@ -56,11 +55,16 @@ export default function Game() {
         .getState()
         .setSize(Math.max(window.innerWidth, window.innerHeight));
     }
+    function onContextMenu(event: MouseEvent) {
+      event.preventDefault();
+    }
 
     onResize();
     window.addEventListener("resize", onResize);
+    window.addEventListener("contextmenu", onContextMenu);
     return () => {
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("contextmenu", onContextMenu);
     };
   }, []);
 

@@ -10,7 +10,7 @@ import Player from "./player/player";
 import Bullets from "./entities/bullets";
 
 export default function Game() {
-  const { size, zoom, player, players, instance } = useGame();
+  const { size, zoom, players, currentPlayer, instance } = useGame();
 
   React.useEffect(() => {
     return instance.subscribe(
@@ -36,15 +36,15 @@ export default function Game() {
 
   React.useEffect(() => {
     const player = instance.addPlayer("Enijar", Shape.triangle, "#ff0000");
-    useGame.getState().setPlayer(player);
+    useGame.getState().setCurrentPlayer(player);
   }, [instance]);
 
   React.useEffect(() => {
     instance.start();
     return () => {
       instance.stop();
-      const { setPlayer, setPlayers } = useGame.getState();
-      setPlayer(null);
+      const { setCurrentPlayer, setPlayers } = useGame.getState();
+      setCurrentPlayer(null);
       setPlayers([]);
     };
   }, [instance]);
@@ -74,20 +74,20 @@ export default function Game() {
         <React.Suspense fallback={null}>
           <World size={instance.mapSize}>
             {/*Default camera if there is no current player*/}
-            {player === null && (
+            {currentPlayer === null && (
               <OrthographicCamera
                 makeDefault
                 position={[0, 0, size]}
                 zoom={size * zoom}
               />
             )}
-            {players.map((p) => {
-              if (p.id === -1) return null;
+            {players.map((player) => {
+              if (player.id === -1) return null;
               return (
                 <Player
-                  key={p.id}
-                  player={p}
-                  currentPlayer={p.id === player?.id}
+                  key={player.id}
+                  player={player}
+                  currentPlayer={player.id === currentPlayer?.id}
                 />
               );
             })}

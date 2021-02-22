@@ -4,8 +4,8 @@ import Game from "../shared/game/game";
 import { GameContext } from "../shared/types";
 
 export type GameState = {
-  player: Player | null;
-  setPlayer: (player: Player | null) => void;
+  currentPlayer: Player | null;
+  setCurrentPlayer: (player: Player | null) => void;
   players: Player[];
   setPlayers: (players: Player[]) => void;
   size: number;
@@ -19,11 +19,11 @@ export const useGame = create<GameState>((set) => {
   return {
     size: Math.max(window.innerWidth, window.innerHeight),
     zoom: 1,
-    player: null,
+    currentPlayer: null,
     players: [],
     instance: new Game(GameContext.client),
-    setPlayer(player: Player | null) {
-      set({ player });
+    setCurrentPlayer(currentPlayer: Player | null) {
+      set({ currentPlayer });
     },
     setPlayers(players: Player[]) {
       set({ players });

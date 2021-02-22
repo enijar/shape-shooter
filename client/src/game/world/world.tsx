@@ -14,7 +14,7 @@ type Props = {
 };
 
 export default function World({ children, size = { w: 2, h: 2 } }: Props) {
-  const { player, instance } = useGame();
+  const { currentPlayer, instance } = useGame();
 
   const texture = useTexture(assets.chunk);
   const controls = useControls();
@@ -26,7 +26,7 @@ export default function World({ children, size = { w: 2, h: 2 } }: Props) {
   }, [texture, size]);
 
   useFrame(() => {
-    if (player === null) return;
+    if (currentPlayer === null) return;
     const moveUp = controls[Controls.moveUp]();
     const moveDown = controls[Controls.moveDown]();
     const moveLeft = controls[Controls.moveLeft]();
@@ -42,13 +42,16 @@ export default function World({ children, size = { w: 2, h: 2 } }: Props) {
     if (moveRight) moveX = 1;
 
     instance.action(GameActionType.playerMove, {
-      playerId: player.id,
+      playerId: currentPlayer.id,
       moveX,
       moveY,
     });
 
-    if (player.firing !== firing) {
-      instance.action(GameActionType.playerFire, { playerId: player.id, firing });
+    if (currentPlayer.firing !== firing) {
+      instance.action(GameActionType.playerFire, {
+        playerId: currentPlayer.id,
+        firing,
+      });
     }
   });
 

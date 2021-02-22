@@ -55,6 +55,7 @@ export default function Game() {
         .getState()
         .setSize(Math.max(window.innerWidth, window.innerHeight));
     }
+
     function onContextMenu(event: MouseEvent) {
       event.preventDefault();
     }

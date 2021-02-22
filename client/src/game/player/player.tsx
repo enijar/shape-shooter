@@ -9,6 +9,7 @@ import PlayerEntity from "../../shared/game/entities/player";
 import { GameActionType, GameEventType } from "../../shared/types";
 import vars from "../../styles/vars";
 import { map } from "../../shared/game/utils";
+import Minimap from "../minimap";
 
 type Props = {
   player: PlayerEntity;
@@ -189,11 +190,14 @@ export default function Player({ player, currentPlayer = false }: Props) {
         </mesh>
       </group>
       {currentPlayer && (
-        <OrthographicCamera
-          makeDefault
-          position={[0, 0, size]}
-          zoom={size * zoom}
-        />
+        <>
+          <Minimap />
+          <OrthographicCamera
+            makeDefault
+            position={[0, 0, size]}
+            zoom={size * zoom}
+          />
+        </>
       )}
     </group>
   );

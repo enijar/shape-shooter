@@ -8,7 +8,7 @@ export default class Bullet {
   alive: boolean = false;
   distance: number = 0;
   velocity: number = 0.006;
-  maxDistance: number = 2;
+  maxDistance: number = 0.75;
   now: number = 0;
   steps: number = 1;
 

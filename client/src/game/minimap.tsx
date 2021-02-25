@@ -20,8 +20,6 @@ export default function Minimap() {
     }
   });
 
-  console.log(players);
-
   return (
     <group position={[-0.42, -0.255, 0]}>
       <mesh>

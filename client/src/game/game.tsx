@@ -17,15 +17,24 @@ export default function Game() {
 
   React.useEffect(() => {
     function onJoined(state: any) {
-      const { setCurrentPlayer, setPlayers } = useGame.getState();
+      const { setCurrentPlayer, setPlayers, setMapSize } = useGame.getState();
       setCurrentPlayer(state.currentPlayer);
       setPlayers(state.players);
+      setMapSize(state.mapSize);
     }
-
+    function onPlayerJoin(state: any) {
+      useGame.getState().setPlayers(state.players);
+    }
+    function onPlayerLeave(state: any) {
+      useGame.getState().setPlayers(state.players);
+    }
+    function onPlayerDeath(playerId: number) {
+      const { players, setPlayers } = useGame.getState();
+      setPlayers(players.filter((player) => player.id !== playerId));
+    }
     function onTick(state: any) {
       gameState.players = state.players;
     }
-
     function onDisconnect() {
       console.log("disconnect");
     }
@@ -34,6 +43,9 @@ export default function Game() {
     useGame.getState().setSocket(socket);
     io.on("game.joined", onJoined);
     io.on("game.tick", onTick);
+    io.on("game.player.join", onPlayerJoin);
+    io.on("game.player.leave", onPlayerLeave);
+    io.on("game.player.death", onPlayerDeath);
     io.on("disconnected", onDisconnect);
     io.emit("game.join", {
       name: "Enijar",
@@ -47,6 +59,8 @@ export default function Game() {
       setPlayers([]);
       setSocket(null);
       io.off("game.joined", onJoined);
+      io.off("game.player.join", onPlayerJoin);
+      io.off("game.player.leave", onPlayerLeave);
       io.off("game.tick", onTick);
       io.off("disconnected", onDisconnect);
     };

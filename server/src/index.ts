@@ -19,10 +19,13 @@ import Player from "./game/entities/player";
       socket.on("game.join", (player: any) => {
         console.log(`[${socket.id}] game.join`);
         currentPlayer = game.addPlayer(player.name, player.shape, player.color);
+        const players = game.players.map((player) => player.encode());
         socket.emit("game.joined", {
           currentPlayer: currentPlayer.encode(),
-          players: game.players.map((player) => player.encode()),
+          players,
+          mapSize: game.mapSize,
         });
+        io.emit("game.player.join", { players });
       });
 
       socket.on("game.leave", () => {
@@ -30,6 +33,9 @@ import Player from "./game/entities/player";
         if (currentPlayer !== null) {
           game.removePlayer(currentPlayer.id);
         }
+        io.emit("game.player.join", {
+          players: game.players.map((player) => player.encode()),
+        });
       });
 
       socket.on("controls", (controls: any) => {
@@ -51,6 +57,9 @@ import Player from "./game/entities/player";
         if (currentPlayer !== null) {
           game.removePlayer(currentPlayer.id);
         }
+        io.emit("game.player.join", {
+          players: game.players.map((player) => player.encode()),
+        });
       });
     });
 

@@ -16,7 +16,7 @@ type MapBounds = {
 export default class Game {
   public socket: Server;
   public players: Player[] = [];
-  public mapSize: MapSize = { w: 2, h: 2 };
+  public mapSize: MapSize = { w: 0.5, h: 0.5 };
   public mapBounds: MapBounds = {
     x: { min: -this.mapSize.w / 2, max: this.mapSize.w / 2 },
     y: { min: -this.mapSize.h / 2, max: this.mapSize.h / 2 },
@@ -89,6 +89,7 @@ export default class Game {
       this.players[i].steps = steps;
       this.players[i].update();
       if (this.players[i].hp === 0) {
+        this.socket.emit("game.player.death", this.players[i].id);
         this.players.splice(i, 1);
       }
     }

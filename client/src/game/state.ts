@@ -1,11 +1,13 @@
 import create from "zustand";
 import Player from "../shared/game/entities/player";
 
+type MapSize = {
+  w: number;
+  h: number;
+};
+
 export type GameState = {
-  mapSize: {
-    w: number;
-    h: number;
-  };
+  mapSize: MapSize;
   currentPlayer: Player | null;
   setCurrentPlayer: (player: Player | null) => void;
   players: Player[];
@@ -16,6 +18,7 @@ export type GameState = {
   zoom: number;
   setZoom: (zoom: number) => void;
   setSocket: (socket: SocketIOClient.Socket | null) => void;
+  setMapSize: (mapSize: MapSize) => void;
 };
 
 export const useGame = create<GameState>((set) => {
@@ -43,6 +46,9 @@ export const useGame = create<GameState>((set) => {
     },
     setSocket(socket: SocketIOClient.Socket | null) {
       set({ socket });
+    },
+    setMapSize(mapSize: MapSize) {
+      set({ mapSize });
     },
   };
 });

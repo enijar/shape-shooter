@@ -17,9 +17,9 @@ export default function Home() {
   }, [name, shape]);
   const shapes = React.useMemo(() => {
     return [
-      createShape(Shape.circle, vars.color.blue),
-      createShape(Shape.square, vars.color.green),
-      createShape(Shape.triangle, vars.color.red),
+      createShape(Shape.circle, vars.color.blue, "circle"),
+      createShape(Shape.square, vars.color.green, "square"),
+      createShape(Shape.triangle, vars.color.red, "triangle"),
     ];
   }, []);
 

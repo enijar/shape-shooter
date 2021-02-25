@@ -2,9 +2,7 @@
   "private": true,
   "scripts": {
     "start": "BROWSER=none PORT=8080 react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "build": "./bin/build.sh"
   },
   "dependencies": {
     "@react-three/drei": "^3.4.1",

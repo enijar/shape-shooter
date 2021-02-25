@@ -61,12 +61,6 @@ export default function Player({
     if (player.hp !== hp) {
       setHp(player.hp);
     }
-
-    if (textGeometry.current) {
-      textGeometry.current.computeBoundingBox();
-      textGeometry.current.center();
-      textGeometry.current.dispose();
-    }
   });
 
   React.useEffect(() => {

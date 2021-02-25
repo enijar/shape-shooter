@@ -6,8 +6,14 @@ type MapSize = {
   h: number;
 };
 
+type MapBounds = {
+  x: { min: number; max: number };
+  y: { min: number; max: number };
+};
+
 export type GameState = {
   mapSize: MapSize;
+  mapBounds: MapBounds;
   currentPlayer: Player | null;
   setCurrentPlayer: (player: Player | null) => void;
   players: Player[];
@@ -19,10 +25,15 @@ export type GameState = {
   setZoom: (zoom: number) => void;
   setSocket: (socket: SocketIOClient.Socket | null) => void;
   setMapSize: (mapSize: MapSize) => void;
+  setMapBounds: (mapBounds: MapBounds) => void;
 };
 
 export const useGame = create<GameState>((set) => {
   return {
+    mapBounds: {
+      x: { min: -1, max: 1 },
+      y: { min: -1, max: 1 },
+    },
     mapSize: {
       w: 2,
       h: 2,
@@ -49,6 +60,9 @@ export const useGame = create<GameState>((set) => {
     },
     setMapSize(mapSize: MapSize) {
       set({ mapSize });
+    },
+    setMapBounds(mapBounds: MapBounds) {
+      set({ mapBounds });
     },
   };
 });

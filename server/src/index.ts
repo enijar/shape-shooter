@@ -24,6 +24,7 @@ import Player from "./game/entities/player";
           currentPlayer: currentPlayer.encode(),
           players,
           mapSize: game.mapSize,
+          mapBounds: game.mapBounds,
         });
         io.emit("game.player.join", { players });
       });

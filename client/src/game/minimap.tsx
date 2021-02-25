@@ -4,19 +4,32 @@ import vars from "../styles/vars";
 import { useGame } from "./state";
 import { useFrame } from "react-three-fiber";
 import { map } from "../shared/game/utils";
+import gameState from "./game-state";
 
 export default function Minimap() {
-  const { players, currentPlayer } = useGame();
+  const { players, currentPlayer, mapBounds } = useGame();
   const playerMeshes = players.map(() => React.createRef<THREE.Mesh>());
 
   useFrame(() => {
-    for (let i = 0, length = players.length; i < length; i++) {
+    for (let i = 0, length = gameState.players.length; i < length; i++) {
       if (!playerMeshes[i] || !playerMeshes[i].current) continue;
-      const { minX, minY, maxX, maxY, x, y } = players[i];
+      const { x, y } = gameState.players[i];
       // @ts-ignore
-      playerMeshes[i].current.position.x = map(x, minX, maxX, -0.05, 0.05);
+      playerMeshes[i].current.position.x = map(
+        x,
+        mapBounds.x.min,
+        mapBounds.x.max,
+        -0.05,
+        0.05
+      );
       // @ts-ignore
-      playerMeshes[i].current.position.y = map(y, minY, maxY, -0.05, 0.05);
+      playerMeshes[i].current.position.y = map(
+        y,
+        mapBounds.y.min,
+        mapBounds.y.max,
+        -0.05,
+        0.05
+      );
     }
   });
 

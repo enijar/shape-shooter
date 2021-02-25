@@ -17,10 +17,16 @@ export default function Game() {
 
   React.useEffect(() => {
     function onJoined(state: any) {
-      const { setCurrentPlayer, setPlayers, setMapSize } = useGame.getState();
+      const {
+        setCurrentPlayer,
+        setPlayers,
+        setMapSize,
+        setMapBounds,
+      } = useGame.getState();
       setCurrentPlayer(state.currentPlayer);
       setPlayers(state.players);
       setMapSize(state.mapSize);
+      setMapBounds(state.mapBounds);
     }
     function onPlayerJoin(state: any) {
       useGame.getState().setPlayers(state.players);

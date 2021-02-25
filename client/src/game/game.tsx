@@ -50,7 +50,7 @@ export default function Game() {
       useGame.getState().setPlayers(state.players);
     }
     function onPlayerDeath(playerId: number) {
-      const { players, setPlayers } = useGame.getState();
+      const { players, setPlayers, currentPlayer } = useGame.getState();
       setPlayers(players.filter((player) => player.id !== playerId));
       if (currentPlayer) {
         if (playerId === currentPlayer.id) {

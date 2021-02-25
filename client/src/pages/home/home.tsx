@@ -71,6 +71,7 @@ export default function Home() {
                 name="name"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
+                autoFocus
               />
             </div>
             <div>

@@ -18,7 +18,7 @@ export type NewPlayer = {
   color: string;
 };
 
-export enum ControlsKeys {
+export enum Controls {
   moveUp = "w",
   moveDown = "s",
   moveLeft = "a",
@@ -79,8 +79,3 @@ export type GameEvent = {
   type: GameEventType;
   payload: any;
 };
-
-export enum GameContext {
-  client,
-  server,
-}

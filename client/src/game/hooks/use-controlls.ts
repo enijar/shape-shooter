@@ -1,36 +1,22 @@
 import React from "react";
-import { Controls } from "../../shared/types";
+import { ControlsKeys } from "../../shared/types";
+import { useGame } from "../state";
 
-type ControlsState = {
-  [Controls.moveUp]: () => boolean;
-  [Controls.moveDown]: () => boolean;
-  [Controls.moveLeft]: () => boolean;
-  [Controls.moveRight]: () => boolean;
-  firing: () => boolean;
+type Controls = {
+  moveX: -1 | 0 | 1;
+  moveY: -1 | 0 | 1;
+  firing: boolean;
 };
 
-export default function useControls(): ControlsState {
+export default function useControls(): Controls {
+  const { socket } = useGame();
   const [activeKeys, setActiveKeys] = React.useState<string[]>([]);
-  const pointerDown = React.useRef<boolean>(false);
-  const controlsState = React.useMemo<ControlsState>(() => {
-    return {
-      [Controls.moveUp]() {
-        return activeKeys.includes(Controls.moveUp);
-      },
-      [Controls.moveDown]() {
-        return activeKeys.includes(Controls.moveDown);
-      },
-      [Controls.moveLeft]() {
-        return activeKeys.includes(Controls.moveLeft);
-      },
-      [Controls.moveRight]() {
-        return activeKeys.includes(Controls.moveRight);
-      },
-      firing() {
-        return pointerDown.current;
-      },
-    };
-  }, [activeKeys, pointerDown]);
+  const [pointerDown, setPointerDown] = React.useState<boolean>(false);
+  const [controls, setControls] = React.useState<Controls>(() => ({
+    moveX: 0,
+    moveY: 0,
+    firing: false,
+  }));
 
   React.useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -57,11 +43,11 @@ export default function useControls(): ControlsState {
     }
 
     function onPointerDown() {
-      pointerDown.current = true;
+      setPointerDown(true);
     }
 
     function onPointerUp() {
-      pointerDown.current = false;
+      setPointerDown(false);
     }
 
     window.addEventListener("keydown", onKeyDown);
@@ -76,5 +62,26 @@ export default function useControls(): ControlsState {
     };
   }, []);
 
-  return controlsState;
+  React.useEffect(() => {
+    let moveX: -1 | 0 | 1 = 0;
+    let moveY: -1 | 0 | 1 = 0;
+    if (activeKeys.includes(ControlsKeys.moveUp)) {
+      moveY = -1;
+    }
+    if (activeKeys.includes(ControlsKeys.moveDown)) {
+      moveY = 1;
+    }
+    if (activeKeys.includes(ControlsKeys.moveLeft)) {
+      moveX = -1;
+    }
+    if (activeKeys.includes(ControlsKeys.moveRight)) {
+      moveX = 1;
+    }
+    if (socket !== null) {
+      socket.emit("controls", { moveX, moveY, firing: pointerDown });
+    }
+    setControls({ moveX, moveY, firing: pointerDown });
+  }, [activeKeys, pointerDown, socket]);
+
+  return controls;
 }

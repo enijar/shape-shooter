@@ -20,6 +20,8 @@ export default function Minimap() {
     }
   });
 
+  console.log(players);
+
   return (
     <group position={[-0.42, -0.255, 0]}>
       <mesh>
@@ -28,8 +30,9 @@ export default function Minimap() {
       </mesh>
       <group>
         {players.map((player, index) => {
+          if (player === null) return null;
           return (
-            <mesh key={player.id} ref={playerMeshes[index]} visible={player.hp > 0}>
+            <mesh key={player.id} ref={playerMeshes[index]}>
               <circleBufferGeometry attach="geometry" args={[0.002, 32]} />
               <meshBasicMaterial
                 attach="material"

@@ -1,53 +1,56 @@
 import React from "react";
+import * as THREE from "three";
 import { Canvas } from "react-three-fiber";
 import { OrthographicCamera } from "@react-three/drei";
+import io from "../services/io";
 import { GameWrapper } from "./styles";
 import { useGame } from "./state";
-import { GameEventType, Shape } from "../shared/types";
-import PlayerType from "../shared/game/entities/player";
 import World from "./world/world";
 import Player from "./player/player";
 import Bullets from "./entities/bullets";
+import vars from "../styles/vars";
+import { Shape } from "../shared/types";
+import gameState from "./game-state";
 
 export default function Game() {
-  const { size, zoom, players, currentPlayer, instance } = useGame();
+  const { size, zoom, players, currentPlayer, mapSize } = useGame();
 
   React.useEffect(() => {
-    return instance.subscribe(
-      GameEventType.playerConnected,
-      (player: PlayerType) => {
-        const { players, setPlayers } = useGame.getState();
-        setPlayers(players.concat([player]));
-        console.log("playerConnected->player", player);
-      }
-    );
-  }, [instance]);
-
-  React.useEffect(() => {
-    return instance.subscribe(
-      GameEventType.playerDisconnected,
-      (playerId: number) => {
-        const { players, setPlayers } = useGame.getState();
-        setPlayers(players.filter((player) => player.id !== playerId));
-        console.log("playerDisconnected->playerId", playerId);
-      }
-    );
-  }, [instance]);
-
-  React.useEffect(() => {
-    const player = instance.addPlayer("Enijar", Shape.triangle, "#ff0000");
-    useGame.getState().setCurrentPlayer(player);
-  }, [instance]);
-
-  React.useEffect(() => {
-    instance.start();
-    return () => {
-      instance.stop();
+    function onJoined(state: any) {
       const { setCurrentPlayer, setPlayers } = useGame.getState();
+      setCurrentPlayer(state.currentPlayer);
+      setPlayers(state.players);
+    }
+
+    function onTick(state: any) {
+      gameState.players = state.players;
+    }
+
+    function onDisconnect() {
+      console.log("disconnect");
+    }
+
+    const socket = io.connect();
+    useGame.getState().setSocket(socket);
+    io.on("game.joined", onJoined);
+    io.on("game.tick", onTick);
+    io.on("disconnected", onDisconnect);
+    io.emit("game.join", {
+      name: "Enijar",
+      shape: Shape.triangle,
+      color: "#ff0000",
+    });
+
+    return () => {
+      const { setCurrentPlayer, setPlayers, setSocket } = useGame.getState();
       setCurrentPlayer(null);
       setPlayers([]);
+      setSocket(null);
+      io.off("game.joined", onJoined);
+      io.off("game.tick", onTick);
+      io.off("disconnected", onDisconnect);
     };
-  }, [instance]);
+  }, []);
 
   React.useEffect(() => {
     function onResize() {
@@ -69,11 +72,21 @@ export default function Game() {
     };
   }, []);
 
+  const handleCreated = React.useCallback(({ gl }) => {
+    gl.gammaFactor = 2.2;
+    gl.toneMapping = THREE.CineonToneMapping;
+    gl.toneMappingExposure = 0.75;
+    gl.outputEncoding = THREE.sRGBEncoding;
+    gl.shadowMap.enabled = true;
+    gl.shadowMap.type = THREE.PCFSoftShadowMap;
+    gl.setClearColor(vars.color.gameBackground);
+  }, []);
+
   return (
     <GameWrapper>
-      <Canvas>
+      <Canvas onCreated={handleCreated}>
         <React.Suspense fallback={null}>
-          <World size={instance.mapSize}>
+          <World size={mapSize}>
             {/*Default camera if there is no current player*/}
             {currentPlayer === null && (
               <OrthographicCamera
@@ -83,12 +96,15 @@ export default function Game() {
               />
             )}
             {players.map((player) => {
-              if (player.id === -1) return null;
+              if (player === null) return null;
               return (
                 <Player
                   key={player.id}
-                  player={player}
                   currentPlayer={player.id === currentPlayer?.id}
+                  id={player.id}
+                  name={player.name}
+                  shape={player.shape}
+                  color={player.color}
                 />
               );
             })}

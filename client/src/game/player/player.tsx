@@ -1,73 +1,76 @@
 import React from "react";
 import * as THREE from "three";
-import { useLoader, useThree } from "react-three-fiber";
+import { useFrame, useLoader, useThree } from "react-three-fiber";
 import { OrthographicCamera, useTexture } from "@react-three/drei";
-import { deg2rad } from "../utils";
 import createShape from "../shape";
 import { useGame } from "../state";
-import PlayerEntity from "../../shared/game/entities/player";
-import { GameActionType, GameEventType } from "../../shared/types";
 import vars from "../../styles/vars";
 import { map } from "../../shared/game/utils";
 import Minimap from "../minimap";
+import { deg2rad } from "../utils";
+import { Shape } from "../../shared/types";
+import gameState from "../game-state";
 
 type Props = {
-  player: PlayerEntity;
+  id: number;
+  name: string;
+  shape: Shape;
+  color: string;
   currentPlayer?: boolean;
 };
 
 const HP_BORDER_WIDTH = 0.005;
 
-export default function Player({ player, currentPlayer = false }: Props) {
+export default function Player({
+  id,
+  name,
+  shape,
+  color,
+  currentPlayer = false,
+}: Props) {
   const font = useLoader(
     THREE.FontLoader,
     "/assets/3d/fonts/OpenSans_Bold.json"
   );
-  const shape = React.useMemo(() => createShape(player.shape, player.color), [
-    player.shape,
-    player.color,
+  const shapeImage = React.useMemo(() => createShape(shape, color), [
+    shape,
+    color,
   ]);
-  const texture = useTexture(shape);
+  const texture = useTexture(shapeImage);
   const { raycaster } = useThree();
-  const { size, zoom, instance } = useGame();
+  const { size, zoom } = useGame();
   const group = React.useRef<THREE.Group>();
   const meshGroup = React.useRef<THREE.Group>();
   const mesh = React.useRef<THREE.Mesh>();
   const textGeometry = React.useRef<THREE.TextGeometry>();
   const textHpStatsGeometry = React.useRef<THREE.TextGeometry>();
+  const hpFillMesh = React.useRef<THREE.Mesh>();
+  const hpFillGeometry = React.useRef<THREE.PlaneBufferGeometry>();
   const box = React.useMemo<THREE.Box3>(() => new THREE.Box3(), []);
-  const [hp, setHp] = React.useState(player.hp);
+  const [hp, setHp] = React.useState<number>(1);
 
-  React.useEffect(() => {
-    return instance.subscribe(GameEventType.playerHp, (payload: any) => {
-      if (payload.playerId === player.id) {
-        setHp(payload.hp);
-      }
-    });
-  }, [player, instance]);
-
-  React.useEffect(() => {
-    return instance.subscribe(GameEventType.playerRotate, (payload: any) => {
-      if (!meshGroup.current) return;
-      if (payload.playerId === player.id) {
-        meshGroup.current.rotation.z = payload.r;
-      }
-    });
-  }, [player, instance]);
-
-  React.useEffect(() => {
+  useFrame(() => {
+    const player = gameState.players.find((player) => player.id === id);
+    if (!player) return;
     if (group.current) {
       group.current.position.x = player.x;
       group.current.position.y = player.y;
     }
-    return instance.subscribe(GameEventType.playerMove, (payload: any) => {
-      if (!group.current) return;
-      if (payload.playerId === player.id) {
-        group.current.position.x = player.x;
-        group.current.position.y = player.y;
-      }
-    });
-  }, [player, instance]);
+    if (meshGroup.current) {
+      meshGroup.current.rotation.z = player.r;
+    }
+    if (player.hp !== hp) {
+      setHp(player.hp);
+    }
+  });
+
+  React.useEffect(() => {
+    if (textHpStatsGeometry.current) {
+      textHpStatsGeometry.current.computeBoundingBox();
+      textHpStatsGeometry.current.center();
+      textHpStatsGeometry.current.dispose();
+    }
+  }, [hp]);
 
   // Update current player's rotation
   React.useEffect(() => {
@@ -79,17 +82,18 @@ export default function Player({ player, currentPlayer = false }: Props) {
       const cX = (box.max.x + box.min.x) / 2;
       const cY = (box.max.y + box.min.y) / 2;
       const { x: oX, y: oY } = raycaster.ray.origin;
-      instance.action(GameActionType.playerRotate, {
-        playerId: player.id,
-        r: Math.atan2(oY - cY, oX - cX) - deg2rad(90),
-      });
+      const r = Math.atan2(oY - cY, oX - cX) - deg2rad(90);
+      const { socket } = useGame.getState();
+      if (socket !== null) {
+        socket.emit("rotate", r);
+      }
     }
 
     window.addEventListener("pointermove", onMove);
     return () => {
       window.removeEventListener("pointermove", onMove);
     };
-  }, [raycaster, currentPlayer, player, box, instance]);
+  }, [raycaster, currentPlayer, box]);
 
   React.useEffect(() => {
     if (!textGeometry.current) return;
@@ -98,15 +102,8 @@ export default function Player({ player, currentPlayer = false }: Props) {
     textGeometry.current.dispose();
   }, []);
 
-  React.useEffect(() => {
-    if (!textHpStatsGeometry.current) return;
-    textHpStatsGeometry.current.computeBoundingBox();
-    textHpStatsGeometry.current.center();
-    textHpStatsGeometry.current.dispose();
-  }, [hp]);
-
   return (
-    <group ref={group} visible={hp > 0}>
+    <group ref={group}>
       {/* Name tag + HP bar */}
       <group position={[0, -0.06, 0]}>
         {/* Name tag background */}
@@ -123,7 +120,7 @@ export default function Player({ player, currentPlayer = false }: Props) {
             ref={textGeometry}
             attach="geometry"
             args={[
-              player.name,
+              name,
               {
                 font,
                 size: 30,

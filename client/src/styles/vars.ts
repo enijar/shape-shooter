@@ -13,6 +13,7 @@ export default {
     red: "#ff0000",
     green: "#07930e",
     hp: "#00ff00",
+    gameBackground: "#1f1f1f",
   },
   zIndex: {
     game: 1,

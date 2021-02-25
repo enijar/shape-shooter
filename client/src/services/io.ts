@@ -1,25 +1,25 @@
 import io from "socket.io-client";
 import config from "../config/config";
 
-const socket: SocketIOClient.Socket = io(config.serverUrl, {
+const client: SocketIOClient.Socket = io(config.serverUrl, {
   autoConnect: false,
 });
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
-  connect() {
-    socket.connect();
+  connect(): SocketIOClient.Socket {
+    return client.connect();
   },
   disconnect() {
-    socket.disconnect();
+    client.disconnect();
   },
   on(event: string, fn: Function) {
-    socket.on(event, fn);
+    client.on(event, fn);
   },
   off(event: string, fn?: Function) {
-    socket.off(event, fn);
+    client.off(event, fn);
   },
   emit(event: string, data?: any) {
-    socket.emit(event, data);
+    client.emit(event, data);
   },
 };

@@ -86,17 +86,6 @@ export default class Player {
       this.bullets[index].alive = true;
     }
 
-    if (this.hp === 0) {
-      this.alive = false;
-      this.firing = false;
-      this.moveX = 0;
-      this.moveY = 0;
-
-      for (let i = this.bullets.length - 1; i >= 0; i--) {
-        this.bullets[i].alive = false;
-      }
-    }
-
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       if (!this.bullets[i].alive) continue;
       this.bullets[i].now = this.now;
@@ -128,6 +117,17 @@ export default class Player {
 
       if (!this.bullets[i].alive) {
         this.availableBulletIndices.push(i);
+      }
+    }
+
+    if (this.hp === 0) {
+      this.alive = false;
+      this.firing = false;
+      this.moveX = 0;
+      this.moveY = 0;
+
+      for (let i = this.bullets.length - 1; i >= 0; i--) {
+        this.bullets[i].alive = false;
       }
     }
   }

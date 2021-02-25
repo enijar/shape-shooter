@@ -1,12 +1,12 @@
 import config from "./config/config";
-import database from "./services/database";
+// import database from "./services/database";
 import { http, socket, socket as io } from "./services/app";
 import Game from "./game/game";
 import Player from "./game/entities/player";
 
 (async () => {
   try {
-    await database.sync({ alter: true });
+    // await database.sync({ alter: true });
 
     const game = new Game(socket);
     game.start();

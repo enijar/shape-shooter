@@ -52,6 +52,11 @@ export default function Game() {
     function onPlayerDeath(playerId: number) {
       const { players, setPlayers } = useGame.getState();
       setPlayers(players.filter((player) => player.id !== playerId));
+      if (currentPlayer) {
+        if (playerId === currentPlayer.id) {
+          history.push("/");
+        }
+      }
     }
     function onTick(state: any) {
       gameState.players = state.players;

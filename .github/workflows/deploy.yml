@@ -1,11 +1,11 @@
 # @todo build on CI server first, then copy files to avoid downtime
 
-name: Deploy FV UAT
+name: Deploy Game
 
 on:
   push:
     branches:
-      - fv-uat
+      - prod
 
 jobs:
   build:

@@ -42,10 +42,9 @@ export default function Player({
   const group = React.useRef<THREE.Group>();
   const meshGroup = React.useRef<THREE.Group>();
   const mesh = React.useRef<THREE.Mesh>();
+  const material = React.useRef<THREE.MeshBasicMaterial>();
   const textGeometry = React.useRef<THREE.TextGeometry>();
   const textHpStatsGeometry = React.useRef<THREE.TextGeometry>();
-  const hpFillMesh = React.useRef<THREE.Mesh>();
-  const hpFillGeometry = React.useRef<THREE.PlaneBufferGeometry>();
   const box = React.useMemo<THREE.Box3>(() => new THREE.Box3(), []);
   const [hp, setHp] = React.useState<number>(1);
 
@@ -61,6 +60,12 @@ export default function Player({
     }
     if (player.hp !== hp) {
       setHp(player.hp);
+    }
+
+    if (textGeometry.current) {
+      textGeometry.current.computeBoundingBox();
+      textGeometry.current.center();
+      textGeometry.current.dispose();
     }
   });
 
@@ -180,6 +185,7 @@ export default function Player({
         <mesh ref={mesh}>
           <planeBufferGeometry attach="geometry" args={[0.1, 0.1, 1]} />
           <meshBasicMaterial
+            ref={material}
             attach="material"
             map={texture}
             transparent={true}

@@ -1,5 +1,5 @@
 import create from "zustand";
-import { PlayerData as Player } from "../shared/types";
+import { PlayerData as Player, Shape } from "../shared/types";
 
 type MapSize = {
   w: number;
@@ -12,6 +12,9 @@ type MapBounds = {
 };
 
 export type GameState = {
+  name: string;
+  shape: Shape;
+  color: string;
   mapSize: MapSize;
   mapBounds: MapBounds;
   currentPlayer: Player | null;
@@ -26,10 +29,15 @@ export type GameState = {
   setSocket: (socket: SocketIOClient.Socket | null) => void;
   setMapSize: (mapSize: MapSize) => void;
   setMapBounds: (mapBounds: MapBounds) => void;
+  setName: (name: string) => void;
+  setShape: (shape: Shape) => void;
 };
 
 export const useGame = create<GameState>((set) => {
   return {
+    name: "",
+    shape: Shape.triangle,
+    color: "#ff0000",
     mapBounds: {
       x: { min: -1, max: 1 },
       y: { min: -1, max: 1 },
@@ -63,6 +71,15 @@ export const useGame = create<GameState>((set) => {
     },
     setMapBounds(mapBounds: MapBounds) {
       set({ mapBounds });
+    },
+    setName(name: string) {
+      set({ name });
+    },
+    setShape(shape: Shape) {
+      set({ shape });
+    },
+    setColor(color: string) {
+      set({ color });
     },
   };
 });

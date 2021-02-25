@@ -1,4 +1,5 @@
 import React from "react";
+import { useHistory } from "react-router-dom";
 import { HomeShape, HomeWrapper } from "./styles";
 import Page from "../../components/page/page";
 import { Title } from "../../styles/typeography";
@@ -6,10 +7,11 @@ import { Container, Flex } from "../../styles/layout";
 import { Shape } from "../../shared/types";
 import createShape from "../../game/shape";
 import vars from "../../styles/vars";
+import { useGame } from "../../game/state";
 
 export default function Home() {
-  const [name, setName] = React.useState<string>("");
-  const [shape, setShape] = React.useState<null | Shape>(null);
+  const history = useHistory();
+  const { name, setName, shape, setShape } = useGame();
   const disabled = React.useMemo<boolean>(() => {
     return name.trim().length === 0 || shape === null;
   }, [name, shape]);
@@ -25,9 +27,9 @@ export default function Home() {
     (event) => {
       event.preventDefault();
       if (disabled) return;
-      console.log(name, shape);
+      history.push("/play");
     },
-    [disabled, name, shape]
+    [disabled, history]
   );
 
   return (
@@ -39,22 +41,24 @@ export default function Home() {
           </Title>
           <Flex align="center" justify="space-between">
             <HomeShape
+              disabled
               selected={shape === Shape.circle}
               onClick={() => setShape(Shape.circle)}
             >
-              <img src={shapes[0]} alt="Circle" />
+              <img src={shapes[0]} alt="Circle" style={{ opacity: 0 }} />
             </HomeShape>
             <HomeShape
               selected={shape === Shape.triangle}
               onClick={() => setShape(Shape.triangle)}
             >
-              <img src={shapes[1]} alt="Triangle" />
+              <img src={shapes[2]} alt="Square" />
             </HomeShape>
             <HomeShape
+              disabled
               selected={shape === Shape.square}
               onClick={() => setShape(Shape.square)}
             >
-              <img src={shapes[2]} alt="Square" />
+              <img src={shapes[1]} alt="Triangle" style={{ opacity: 0 }} />
             </HomeShape>
           </Flex>
 

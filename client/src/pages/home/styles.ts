@@ -7,6 +7,7 @@ export const HomeWrapper = styled.div`
 
 type HomeShapeProps = {
   selected?: boolean;
+  disabled?: boolean;
 };
 export const HomeShape = styled.div<HomeShapeProps>`
   user-select: none;
@@ -17,10 +18,16 @@ export const HomeShape = styled.div<HomeShapeProps>`
     pointer-events: none;
   }
 
-  ${({ selected }) => {
+  ${({ selected, disabled }) => {
+    if (disabled) {
+      return css`
+        pointer-events: none;
+        cursor: default;
+      `;
+    }
     if (selected) {
       return css`
-        filter: drop-shadow(0px 0px 10px ${vars.color.black});
+        filter: drop-shadow(0px 0px 15px ${vars.color.white});
       `;
     }
   }}

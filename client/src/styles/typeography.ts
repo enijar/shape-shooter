@@ -5,7 +5,7 @@ type TitleProps = {
   center?: boolean;
 };
 export const Title = styled.div<TitleProps>`
-  color: ${vars.color.black959};
+  color: ${vars.color.white};
 
   ${({ center = false }) => {
     if (center) {

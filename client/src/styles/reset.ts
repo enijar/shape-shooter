@@ -19,6 +19,7 @@ export default createGlobalStyle`
     font-family: ${vars.font.primary};
     font-size: ${vars.rootSize}px;
     font-weight: 600;
+    color: ${vars.color.white};
   }
 
   svg, img, iframe, canvas {

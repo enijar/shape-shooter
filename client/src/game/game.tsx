@@ -2,6 +2,7 @@ import React from "react";
 import * as THREE from "three";
 import { Canvas } from "react-three-fiber";
 import { OrthographicCamera } from "@react-three/drei";
+import { useHistory } from "react-router-dom";
 import io from "../services/io";
 import { GameWrapper } from "./styles";
 import { useGame } from "./state";
@@ -9,13 +10,27 @@ import World from "./world/world";
 import Player from "./player/player";
 import Bullets from "./entities/bullets";
 import vars from "../styles/vars";
-import { Shape } from "../shared/types";
 import gameState from "./game-state";
 
 export default function Game() {
-  const { size, zoom, players, currentPlayer, mapSize } = useGame();
+  const history = useHistory();
+  const {
+    name,
+    shape,
+    color,
+    size,
+    zoom,
+    players,
+    currentPlayer,
+    mapSize,
+  } = useGame();
 
   React.useEffect(() => {
+    if (!name || !shape || !color) {
+      history.push("/");
+      return;
+    }
+
     function onJoined(state: any) {
       const {
         setCurrentPlayer,
@@ -53,11 +68,7 @@ export default function Game() {
     io.on("game.player.leave", onPlayerLeave);
     io.on("game.player.death", onPlayerDeath);
     io.on("disconnected", onDisconnect);
-    io.emit("game.join", {
-      name: "Enijar",
-      shape: Shape.triangle,
-      color: "#ff0000",
-    });
+    io.emit("game.join", { name, shape, color });
 
     return () => {
       const { setCurrentPlayer, setPlayers, setSocket } = useGame.getState();
@@ -70,7 +81,7 @@ export default function Game() {
       io.off("game.tick", onTick);
       io.off("disconnected", onDisconnect);
     };
-  }, []);
+  }, [name, shape, color, history]);
 
   React.useEffect(() => {
     function onResize() {

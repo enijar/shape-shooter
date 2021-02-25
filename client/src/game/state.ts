@@ -1,5 +1,5 @@
 import create from "zustand";
-import Player from "../shared/game/entities/player";
+import { PlayerData as Player } from "../shared/types";
 
 type MapSize = {
   w: number;

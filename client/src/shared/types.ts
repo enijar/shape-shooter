@@ -84,3 +84,20 @@ export enum GameContext {
   client,
   server,
 }
+
+export type BulletData = {
+  x: number;
+  y: number;
+};
+
+export type PlayerData = {
+  id: number;
+  name: string;
+  shape: Shape;
+  color: string;
+  hp: number;
+  x: number;
+  y: number;
+  r: number;
+  bullets: BulletData[];
+};

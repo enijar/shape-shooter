@@ -85,6 +85,7 @@ export default function Game() {
       io.off("game.player.leave", onPlayerLeave);
       io.off("game.tick", onTick);
       io.off("disconnected", onDisconnect);
+      io.disconnect();
     };
   }, [name, shape, color, history]);
 

@@ -46,7 +46,7 @@ export default function Game() {
       setPlayers(state.players);
       setMapSize(state.mapSize);
       setMapBounds(state.mapBounds);
-      setModifiers(state.modifiers);
+      setModifiers(state.modifiers ?? []);
     }
     function onPlayerJoin(state: any) {
       useGame.getState().setPlayers(state.players);
@@ -67,7 +67,7 @@ export default function Game() {
       gameState.players = state.players;
     }
     function onModifiers(modifiers: ModifierData[]) {
-      useGame.getState().setModifiers(modifiers);
+      useGame.getState().setModifiers(modifiers ?? []);
     }
     function onDisconnect() {
       console.log("disconnect");

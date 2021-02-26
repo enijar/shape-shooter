@@ -1,5 +1,5 @@
-import { GameEventType, Shape } from "../types";
-import { clamp } from "../utils";
+import { ModifierStatus, Shape } from "../../../../client/src/shared/types";
+import { clamp, collision } from "../utils";
 import Bullet from "./bullet";
 import Game from "../game";
 
@@ -25,17 +25,6 @@ export default class Player {
 
   constructor(game: Game) {
     this.game = game;
-  }
-
-  private static bulletHit(
-    player: Player,
-    bullet: Bullet,
-    r: number = 0.05
-  ): boolean {
-    const a = bullet.x - player.x;
-    const b = bullet.y - player.y;
-    const d = Math.sqrt(a * a + b * b);
-    return d <= r;
   }
 
   encode(): object {
@@ -82,6 +71,28 @@ export default class Player {
       this.bullets.push(bullet);
     }
 
+    let modifierCollision = false;
+    for (let i = this.game.modifiers.length - 1; i >= 0; i--) {
+      const { x: x1, y: y1 } = this;
+      const { x: x2, y: y2 } = this.game.modifiers[i];
+      if (collision(x1, y1, x2, y2)) {
+        switch (this.game.modifiers[i].status) {
+          case ModifierStatus.heal:
+            this.hp = Math.min(1, this.hp + this.game.modifiers[i].value);
+            break;
+        }
+        modifierCollision = true;
+        this.game.modifiers.splice(i, 1);
+      }
+    }
+
+    if (modifierCollision) {
+      this.game.socket.emit(
+        "game.modifiers",
+        this.game.modifiers.map((modifier) => modifier.encode())
+      );
+    }
+
     for (let i = this.bullets.length - 1; i >= 0; i--) {
       this.bullets[i].now = this.now;
       this.bullets[i].steps = this.steps;
@@ -90,7 +101,9 @@ export default class Player {
       let remove = false;
       for (let j = this.game.players.length - 1; j >= 0; j--) {
         if (this.game.players[j].id === this.id) continue;
-        if (Player.bulletHit(this.game.players[j], this.bullets[i])) {
+        const { x: x1, y: y1 } = this.game.players[j];
+        const { x: x2, y: y2 } = this.bullets[i];
+        if (collision(x1, y1, x2, y2)) {
           remove = true;
           this.game.players[j].hp = Math.max(
             0,

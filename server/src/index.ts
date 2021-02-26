@@ -20,6 +20,7 @@ import Player from "./game/entities/player";
         socket.emit("game.joined", {
           currentPlayer: currentPlayer.encode(),
           players,
+          modifiers: game.modifiers,
           mapSize: game.mapSize,
           mapBounds: game.mapBounds,
         });

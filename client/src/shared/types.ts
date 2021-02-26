@@ -34,3 +34,14 @@ export type PlayerData = {
   r: number;
   bullets: BulletData[];
 };
+
+export enum ModifierStatus {
+  empty,
+  heal,
+}
+
+export type ModifierData = {
+  x: number;
+  y: number;
+  status: ModifierStatus;
+};

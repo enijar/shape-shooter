@@ -1,5 +1,5 @@
 import create from "zustand";
-import { PlayerData as Player, Shape } from "../shared/types";
+import { ModifierData, PlayerData as Player, Shape } from "../shared/types";
 import { MODE } from "../config/consts";
 
 type MapSize = {
@@ -13,6 +13,7 @@ type MapBounds = {
 };
 
 export type GameState = {
+  modifiers: ModifierData[];
   name: string;
   shape: Shape;
   color: string;
@@ -32,10 +33,12 @@ export type GameState = {
   setMapBounds: (mapBounds: MapBounds) => void;
   setName: (name: string) => void;
   setShape: (shape: Shape) => void;
+  setModifiers: (modifiers: ModifierData[]) => void;
 };
 
 export const useGame = create<GameState>((set) => {
   return {
+    modifiers: [],
     name: MODE === "dev" ? "Player 1" : "",
     shape: Shape.triangle,
     color: "#ff0000",
@@ -81,6 +84,9 @@ export const useGame = create<GameState>((set) => {
     },
     setColor(color: string) {
       set({ color });
+    },
+    setModifiers(modifiers: ModifierData[]) {
+      set({ modifiers });
     },
   };
 });

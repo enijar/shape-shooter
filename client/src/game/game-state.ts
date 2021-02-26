@@ -1,4 +1,4 @@
-import { PlayerData } from "../shared/types";
+import { ModifierStatus, PlayerData } from "../shared/types";
 
 export type GameState = {
   players: PlayerData[];

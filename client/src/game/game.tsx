@@ -7,10 +7,12 @@ import io from "../services/io";
 import { GameWrapper } from "./styles";
 import { useGame } from "./state";
 import World from "./world/world";
-import Player from "./player/player";
+import Player from "./entities/player";
 import Bullets from "./entities/bullets";
 import vars from "../styles/vars";
 import gameState from "./game-state";
+import { ModifierData } from "../shared/types";
+import Modifier from "./entities/modifier";
 
 export default function Game() {
   const history = useHistory();
@@ -23,6 +25,7 @@ export default function Game() {
     players,
     currentPlayer,
     mapSize,
+    modifiers,
   } = useGame();
 
   React.useEffect(() => {
@@ -37,11 +40,13 @@ export default function Game() {
         setPlayers,
         setMapSize,
         setMapBounds,
+        setModifiers,
       } = useGame.getState();
       setCurrentPlayer(state.currentPlayer);
       setPlayers(state.players);
       setMapSize(state.mapSize);
       setMapBounds(state.mapBounds);
+      setModifiers(state.modifiers);
     }
     function onPlayerJoin(state: any) {
       useGame.getState().setPlayers(state.players);
@@ -61,6 +66,9 @@ export default function Game() {
     function onTick(state: any) {
       gameState.players = state.players;
     }
+    function onModifiers(modifiers: ModifierData[]) {
+      useGame.getState().setModifiers(modifiers);
+    }
     function onDisconnect() {
       console.log("disconnect");
     }
@@ -72,6 +80,7 @@ export default function Game() {
     io.on("game.player.join", onPlayerJoin);
     io.on("game.player.leave", onPlayerLeave);
     io.on("game.player.death", onPlayerDeath);
+    io.on("game.modifiers", onModifiers);
     io.on("disconnected", onDisconnect);
     io.emit("game.join", { name, shape, color });
 
@@ -84,6 +93,7 @@ export default function Game() {
       io.off("game.player.join", onPlayerJoin);
       io.off("game.player.leave", onPlayerLeave);
       io.off("game.tick", onTick);
+      io.off("game.modifiers", onModifiers);
       io.off("disconnected", onDisconnect);
       io.disconnect();
     };
@@ -142,6 +152,16 @@ export default function Game() {
                   name={player.name}
                   shape={player.shape}
                   color={player.color}
+                />
+              );
+            })}
+            {modifiers.map((modifier, index) => {
+              return (
+                <Modifier
+                  key={index}
+                  x={modifier.x}
+                  y={modifier.y}
+                  status={modifier.status}
                 />
               );
             })}

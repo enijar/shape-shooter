@@ -1,7 +1,9 @@
 import { Server } from "socket.io";
-import { Shape } from "./types";
+import { ModifierStatus, Shape } from "../../../client/src/shared/types";
 import Player from "./entities/player";
 import { map } from "./utils";
+import { MODE } from "../config/consts";
+import Modifier from "./entities/modifier";
 
 type MapSize = {
   w: number;
@@ -13,10 +15,13 @@ type MapBounds = {
   y: { min: number; max: number };
 };
 
+const DEFAULT_MAP_SIZE = MODE === "dev" ? 0.5 : 1.5;
+
 export default class Game {
   public socket: Server;
+  public modifiers: Modifier[] = [];
   public players: Player[] = [];
-  public mapSize: MapSize = { w: 1.5, h: 1.5 };
+  public mapSize: MapSize = { w: DEFAULT_MAP_SIZE, h: DEFAULT_MAP_SIZE };
   public mapBounds: MapBounds = {
     x: { min: -this.mapSize.w / 2, max: this.mapSize.w / 2 },
     y: { min: -this.mapSize.h / 2, max: this.mapSize.h / 2 },
@@ -25,6 +30,9 @@ export default class Game {
   private lastTickTime: number = 0;
   private timeoutId: NodeJS.Timeout | null = null;
   private nextPlayerId = 1;
+  private lastModifierSpawnTime: number = 0;
+  private maxModifierEntities: number = 10;
+  private modifierSpawnRate: number = 1500;
 
   constructor(socket: Server) {
     this.socket = socket;
@@ -95,6 +103,35 @@ export default class Game {
         this.socket.emit("game.player.death", this.players[i].id);
         this.players.splice(i, 1);
       }
+    }
+
+    if (
+      this.modifiers.length < this.maxModifierEntities &&
+      now - this.lastModifierSpawnTime >= this.modifierSpawnRate
+    ) {
+      this.lastModifierSpawnTime = now;
+      const modifier = new Modifier();
+      modifier.status = ModifierStatus.heal;
+      modifier.value = Math.max(0.01, Math.random());
+      modifier.x = map(
+        Math.random(),
+        0,
+        1,
+        this.mapBounds.x.min,
+        this.mapBounds.x.max
+      );
+      modifier.y = map(
+        Math.random(),
+        0,
+        1,
+        this.mapBounds.y.min,
+        this.mapBounds.y.max
+      );
+      this.modifiers.push(modifier);
+      this.socket.emit(
+        "game.modifiers",
+        this.modifiers.map((modifier) => modifier.encode())
+      );
     }
 
     // todo: optimise data sent over network

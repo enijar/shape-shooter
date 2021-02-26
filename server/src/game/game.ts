@@ -87,6 +87,7 @@ export default class Game {
       this.timeoutId = null;
     }
     this.players = [];
+    this.modifiers = [];
     this.nextPlayerId = 1;
   }
 

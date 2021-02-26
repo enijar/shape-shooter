@@ -132,6 +132,7 @@ export default class Game {
         "game.modifiers",
         this.modifiers.map((modifier) => modifier.encode())
       );
+      console.log(this.modifiers);
     }
 
     // todo: optimise data sent over network

@@ -16,7 +16,7 @@ type MapBounds = {
 export default class Game {
   public socket: Server;
   public players: Player[] = [];
-  public mapSize: MapSize = { w: 0.5, h: 0.5 };
+  public mapSize: MapSize = { w: 1.5, h: 1.5 };
   public mapBounds: MapBounds = {
     x: { min: -this.mapSize.w / 2, max: this.mapSize.w / 2 },
     y: { min: -this.mapSize.h / 2, max: this.mapSize.h / 2 },
@@ -51,6 +51,9 @@ export default class Game {
       this.mapBounds.y.min,
       this.mapBounds.y.max
     );
+    if (player.name === "GOD") {
+      player.fireRate = 5;
+    }
     this.nextPlayerId++;
     this.players.push(player);
     return this.players[this.players.length - 1];

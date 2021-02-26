@@ -39,6 +39,7 @@ export default function Player({
   const texture = useTexture(shapeImage);
   const { raycaster } = useThree();
   const { size, zoom } = useGame();
+  const lastR = React.useRef<number>(0);
   const group = React.useRef<THREE.Group>();
   const meshGroup = React.useRef<THREE.Group>();
   const mesh = React.useRef<THREE.Mesh>();
@@ -81,10 +82,14 @@ export default function Player({
       const cX = (box.max.x + box.min.x) / 2;
       const cY = (box.max.y + box.min.y) / 2;
       const { x: oX, y: oY } = raycaster.ray.origin;
-      const r = Math.atan2(oY - cY, oX - cX) - deg2rad(90);
-      const { socket } = useGame.getState();
-      if (socket !== null) {
-        socket.emit("rotate", r);
+      let r = Math.atan2(oY - cY, oX - cX) - deg2rad(90);
+      r = parseFloat(r.toFixed(2));
+      if (r !== lastR.current) {
+        lastR.current = r;
+        const { socket } = useGame.getState();
+        if (socket !== null) {
+          socket.emit("rotate", r);
+        }
       }
     }
 

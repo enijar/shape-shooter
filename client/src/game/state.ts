@@ -1,5 +1,6 @@
 import create from "zustand";
 import { PlayerData as Player, Shape } from "../shared/types";
+import { MODE } from "../config/consts";
 
 type MapSize = {
   w: number;
@@ -35,7 +36,7 @@ export type GameState = {
 
 export const useGame = create<GameState>((set) => {
   return {
-    name: "",
+    name: MODE === "dev" ? "Player 1" : "",
     shape: Shape.triangle,
     color: "#ff0000",
     mapBounds: {

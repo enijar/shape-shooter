@@ -1,4 +1,4 @@
-import { ModifierStatus, PlayerData } from "../shared/types";
+import { PlayerData } from "@shape-shooter/shared";
 
 export type GameState = {
   players: PlayerData[];

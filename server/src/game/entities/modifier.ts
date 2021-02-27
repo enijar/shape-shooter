@@ -1,4 +1,4 @@
-import { ModifierStatus } from "../../../../client/src/shared/types";
+import { ModifierStatus } from "@shape-shooter/shared";
 
 export default class Modifier {
   x: number = 0;

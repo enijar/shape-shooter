@@ -1,9 +1,9 @@
 import React from "react";
 import * as THREE from "three";
+import { utils } from "@shape-shooter/shared";
 import vars from "../styles/vars";
 import { useGame } from "./state";
 import { useFrame } from "react-three-fiber";
-import { map } from "../shared/game/utils";
 import gameState from "./game-state";
 
 export default function Minimap() {
@@ -15,7 +15,7 @@ export default function Minimap() {
       if (!playerMeshes[i] || !playerMeshes[i].current) continue;
       const { x, y } = gameState.players[i];
       // @ts-ignore
-      playerMeshes[i].current.position.x = map(
+      playerMeshes[i].current.position.x = utils.map(
         x,
         mapBounds.x.min,
         mapBounds.x.max,
@@ -23,7 +23,7 @@ export default function Minimap() {
         0.05
       );
       // @ts-ignore
-      playerMeshes[i].current.position.y = map(
+      playerMeshes[i].current.position.y = utils.map(
         y,
         mapBounds.y.min,
         mapBounds.y.max,

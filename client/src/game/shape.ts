@@ -1,4 +1,4 @@
-import { Shape } from "../shared/types";
+import { Shape } from "@shape-shooter/shared";
 
 function encode(svg: string): string {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;

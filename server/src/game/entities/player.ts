@@ -1,4 +1,4 @@
-import { ModifierStatus, Shape } from "../../../../client/src/shared/types";
+import { ModifierStatus, Shape } from "@shape-shooter/shared";
 import { clamp, collision } from "../utils";
 import Bullet from "./bullet";
 import Game from "../game";

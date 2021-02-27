@@ -1,11 +1,11 @@
 {
+  "version": "0.1.0",
+  "name": "@shape-shooter/game",
   "private": true,
   "scripts": {
-    "postinstall": "concurrently \"npm --prefix client install\" \"npm --prefix server install\"",
-    "format": "prettier --write \"client/src/**/*.{js,jsx,ts,tsx},server/src/**/*.{js,jsx,ts,tsx}\"",
-    "lint": "prettier --check \"client/src/**/*.{js,jsx,ts,tsx},server/src/**/*.{js,jsx,ts,tsx}\"",
-    "start": "concurrently \"npm --prefix client start\" \"npm --prefix server start\"",
-    "build": "concurrently \"npm --prefix client run build\" \"npm --prefix server run build\""
+    "postinstall": "concurrently \"npm --prefix shared install\" \"npm --prefix client install\" \"npm --prefix server install\"",
+    "start": "concurrently \"npm --prefix shared start\" \"npm --prefix client start\" \"npm --prefix server start\"",
+    "build": "concurrently \"npm --prefix shared run build\" \"npm --prefix client run build\" \"npm --prefix server run build\""
   },
   "devDependencies": {
     "concurrently": "^5.3.0",

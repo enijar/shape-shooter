@@ -11,13 +11,6 @@ export enum Weapon {
   handgun = "handgun",
 }
 
-export enum ControlsKeys {
-  moveUp = "w",
-  moveDown = "s",
-  moveLeft = "a",
-  moveRight = "d",
-}
-
 export type BulletData = {
   x: number;
   y: number;

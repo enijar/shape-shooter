@@ -11,7 +11,7 @@ import Player from "./entities/player";
 import Bullets from "./entities/bullets";
 import vars from "../styles/vars";
 import gameState from "./game-state";
-import { ModifierData } from "../shared/types";
+import { ModifierData } from "@shape-shooter/shared";
 import Modifier from "./entities/modifier";
 
 export default function Game() {
@@ -68,7 +68,6 @@ export default function Game() {
       gameState.players = state.players;
     }
     function onModifiers(modifiers: ModifierData[]) {
-      console.log({ modifiers });
       useGame.getState().setModifiers(modifiers ?? []);
     }
     function onDisconnect() {

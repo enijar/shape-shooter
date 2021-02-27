@@ -1,5 +1,5 @@
 import React from "react";
-import { ModifierStatus } from "../../shared/types";
+import { ModifierStatus } from "@shape-shooter/shared";
 import vars from "../../styles/vars";
 
 type Props = {

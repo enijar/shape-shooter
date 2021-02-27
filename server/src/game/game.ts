@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { ModifierStatus, Shape } from "../../../client/src/shared/types";
+import { ModifierStatus, Shape } from "@shape-shooter/shared";
 import Player from "./entities/player";
 import { map } from "./utils";
 import { MODE } from "../config/consts";
@@ -133,7 +133,6 @@ export default class Game {
         "game.modifiers",
         this.modifiers.map((modifier) => modifier.encode())
       );
-      console.log(this.modifiers);
     }
 
     // todo: optimise data sent over network

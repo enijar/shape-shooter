@@ -1,10 +1,10 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
+import { Shape } from "@shape-shooter/shared";
 import { HomeShape, HomeWrapper } from "./styles";
 import Page from "../../components/page/page";
 import { Title } from "../../styles/typeography";
 import { Container, Flex } from "../../styles/layout";
-import { Shape } from "../../shared/types";
 import createShape from "../../game/shape";
 import vars from "../../styles/vars";
 import { useGame } from "../../game/state";

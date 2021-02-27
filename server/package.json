@@ -1,4 +1,6 @@
 {
+  "version": "0.1.0",
+  "name": "@shape-shooter/server",
   "private": true,
   "scripts": {
     "start": "NODE_ENV=development nodemon --watch ../../client/src/shared --watch src src/index.ts",
@@ -7,6 +9,7 @@
     "lint": "prettier --check \"src/**/*.{js,jsx,ts,tsx}\""
   },
   "dependencies": {
+    "@shape-shooter/shared": "file:../shared",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "cookies": "^0.8.0",

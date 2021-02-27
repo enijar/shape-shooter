@@ -1,4 +1,4 @@
-import { ModifierStatus } from "../shared/types";
+import { ModifierStatus } from "@shape-shooter/shared";
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {

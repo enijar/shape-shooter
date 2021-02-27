@@ -1,6 +1,12 @@
 import React from "react";
-import { ControlsKeys } from "../../shared/types";
 import { useGame } from "../state";
+
+enum ControlsKeys {
+  moveUp = "w",
+  moveDown = "s",
+  moveLeft = "a",
+  moveRight = "d",
+}
 
 type Controls = {
   moveX: -1 | 0 | 1;

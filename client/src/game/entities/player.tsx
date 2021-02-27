@@ -2,13 +2,12 @@ import React from "react";
 import * as THREE from "three";
 import { useFrame, useLoader, useThree } from "react-three-fiber";
 import { OrthographicCamera, useTexture } from "@react-three/drei";
+import { Shape, utils } from "@shape-shooter/shared";
 import createShape from "../shape";
 import { useGame } from "../state";
 import vars from "../../styles/vars";
-import { map } from "../../shared/game/utils";
 import Minimap from "../minimap";
 import { deg2rad } from "../utils";
-import { Shape } from "../../shared/types";
 import gameState from "../game-state";
 
 type Props = {
@@ -153,7 +152,8 @@ export default function Player({
             />
           </mesh>
           {/* HP fill */}
-          <mesh position={[map(hp, 0, 1, -0.05, 0), 0, 0]}>
+          {/* @ts-ignore */}
+          <mesh position={[utils.map(hp, 0, 1, -0.05, 0), 0, 0]}>
             <planeGeometry attach="geometry" args={[0.1 * hp, 0.01, 1]} />
             <meshBasicMaterial attach="material" color={vars.color.hp} />
           </mesh>

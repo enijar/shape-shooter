@@ -2,6 +2,7 @@ import { ModifierStatus, Shape } from "../../types";
 import { clamp, collision } from "../../utils";
 import Bullet from "./bullet";
 import Engine from "../engine";
+import Transport from "../transport";
 
 export default class Player {
   id: number = -1;
@@ -89,7 +90,9 @@ export default class Player {
     if (modifierCollision) {
       this.engine.socket.emit(
         "game.modifiers",
-        this.engine.modifiers.map((modifier) => modifier.encode())
+        Transport.encode(
+          this.engine.modifiers.map((modifier) => modifier.encode())
+        )
       );
     }
 

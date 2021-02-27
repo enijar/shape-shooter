@@ -67,7 +67,7 @@ export default function Game() {
       gameState.players = state.players;
     }
     function onModifiers(modifiers: ModifierData[]) {
-      useGame.getState().setModifiers(modifiers ?? []);
+      useGame.getState().setModifiers(Object.values(modifiers));
     }
 
     function onConnect() {

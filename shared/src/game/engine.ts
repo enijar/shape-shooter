@@ -5,6 +5,7 @@ import Player from "./entities/player";
 import { rand } from "../utils";
 import { MODE } from "../config/consts";
 import Modifier from "./entities/modifier";
+import Transport from "./transport";
 
 type MapSize = {
   w: number;
@@ -95,7 +96,10 @@ export default class Engine {
       this.players[i].steps = steps;
       this.players[i].update();
       if (this.players[i].hp === 0) {
-        this.socket.emit("game.player.death", this.players[i].id);
+        this.socket.emit(
+          "game.player.death",
+          Transport.encode(this.players[i].id)
+        );
         this.players.splice(i, 1);
       }
     }
@@ -113,14 +117,13 @@ export default class Engine {
       this.modifiers.push(modifier);
       this.socket.emit(
         "game.modifiers",
-        this.modifiers.map((modifier) => modifier.encode())
+        Transport.encode(this.modifiers.map((modifier) => modifier.encode()))
       );
     }
 
     // todo: optimise data sent over network
-    this.socket.emit("game.tick", {
-      players: this.players.map((player) => player.encode()),
-    });
+    const players = this.players.map((player) => player.encode());
+    this.socket.emit("game.tick", Transport.encode({ players }));
 
     this.lastTickTime = now;
     this.timeoutId = setTimeout(() => this.tick(), this.tps);

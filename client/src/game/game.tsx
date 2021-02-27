@@ -46,8 +46,7 @@ export default function Game() {
       setPlayers(state.players);
       setMapSize(state.mapSize);
       setMapBounds(state.mapBounds);
-      console.log("state.modifiers", state.modifiers);
-      setModifiers(state.modifiers ?? []);
+      setModifiers(state.modifiers);
     }
     function onPlayerJoin(state: any) {
       useGame.getState().setPlayers(state.players);

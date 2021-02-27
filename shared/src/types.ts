@@ -38,3 +38,8 @@ export type ModifierData = {
   y: number;
   status: ModifierStatus;
 };
+
+export enum GameEngineContext {
+  client,
+  server,
+}

@@ -1,11 +1,10 @@
+import { Engine, Player } from "@shape-shooter/shared";
 import config from "./config/config";
 import { http, socket, socket as io } from "./services/app";
-import Game from "./game/game";
-import Player from "./game/entities/player";
 
 (async () => {
   try {
-    const game = new Game(socket);
+    const game = new Engine(socket);
     game.start();
 
     // todo: type definitions

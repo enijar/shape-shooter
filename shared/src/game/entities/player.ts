@@ -1,7 +1,7 @@
-import { ModifierStatus, Shape } from "@shape-shooter/shared";
-import { clamp, collision } from "../utils";
+import { ModifierStatus, Shape } from "../../types";
+import { clamp, collision } from "../../utils";
 import Bullet from "./bullet";
-import Game from "../game";
+import Engine from "../engine";
 
 export default class Player {
   id: number = -1;
@@ -21,10 +21,10 @@ export default class Player {
   velocity: number = 0.003;
   now: number = 0;
   steps: number = 1;
-  game: Game;
+  engine: Engine;
 
-  constructor(game: Game) {
-    this.game = game;
+  constructor(engine: Engine) {
+    this.engine = engine;
   }
 
   encode(): object {
@@ -51,13 +51,13 @@ export default class Player {
     this.y -= velocity * this.moveY * this.steps;
     this.x = clamp(
       this.x,
-      this.game.mapBounds.x.min,
-      this.game.mapBounds.x.max
+      this.engine.mapBounds.x.min,
+      this.engine.mapBounds.x.max
     );
     this.y = clamp(
       this.y,
-      this.game.mapBounds.y.min,
-      this.game.mapBounds.y.max
+      this.engine.mapBounds.y.min,
+      this.engine.mapBounds.y.max
     );
 
     if (this.firing && this.now - this.lastFireTime >= this.fireRate) {
@@ -72,24 +72,24 @@ export default class Player {
     }
 
     let modifierCollision = false;
-    for (let i = this.game.modifiers.length - 1; i >= 0; i--) {
+    for (let i = this.engine.modifiers.length - 1; i >= 0; i--) {
       const { x: x1, y: y1 } = this;
-      const { x: x2, y: y2 } = this.game.modifiers[i];
+      const { x: x2, y: y2 } = this.engine.modifiers[i];
       if (collision(x1, y1, x2, y2)) {
-        switch (this.game.modifiers[i].status) {
+        switch (this.engine.modifiers[i].status) {
           case ModifierStatus.heal:
-            this.hp = Math.min(1, this.hp + this.game.modifiers[i].value);
+            this.hp = Math.min(1, this.hp + this.engine.modifiers[i].value);
             break;
         }
         modifierCollision = true;
-        this.game.modifiers.splice(i, 1);
+        this.engine.modifiers.splice(i, 1);
       }
     }
 
     if (modifierCollision) {
-      this.game.socket.emit(
+      this.engine.socket.emit(
         "game.modifiers",
-        this.game.modifiers.map((modifier) => modifier.encode())
+        this.engine.modifiers.map((modifier) => modifier.encode())
       );
     }
 
@@ -99,15 +99,15 @@ export default class Player {
       this.bullets[i].update();
 
       let remove = false;
-      for (let j = this.game.players.length - 1; j >= 0; j--) {
-        if (this.game.players[j].id === this.id) continue;
-        const { x: x1, y: y1 } = this.game.players[j];
+      for (let j = this.engine.players.length - 1; j >= 0; j--) {
+        if (this.engine.players[j].id === this.id) continue;
+        const { x: x1, y: y1 } = this.engine.players[j];
         const { x: x2, y: y2 } = this.bullets[i];
         if (collision(x1, y1, x2, y2)) {
           remove = true;
-          this.game.players[j].hp = Math.max(
+          this.engine.players[j].hp = Math.max(
             0,
-            this.game.players[j].hp - this.bullets[i].damage
+            this.engine.players[j].hp - this.bullets[i].damage
           );
           break;
         }

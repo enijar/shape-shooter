@@ -10,10 +10,8 @@ import { http, socket, socket as io } from "./services/app";
     // todo: type definitions
     io.on("connection", (socket) => {
       let currentPlayer: Player = null;
-      console.log(`[${socket.id}] connected`);
 
       socket.on("game.join", (player: any) => {
-        console.log(`[${socket.id}] game.join`);
         currentPlayer = game.addPlayer(player.name, player.shape, player.color);
         const players = game.players.map((player) => player.encode());
         socket.emit("game.joined", {
@@ -27,7 +25,6 @@ import { http, socket, socket as io } from "./services/app";
       });
 
       socket.on("game.leave", () => {
-        console.log(`[${socket.id}] game.leave`);
         if (currentPlayer !== null) {
           game.removePlayer(currentPlayer.id);
         }
@@ -51,11 +48,10 @@ import { http, socket, socket as io } from "./services/app";
       });
 
       socket.on("disconnect", () => {
-        console.log(`[${socket.id}] disconnected`);
         if (currentPlayer !== null) {
           game.removePlayer(currentPlayer.id);
         }
-        io.emit("game.player.join", {
+        io.emit("game.player.leave", {
           players: game.players.map((player) => player.encode()),
         });
       });

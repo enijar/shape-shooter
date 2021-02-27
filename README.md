@@ -1,4 +1,4 @@
-# Shapes
+# Shape Shooter
 
 Battle-Royal, but you're all shapes with weapons!
 

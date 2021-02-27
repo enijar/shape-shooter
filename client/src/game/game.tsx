@@ -85,7 +85,7 @@ export default function Game() {
     io.on("game.tick", onTick);
     io.on("game.player.join", onPlayerJoin);
     io.on("game.player.leave", onPlayerLeave);
-    io.on("game.player.death", onPlayerDeath);
+    io.on("game.player.death", onPlayerDeath, false);
     io.on("game.modifiers", onModifiers);
     useGame.getState().setSocket(socket);
     socket.on("connect", onConnect);

@@ -98,7 +98,7 @@ export default class Engine {
       if (this.players[i].hp === 0) {
         this.socket.emit(
           "game.player.death",
-          Transport.encode(this.players[i].id)
+          this.players[i].id
         );
         this.players.splice(i, 1);
       }

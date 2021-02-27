@@ -14,9 +14,9 @@ export default {
   disconnect() {
     client.disconnect();
   },
-  on(event: string, fn: Function) {
+  on(event: string, fn: Function, encoded: boolean = true) {
     client.on(event, (data?: any) => {
-      if (data) {
+      if (encoded && data !== undefined) {
         data = Transport.decode(data);
       }
       fn(data);

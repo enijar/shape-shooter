@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { Canvas } from "react-three-fiber";
 import { OrthographicCamera } from "@react-three/drei";
 import { useHistory } from "react-router-dom";
+import { DeathMenu } from "./styles";
 import io from "../services/io";
 import { GameWrapper } from "./styles";
 import { useGame } from "./state";
@@ -27,6 +28,7 @@ export default function Game() {
     mapSize,
     modifiers,
   } = useGame();
+  const [dead, setDead] = React.useState<boolean>(false);
 
   React.useEffect(() => {
     if (!name || !shape || !color) {
@@ -59,7 +61,7 @@ export default function Game() {
       setPlayers(players.filter((player) => player.id !== playerId));
       if (currentPlayer) {
         if (playerId === currentPlayer.id) {
-          history.push("/");
+          setDead(true);
         }
       }
     }
@@ -137,6 +139,17 @@ export default function Game() {
 
   return (
     <GameWrapper>
+      <DeathMenu show={dead}>
+        <h3>You died!</h3>
+        <button
+          onClick={() => {
+            setDead(false);
+            io.emit("game.join", { name, shape, color });
+          }}
+        >
+          Respawn
+        </button>
+      </DeathMenu>
       <Canvas onCreated={handleCreated}>
         <React.Suspense fallback={null}>
           <World size={mapSize}>

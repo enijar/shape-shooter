@@ -121,6 +121,7 @@ export default function Game() {
     return () => {
       window.removeEventListener("resize", onResize);
       window.removeEventListener("contextmenu", onContextMenu);
+      io.disconnect();
     };
   }, []);
 

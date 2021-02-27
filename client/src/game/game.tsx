@@ -69,33 +69,38 @@ export default function Game() {
     function onModifiers(modifiers: ModifierData[]) {
       useGame.getState().setModifiers(modifiers ?? []);
     }
+
+    function onConnect() {
+      io.emit("game.join", { name, shape, color });
+    }
+
     function onDisconnect() {
-      console.log("disconnect");
+      const { setCurrentPlayer, setPlayers } = useGame.getState();
+      setCurrentPlayer(null);
+      setPlayers([]);
     }
 
     const socket = io.connect();
-    useGame.getState().setSocket(socket);
     io.on("game.joined", onJoined);
     io.on("game.tick", onTick);
     io.on("game.player.join", onPlayerJoin);
     io.on("game.player.leave", onPlayerLeave);
     io.on("game.player.death", onPlayerDeath);
     io.on("game.modifiers", onModifiers);
-    io.on("disconnected", onDisconnect);
-    io.emit("game.join", { name, shape, color });
+    useGame.getState().setSocket(socket);
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
 
     return () => {
-      const { setCurrentPlayer, setPlayers, setSocket } = useGame.getState();
-      setCurrentPlayer(null);
-      setPlayers([]);
-      setSocket(null);
+      if (socket !== null) {
+        socket.off("connect", onConnect);
+        socket.off("disconnect", onDisconnect);
+      }
       io.off("game.joined", onJoined);
       io.off("game.player.join", onPlayerJoin);
       io.off("game.player.leave", onPlayerLeave);
       io.off("game.tick", onTick);
       io.off("game.modifiers", onModifiers);
-      io.off("disconnected", onDisconnect);
-      io.disconnect();
     };
   }, [name, shape, color, history]);
 

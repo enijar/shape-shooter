@@ -1,5 +1,5 @@
 import { BulletType, ModifierStatus, PlayerType, Shape } from "../../types";
-import { clamp, closestPlayer, collision, deg2rad } from "../../utils";
+import { clamp, closestPlayer, collision, deg2rad, dist } from "../../utils";
 import Bullet from "./bullet";
 import Engine from "../engine";
 import Transport from "../transport";
@@ -26,7 +26,7 @@ export default class Player {
   engine: Engine;
   type: PlayerType;
   private lastMoveTime: number = 0;
-  private moveDelay: number = 250;
+  private moveDelay: number = 350;
 
   constructor(engine: Engine) {
     this.engine = engine;
@@ -55,19 +55,25 @@ export default class Player {
       this.firing = false;
     }
     if (closest.player !== null) {
-      let x: -1 | 0 | 1 = 0;
-      let y: -1 | 0 | 1 = 0;
-      if (closest.distance >= 0.2) {
+      let x: -1 | 0 | 1 = this.moveX;
+      let y: -1 | 0 | 1 = this.moveY;
+
+      // Move towards closest player
+      if (closest.distance >= 0.3) {
         if (this.x - closest.player.x < 0) x = 1;
         if (this.x - closest.player.x > 0) x = -1;
         if (this.y - closest.player.y < 0) y = -1;
         if (this.y - closest.player.y > 0) y = 1;
-      } else {
+      }
+
+      // Move away from closest player when their HP is higher or this bot is too close
+      if (closest.player.hp > this.hp || closest.distance < 0.2) {
         if (this.x - closest.player.x < 0) x = -1;
         if (this.x - closest.player.x > 0) x = 1;
         if (this.y - closest.player.y < 0) y = 1;
         if (this.y - closest.player.y > 0) y = -1;
       }
+
       if (this.now - this.lastMoveTime >= this.moveDelay) {
         this.lastMoveTime = this.now;
         this.moveX = x;

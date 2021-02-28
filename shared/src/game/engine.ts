@@ -17,7 +17,7 @@ type MapBounds = {
   y: { min: number; max: number };
 };
 
-const DEFAULT_MAP_SIZE = MODE === "dev" ? 0.5 : 1.5;
+const DEFAULT_MAP_SIZE = MODE === "dev" ? 0.5 : 3;
 
 export default class Engine {
   public socket: Server;
@@ -37,6 +37,8 @@ export default class Engine {
   private maxModifierEntities: number = 10;
   private modifierSpawnRate: number = 1500;
   private maxBots: number = MODE === "dev" ? 1 : 3;
+  private lastBotSpawnTime: number = 0;
+  private botSpawnDelay: number = 1500;
 
   constructor(
     socket: Server,
@@ -120,7 +122,10 @@ export default class Engine {
     const botsToCreate = Math.max(0, this.maxBots - totalBots);
 
     for (let i = 0; i < botsToCreate; i++) {
-      this.addBot();
+      if (now - this.lastBotSpawnTime >= this.botSpawnDelay) {
+        this.lastBotSpawnTime = now;
+        this.addBot();
+      }
     }
 
     for (let i = this.players.length - 1; i >= 0; i--) {

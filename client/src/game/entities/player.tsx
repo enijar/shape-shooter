@@ -49,7 +49,13 @@ export default function Player({
   const [hp, setHp] = React.useState<number>(1);
 
   useFrame(() => {
-    const player = gameState.players.find((player) => player.id === id);
+    let player;
+    for (let i = 0, length = gameState.players.length; i < length; i++) {
+      if (gameState.players[i].id === id) {
+        player = gameState.players[i];
+        break;
+      }
+    }
     if (!player) return;
     if (group.current) {
       group.current.position.x = player.x;

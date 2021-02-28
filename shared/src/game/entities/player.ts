@@ -36,6 +36,7 @@ export default class Player {
       id: this.id,
       name: this.name,
       shape: this.shape,
+      type: this.type,
       color: this.color,
       hp: this.hp,
       x: this.x,
@@ -45,28 +46,28 @@ export default class Player {
     };
   }
 
-  update() {
-    // Bot logic
-    if (this.type === PlayerType.bot) {
-      // move bot towards closes player
-      const closest = closestPlayer(this, this.engine.players);
-      if (closest.player !== null) {
-        let x: -1 | 0 | 1 = 0;
-        let y: -1 | 0 | 1 = 0;
-        if (closest.distance >= 0.1) {
-          if (this.x - closest.player.x < 0) x = 1;
-          if (this.x - closest.player.x > 0) x = -1;
-          if (this.y - closest.player.y < 0) y = -1;
-          if (this.y - closest.player.y > 0) y = 1;
-        } else {
-          x = -1;
-          y = -1;
-        }
-        this.r = closest.player.r;
-        this.moveX = x;
-        this.moveY = y;
+  private updateBot() {
+    // Move bot towards closest player
+    const closest = closestPlayer(this, this.engine.players);
+    if (closest.player !== null) {
+      let x: -1 | 0 | 1 = 0;
+      let y: -1 | 0 | 1 = 0;
+      if (closest.distance >= 0.1) {
+        if (this.x - closest.player.x < 0) x = 1;
+        if (this.x - closest.player.x > 0) x = -1;
+        if (this.y - closest.player.y < 0) y = -1;
+        if (this.y - closest.player.y > 0) y = 1;
       }
+      this.r += deg2rad(15);
+      this.moveX = x;
+      this.moveY = y;
       this.firing = true;
+    }
+  }
+
+  update() {
+    if (this.type === PlayerType.bot) {
+      this.updateBot();
     }
 
     let velocity = this.velocity;

@@ -148,8 +148,7 @@ export default class Engine {
 
     // todo: optimise data sent over network
     const players = this.players.map((player) => player.encode());
-    const encodedPlayers = Transport.encode({ players });
-    this.socket.emit("game.tick", encodedPlayers);
+    this.socket.emit("game.tick", Transport.encode({ players }));
 
     this.lastTickTime = now;
     this.timeoutId = setTimeout(() => this.tick(), this.tps);

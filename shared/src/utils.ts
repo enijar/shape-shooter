@@ -1,5 +1,4 @@
 import Player from "./game/entities/player";
-import { PlayerType } from "./types";
 
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -42,7 +41,7 @@ export function closestPlayer(
   let closest = null;
   let smallestDistance = Infinity;
   for (let i = players.length - 1; i >= 0; i--) {
-    if (players[i].id === player.id || players[i].type === PlayerType.bot) {
+    if (players[i].id === player.id) {
       continue;
     }
     const distance = dist(player.x, player.y, players[i].x, players[i].y);

@@ -21,6 +21,7 @@ export type PlayerData = {
   id: number;
   name: string;
   shape: Shape;
+  type: PlayerType;
   color: string;
   hp: number;
   x: number;

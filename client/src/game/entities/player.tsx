@@ -78,7 +78,7 @@ export default function Player({
       textHpStatsGeometry.current.center();
       textHpStatsGeometry.current.dispose();
     }
-  }, [hp]);
+  }, [hp, armor]);
 
   // Update current player's rotation
   React.useEffect(() => {
@@ -178,7 +178,7 @@ export default function Player({
               ref={textHpStatsGeometry}
               attach="geometry"
               args={[
-                `${Math.floor(hp * 100)}/100`,
+                `${Math.floor((hp + armor) * 100)}/200`,
                 {
                   font,
                   size: 20,

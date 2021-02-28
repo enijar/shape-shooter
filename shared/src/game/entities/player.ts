@@ -3,6 +3,7 @@ import { clamp, closestPlayer, collision, deg2rad } from "../../utils";
 import Bullet from "./bullet";
 import Engine from "../engine";
 import Transport from "../transport";
+import { utils } from "../../../build";
 
 export default class Player {
   id: number = -1;
@@ -24,6 +25,8 @@ export default class Player {
   steps: number = 1;
   engine: Engine;
   type: PlayerType;
+  private lastMoveTime: number = 0;
+  private moveDelay: number = 250;
 
   constructor(engine: Engine) {
     this.engine = engine;
@@ -48,19 +51,32 @@ export default class Player {
   private updateBot() {
     // Move bot towards closest player
     const closest = closestPlayer(this, this.engine.players);
+    if (closest.player === null) {
+      this.firing = false;
+    }
     if (closest.player !== null) {
       let x: -1 | 0 | 1 = 0;
       let y: -1 | 0 | 1 = 0;
-      if (closest.distance >= 0.1) {
+      if (closest.distance >= 0.2) {
         if (this.x - closest.player.x < 0) x = 1;
         if (this.x - closest.player.x > 0) x = -1;
         if (this.y - closest.player.y < 0) y = -1;
         if (this.y - closest.player.y > 0) y = 1;
+      } else {
+        if (this.x - closest.player.x < 0) x = -1;
+        if (this.x - closest.player.x > 0) x = 1;
+        if (this.y - closest.player.y < 0) y = 1;
+        if (this.y - closest.player.y > 0) y = -1;
       }
-      this.r += deg2rad(15);
-      this.moveX = x;
-      this.moveY = y;
-      this.firing = true;
+      if (this.now - this.lastMoveTime >= this.moveDelay) {
+        this.lastMoveTime = this.now;
+        this.moveX = x;
+        this.moveY = y;
+      }
+      this.r =
+        Math.atan2(closest.player.y - this.y, closest.player.x - this.x) -
+        deg2rad(90);
+      this.firing = closest.distance < 0.325;
     }
   }
 

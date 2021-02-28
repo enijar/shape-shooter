@@ -2,7 +2,7 @@ import React from "react";
 import * as THREE from "three";
 import { useFrame, useLoader, useThree } from "react-three-fiber";
 import { OrthographicCamera, useTexture } from "@react-three/drei";
-import {Shape, Transport, utils} from "@shape-shooter/shared";
+import { Shape, Transport, utils } from "@shape-shooter/shared";
 import createShape from "../shape";
 import { useGame } from "../state";
 import vars from "../../styles/vars";

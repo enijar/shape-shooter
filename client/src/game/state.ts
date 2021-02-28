@@ -51,7 +51,7 @@ export const useGame = create<GameState>((set) => {
       h: 2,
     },
     size: Math.max(window.innerWidth, window.innerHeight),
-    zoom: 1,
+    zoom: 0.85,
     currentPlayer: null,
     players: [],
     socket: null,

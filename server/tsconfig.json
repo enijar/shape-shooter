@@ -10,6 +10,6 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "include": ["src", "env.ts"],
+  "include": ["src/index.ts", "env.ts"],
   "exclude": ["node_modules"]
 }

@@ -7,7 +7,6 @@ import createShape from "../shape";
 import { useGame } from "../state";
 import vars from "../../styles/vars";
 import Minimap from "../minimap";
-import { deg2rad } from "../utils";
 import gameState from "../game-state";
 
 type Props = {
@@ -87,7 +86,7 @@ export default function Player({
       const cX = (box.max.x + box.min.x) / 2;
       const cY = (box.max.y + box.min.y) / 2;
       const { x: oX, y: oY } = raycaster.ray.origin;
-      let r = Math.atan2(oY - cY, oX - cX) - deg2rad(90);
+      let r = Math.atan2(oY - cY, oX - cX) - utils.deg2rad(90);
       r = parseFloat(r.toFixed(2));
       if (r !== lastR.current) {
         lastR.current = r;

@@ -5,10 +5,9 @@
     "lib": ["es2017", "es7", "es6", "dom"],
     "declaration": true,
     "outDir": "build",
-    "baseUrl": "./",
     "strict": true,
     "esModuleInterop": true
   },
-  "include": ["src"],
+  "include": ["src/index.ts"],
   "exclude": ["node_modules", "build"]
 }

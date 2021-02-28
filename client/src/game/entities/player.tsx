@@ -46,6 +46,7 @@ export default function Player({
   const textHpStatsGeometry = React.useRef<THREE.TextGeometry>();
   const box = React.useMemo<THREE.Box3>(() => new THREE.Box3(), []);
   const [hp, setHp] = React.useState<number>(1);
+  const [armor, setArmor] = React.useState<number>(0);
 
   useFrame(() => {
     let player;
@@ -65,6 +66,9 @@ export default function Player({
     }
     if (player.hp !== hp) {
       setHp(player.hp);
+    }
+    if (player.armor !== armor) {
+      setArmor(player.armor);
     }
   });
 
@@ -161,6 +165,12 @@ export default function Player({
           <mesh position={[utils.map(hp, 0, 1, -0.05, 0), 0, 0]}>
             <planeGeometry attach="geometry" args={[0.1 * hp, 0.01, 1]} />
             <meshBasicMaterial attach="material" color={vars.color.hp} />
+          </mesh>
+          {/* Armor fill */}
+          {/* @ts-ignore */}
+          <mesh position={[utils.map(armor, 0, 1, -0.05, 0), 0, 0]}>
+            <planeGeometry attach="geometry" args={[0.1 * armor, 0.01, 1]} />
+            <meshBasicMaterial attach="material" color={vars.color.armor} />
           </mesh>
           {/* HP stats */}
           <mesh scale={[0.0003, 0.0003, 0.0003]}>

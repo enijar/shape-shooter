@@ -1,5 +1,5 @@
 import type { Server } from "socket.io";
-import { uniqueNamesGenerator, names } from "unique-names-generator";
+import { names, uniqueNamesGenerator } from "unique-names-generator";
 import { GameEngineContext, ModifierStatus, PlayerType, Shape } from "../types";
 import Player from "./entities/player";
 import { rand } from "../utils";
@@ -139,7 +139,8 @@ export default class Engine {
     ) {
       this.lastModifierSpawnTime = now;
       const modifier = new Modifier();
-      modifier.status = ModifierStatus.heal;
+      modifier.status =
+        rand(0, 100) > 50 ? ModifierStatus.heal : ModifierStatus.armor;
       modifier.value = Math.max(0.01, Math.random());
       modifier.x = rand(this.mapBounds.x.min, this.mapBounds.x.max);
       modifier.y = rand(this.mapBounds.y.min, this.mapBounds.y.max);

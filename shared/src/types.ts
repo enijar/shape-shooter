@@ -25,6 +25,7 @@ export type PlayerData = {
   type: PlayerType;
   color: string;
   hp: number;
+  armor: number;
   x: number;
   y: number;
   r: number;
@@ -34,6 +35,7 @@ export type PlayerData = {
 export enum ModifierStatus {
   empty,
   heal,
+  armor,
 }
 
 export type ModifierData = {

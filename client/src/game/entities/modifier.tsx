@@ -15,14 +15,16 @@ export default function Modifier({ x, y, status }: Props) {
         <sphereBufferGeometry attach="geometry" args={[0.005, 32, 32]} />
         <meshBasicMaterial
           attach="material"
-          color={vars.color.modifiers[ModifierStatus.heal].inner}
+          // @ts-ignore
+          color={vars.color.modifiers[status].inner}
         />
       </mesh>
       <mesh>
         <sphereBufferGeometry attach="geometry" args={[0.009, 32, 32]} />
         <meshBasicMaterial
           attach="material"
-          color={vars.color.modifiers[ModifierStatus.heal].outer}
+          // @ts-ignore
+          color={vars.color.modifiers[status].outer}
           transparent
           opacity={0.3}
         />

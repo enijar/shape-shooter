@@ -16,11 +16,16 @@ export default {
     red: "#ff0000",
     green: "#07930e",
     hp: "#00ff00",
+    armor: "#736a6a",
     gameBackground: "#1f1f1f",
     modifiers: {
       [ModifierStatus.heal]: {
         inner: "#8cff10",
         outer: "#8cff10",
+      },
+      [ModifierStatus.armor]: {
+        inner: "#695f5f",
+        outer: "#695f5f",
       },
     },
     bullets: {

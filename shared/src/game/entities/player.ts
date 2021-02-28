@@ -10,6 +10,7 @@ export default class Player {
   shape: Shape = Shape.triangle;
   color: string = "#ff0000";
   hp: number = 1;
+  armor: number = 0;
   x: number = 0;
   y: number = 0;
   r: number = 0;
@@ -42,6 +43,7 @@ export default class Player {
       type: this.type,
       color: this.color,
       hp: this.hp,
+      armor: this.armor,
       x: this.x,
       y: this.y,
       r: this.r,
@@ -131,6 +133,12 @@ export default class Player {
           case ModifierStatus.heal:
             this.hp = Math.min(1, this.hp + this.engine.modifiers[i].value);
             break;
+          case ModifierStatus.armor:
+            this.armor = Math.min(
+              1,
+              this.armor + this.engine.modifiers[i].value
+            );
+            break;
         }
         modifierCollision = true;
         this.engine.modifiers.splice(i, 1);
@@ -158,10 +166,19 @@ export default class Player {
         const { x: x2, y: y2 } = this.bullets[i];
         if (collision(x1, y1, x2, y2)) {
           remove = true;
-          this.engine.players[j].hp = Math.max(
-            0,
-            this.engine.players[j].hp - this.bullets[i].damage
-          );
+          if (this.engine.players[j].armor > 0) {
+            // Damage armor first
+            this.engine.players[j].armor = Math.max(
+              0,
+              this.engine.players[j].armor - this.bullets[i].damage
+            );
+          } else {
+            // Then reduce hp
+            this.engine.players[j].hp = Math.max(
+              0,
+              this.engine.players[j].hp - this.bullets[i].damage
+            );
+          }
           if (this.engine.players[j].hp === 0) {
             this.kills = this.kills + 1;
             this.engine.socket.emit(

@@ -14,6 +14,7 @@ export enum Weapon {
 export type BulletData = {
   x: number;
   y: number;
+  type: BulletType;
 };
 
 export type PlayerData = {
@@ -42,4 +43,11 @@ export type ModifierData = {
 export enum GameEngineContext {
   client,
   server,
+}
+
+export enum BulletType {
+  circle,
+  square,
+  triangle,
+  ring,
 }

@@ -22,7 +22,7 @@ export default function World({ children, size = { w: 2, h: 2 } }: Props) {
 
   return (
     <group>
-      <mesh position={[0, 0, -0.01]}>
+      <mesh position={[0, 0, -0.02]}>
         <planeBufferGeometry
           attach="geometry"
           args={[size.w, size.h, Math.max(1, size.w), Math.max(1, size.h)]}

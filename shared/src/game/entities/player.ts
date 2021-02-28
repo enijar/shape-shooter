@@ -1,5 +1,5 @@
-import { ModifierStatus, Shape } from "../../types";
-import { clamp, collision } from "../../utils";
+import {BulletType, ModifierStatus, Shape} from "../../types";
+import {clamp, collision} from "../../utils";
 import Bullet from "./bullet";
 import Engine from "../engine";
 import Transport from "../transport";
@@ -69,6 +69,7 @@ export default class Player {
       bullet.x = this.x;
       bullet.y = this.y;
       bullet.r = this.r;
+      bullet.type = BulletType.ring;
       this.bullets.push(bullet);
     }
 

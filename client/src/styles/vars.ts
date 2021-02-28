@@ -19,8 +19,14 @@ export default {
     modifiers: {
       [ModifierStatus.heal]: {
         inner: "#8cff10",
-        outer: "#8cff10"
+        outer: "#8cff10",
       },
+    },
+    bullets: {
+      circle: "#ff0000",
+      square: "#00ff00",
+      triangle: "#000000",
+      ring: "#ffffff",
     },
   },
   zIndex: {

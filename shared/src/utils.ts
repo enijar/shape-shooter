@@ -1,3 +1,6 @@
+import Player from "./game/entities/player";
+import { PlayerType } from "./types";
+
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
@@ -12,6 +15,12 @@ export function map(
   return ((value - x1) * (y2 - x2)) / (y1 - x1) + x2;
 }
 
+export function dist(x1: number, y1: number, x2: number, y2: number): number {
+  const a = x1 - x2;
+  const b = y1 - y2;
+  return Math.sqrt(a * a + b * b);
+}
+
 export function collision(
   x1: number,
   y1: number,
@@ -19,12 +28,28 @@ export function collision(
   y2: number,
   r: number = 0.05
 ): boolean {
-  const a = x1 - x2;
-  const b = y1 - y2;
-  const d = Math.sqrt(a * a + b * b);
-  return d <= r;
+  return dist(x1, y1, x2, y2) <= r;
 }
 
 export function rand(min: number, max: number): number {
   return map(Math.random(), 0, 1, min, max);
+}
+
+export function closestPlayer(
+  player: Player,
+  players: Player[]
+): { player: Player | null; distance: number } {
+  let closest = null;
+  let smallestDistance = Infinity;
+  for (let i = players.length - 1; i >= 0; i--) {
+    if (players[i].id === player.id || players[i].type === PlayerType.bot) {
+      continue;
+    }
+    const distance = dist(player.x, player.y, players[i].x, players[i].y);
+    if (distance < smallestDistance) {
+      smallestDistance = distance;
+      closest = players[i];
+    }
+  }
+  return { player: closest, distance: smallestDistance };
 }

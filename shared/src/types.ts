@@ -51,3 +51,8 @@ export enum BulletType {
   triangle,
   ring,
 }
+
+export enum PlayerType {
+  human,
+  bot,
+}

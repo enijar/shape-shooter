@@ -1,8 +1,9 @@
-import { BulletType, ModifierStatus, Shape } from "../../types";
-import { clamp, collision } from "../../utils";
+import { BulletType, ModifierStatus, PlayerType, Shape } from "../../types";
+import { clamp, closestPlayer, collision } from "../../utils";
 import Bullet from "./bullet";
 import Engine from "../engine";
 import Transport from "../transport";
+import { deg2rad } from "../../../../client/src/game/utils";
 
 export default class Player {
   id: number = -1;
@@ -23,9 +24,11 @@ export default class Player {
   now: number = 0;
   steps: number = 1;
   engine: Engine;
+  type: PlayerType;
 
   constructor(engine: Engine) {
     this.engine = engine;
+    this.type = PlayerType.human;
   }
 
   encode(): object {
@@ -43,6 +46,29 @@ export default class Player {
   }
 
   update() {
+    // Bot logic
+    if (this.type === PlayerType.bot) {
+      // move bot towards closes player
+      const closest = closestPlayer(this, this.engine.players);
+      if (closest.player !== null) {
+        let x: -1 | 0 | 1 = 0;
+        let y: -1 | 0 | 1 = 0;
+        if (closest.distance >= 0.1) {
+          if (this.x - closest.player.x < 0) x = 1;
+          if (this.x - closest.player.x > 0) x = -1;
+          if (this.y - closest.player.y < 0) y = -1;
+          if (this.y - closest.player.y > 0) y = 1;
+        } else {
+          x = -1;
+          y = -1;
+        }
+        this.r = closest.player.r;
+        this.moveX = x;
+        this.moveY = y;
+      }
+      this.firing = true;
+    }
+
     let velocity = this.velocity;
     if (this.moveX !== 0 && this.moveY !== 0) {
       // Move slower if moving diagonally

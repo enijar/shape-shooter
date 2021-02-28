@@ -1,10 +1,10 @@
 import { Engine, Player, Transport } from "@shape-shooter/shared";
 import config from "./config/config";
-import { http, socket, socket as io } from "./services/app";
+import { http, socket as io } from "./services/app";
 
 (async () => {
   try {
-    const game = new Engine(socket);
+    const game = new Engine(io);
     game.start();
 
     // todo: type definitions
@@ -25,19 +25,12 @@ import { http, socket, socket as io } from "./services/app";
             mapBounds: game.mapBounds,
           })
         );
-        io.emit("game.player.join", Transport.encode({ players }));
       });
 
       socket.on("game.leave", () => {
         if (currentPlayer !== null) {
           game.removePlayer(currentPlayer.id);
         }
-        io.emit(
-          "game.player.join",
-          Transport.encode({
-            players: game.players.map((player) => player.encode()),
-          })
-        );
       });
 
       socket.on("controls", (controls: any) => {
@@ -59,9 +52,6 @@ import { http, socket, socket as io } from "./services/app";
         if (currentPlayer !== null) {
           game.removePlayer(currentPlayer.id);
         }
-        io.emit("game.player.leave", {
-          players: game.players.map((player) => player.encode()),
-        });
       });
     });
 

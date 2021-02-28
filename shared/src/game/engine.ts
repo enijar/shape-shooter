@@ -1,6 +1,5 @@
 import type { Server } from "socket.io";
-import type { Socket } from "socket.io-client";
-import { GameEngineContext, ModifierStatus, Shape } from "../types";
+import { GameEngineContext, ModifierStatus, PlayerType, Shape } from "../types";
 import Player from "./entities/player";
 import { rand } from "../utils";
 import { MODE } from "../config/consts";
@@ -20,7 +19,7 @@ type MapBounds = {
 const DEFAULT_MAP_SIZE = MODE === "dev" ? 0.5 : 1.5;
 
 export default class Engine {
-  public socket: Server | Socket;
+  public socket: Server;
   public context: GameEngineContext;
   public modifiers: Modifier[] = [];
   public players: Player[] = [];
@@ -36,27 +35,46 @@ export default class Engine {
   private lastModifierSpawnTime: number = 0;
   private maxModifierEntities: number = 10;
   private modifierSpawnRate: number = 1500;
+  private maxBots: number = MODE === "dev" ? 1 : 5;
 
   constructor(
-    socket: Server | Socket,
+    socket: Server,
     context: GameEngineContext = GameEngineContext.server
   ) {
     this.socket = socket;
     this.context = context;
   }
 
-  addPlayer(name: string, shape: Shape, color: string): Player {
+  addBot(): Player {
+    const bot = new Player(this);
+    bot.id = this.nextPlayerId;
+    bot.name = `Bot ${this.nextPlayerId}`;
+    bot.shape = Shape.triangle;
+    bot.color = "#2979f5";
+    // todo: place random location that is not already occupied by another player
+    bot.x = rand(this.mapBounds.x.min, this.mapBounds.x.max);
+    bot.y = rand(this.mapBounds.y.min, this.mapBounds.y.max);
+    bot.type = PlayerType.bot;
+    this.nextPlayerId++;
+    this.players.push(bot);
+    return this.players[this.players.length - 1];
+  }
+
+  addPlayer(
+    name: string,
+    shape: Shape,
+    color: string,
+    type: PlayerType = PlayerType.human
+  ): Player {
     const player = new Player(this);
     player.id = this.nextPlayerId;
     player.name = name;
     player.shape = shape;
     player.color = color;
-    // todo: place player in random location that is not already occupied by another player
+    // todo: place in random location that is not already occupied by another player
     player.x = rand(this.mapBounds.x.min, this.mapBounds.x.max);
     player.y = rand(this.mapBounds.y.min, this.mapBounds.y.max);
-    if (player.name === "GOD") {
-      player.fireRate = 5;
-    }
+    player.type = type;
     this.nextPlayerId++;
     this.players.push(player);
     return this.players[this.players.length - 1];
@@ -91,6 +109,16 @@ export default class Engine {
     const delta = Math.max(1, now - this.lastTickTime);
     const steps = delta / this.tps;
 
+    const totalBots = this.players.filter(
+      (player) => player.type === PlayerType.bot
+    ).length;
+
+    const botsToCreate = Math.max(0, this.maxBots - totalBots);
+
+    for (let i = 0; i < botsToCreate; i++) {
+      this.addBot();
+    }
+
     for (let i = this.players.length - 1; i >= 0; i--) {
       this.players[i].now = now;
       this.players[i].steps = steps;
@@ -120,7 +148,8 @@ export default class Engine {
 
     // todo: optimise data sent over network
     const players = this.players.map((player) => player.encode());
-    this.socket.emit("game.tick", Transport.encode({ players }));
+    const encodedPlayers = Transport.encode({ players });
+    this.socket.emit("game.tick", encodedPlayers);
 
     this.lastTickTime = now;
     this.timeoutId = setTimeout(() => this.tick(), this.tps);

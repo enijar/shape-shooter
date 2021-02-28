@@ -3,7 +3,6 @@ import * as express from "express";
 import { Server as SocketServer } from "socket.io";
 import { json } from "body-parser";
 import * as cors from "cors";
-import router from "./router";
 import config from "../config/config";
 
 export const app = express();
@@ -18,9 +17,8 @@ export const socket = new SocketServer(http, {
 app.use(json());
 app.use(
   cors({
-    origin: "http://localhost:8080",
+    origin: config.clientUrl,
     methods: ["GET", "POST"],
     credentials: true,
   })
 );
-app.use(router);

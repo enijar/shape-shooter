@@ -50,14 +50,6 @@ export default function Game() {
       setModifiers(state.modifiers);
     }
 
-    function onPlayerJoin(state: any) {
-      useGame.getState().setPlayers(state.players);
-    }
-
-    function onPlayerLeave(state: any) {
-      useGame.getState().setPlayers(state.players);
-    }
-
     function onPlayerDeath(playerId: number) {
       const { players, setPlayers, currentPlayer } = useGame.getState();
       setPlayers(players.filter((player) => player.id !== playerId));
@@ -69,7 +61,11 @@ export default function Game() {
     }
 
     function onTick(state: any) {
+      const { players, setPlayers } = useGame.getState();
       gameState.players = state.players;
+      if (state.players.length !== players.length) {
+        setPlayers(state.players);
+      }
     }
 
     function onModifiers(modifiers: ModifierData[]) {
@@ -87,26 +83,23 @@ export default function Game() {
     }
 
     const socket = io.connect();
+    useGame.getState().setSocket(socket);
     io.on("game.joined", onJoined);
-    io.on("game.tick", onTick);
-    io.on("game.player.join", onPlayerJoin);
-    io.on("game.player.leave", onPlayerLeave);
     io.on("game.player.death", onPlayerDeath, false);
     io.on("game.modifiers", onModifiers);
-    useGame.getState().setSocket(socket);
+    io.on("game.tick", onTick);
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
 
     return () => {
+      io.off("game.joined", onJoined);
+      io.on("game.player.death", onPlayerDeath);
+      io.off("game.modifiers", onModifiers);
+      io.off("game.tick", onTick);
       if (socket !== null) {
         socket.off("connect", onConnect);
         socket.off("disconnect", onDisconnect);
       }
-      io.off("game.joined", onJoined);
-      io.off("game.player.join", onPlayerJoin);
-      io.off("game.player.leave", onPlayerLeave);
-      io.off("game.tick", onTick);
-      io.off("game.modifiers", onModifiers);
     };
   }, [name, shape, color, history]);
 

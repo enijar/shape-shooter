@@ -70,7 +70,10 @@ export default class Player {
       }
 
       // Move away from closest player when their HP is higher or this bot is too close
-      if (closest.player.hp > this.hp || closest.distance < 0.2) {
+      if (
+        closest.player.hp + closest.player.armor > this.hp + this.armor ||
+        closest.distance < 0.2
+      ) {
         if (this.x - closest.player.x < 0) x = -1;
         if (this.x - closest.player.x > 0) x = 1;
         if (this.y - closest.player.y < 0) y = 1;

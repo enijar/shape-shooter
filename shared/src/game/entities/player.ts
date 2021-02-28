@@ -1,5 +1,5 @@
-import {BulletType, ModifierStatus, Shape} from "../../types";
-import {clamp, collision} from "../../utils";
+import { BulletType, ModifierStatus, Shape } from "../../types";
+import { clamp, collision } from "../../utils";
 import Bullet from "./bullet";
 import Engine from "../engine";
 import Transport from "../transport";

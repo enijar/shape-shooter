@@ -1,4 +1,4 @@
-import { serialize, deserialize } from "bson";
+import { deserialize, serialize } from "bson";
 
 export default class Transport {
   static encode(data: any): any {

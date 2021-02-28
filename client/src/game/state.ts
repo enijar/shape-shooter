@@ -1,5 +1,9 @@
 import create from "zustand";
-import { ModifierData, PlayerData as Player, Shape } from "@shape-shooter/shared";
+import {
+  ModifierData,
+  PlayerData as Player,
+  Shape,
+} from "@shape-shooter/shared";
 import { MODE } from "../config/consts";
 
 type MapSize = {

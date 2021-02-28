@@ -96,10 +96,7 @@ export default class Engine {
       this.players[i].steps = steps;
       this.players[i].update();
       if (this.players[i].hp === 0) {
-        this.socket.emit(
-          "game.player.death",
-          this.players[i].id
-        );
+        this.socket.emit("game.player.death", this.players[i].id);
         this.players.splice(i, 1);
       }
     }

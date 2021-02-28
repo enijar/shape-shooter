@@ -1,6 +1,6 @@
 import React from "react";
 import { useGame } from "../state";
-import {Transport} from "@shape-shooter/shared";
+import { Transport } from "@shape-shooter/shared";
 
 enum ControlsKeys {
   moveUp = "w",
@@ -85,7 +85,10 @@ export default function useControls(): Controls {
       moveX = 1;
     }
     if (socket !== null) {
-      socket.emit("controls", Transport.encode({ moveX, moveY, firing: pointerDown }));
+      socket.emit(
+        "controls",
+        Transport.encode({ moveX, moveY, firing: pointerDown })
+      );
     }
     setControls({ moveX, moveY, firing: pointerDown });
   }, [activeKeys, pointerDown, socket]);

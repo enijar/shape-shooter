@@ -1,6 +1,6 @@
 import React from "react";
 import { Route, Switch } from "react-router-dom";
-import { AppWrapper, AppVersion } from "./styles";
+import { AppVersion, AppWrapper } from "./styles";
 import Loading from "../loading/loading";
 
 const Play = React.lazy(() => import("../../pages/play/play"));

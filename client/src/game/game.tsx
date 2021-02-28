@@ -3,9 +3,8 @@ import * as THREE from "three";
 import { Canvas } from "react-three-fiber";
 import { OrthographicCamera } from "@react-three/drei";
 import { useHistory } from "react-router-dom";
-import { DeathMenu } from "./styles";
+import { DeathMenu, GameWrapper } from "./styles";
 import io from "../services/io";
-import { GameWrapper } from "./styles";
 import { useGame } from "./state";
 import World from "./world/world";
 import Player from "./entities/player";
@@ -50,12 +49,15 @@ export default function Game() {
       setMapBounds(state.mapBounds);
       setModifiers(state.modifiers);
     }
+
     function onPlayerJoin(state: any) {
       useGame.getState().setPlayers(state.players);
     }
+
     function onPlayerLeave(state: any) {
       useGame.getState().setPlayers(state.players);
     }
+
     function onPlayerDeath(playerId: number) {
       const { players, setPlayers, currentPlayer } = useGame.getState();
       setPlayers(players.filter((player) => player.id !== playerId));
@@ -65,9 +67,11 @@ export default function Game() {
         }
       }
     }
+
     function onTick(state: any) {
       gameState.players = state.players;
     }
+
     function onModifiers(modifiers: ModifierData[]) {
       useGame.getState().setModifiers(Object.values(modifiers));
     }

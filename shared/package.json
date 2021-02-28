@@ -18,6 +18,7 @@
   "dependencies": {
     "bson": "^4.2.2",
     "socket.io": "^3.1.2",
-    "socket.io-client": "^3.1.2"
+    "socket.io-client": "^3.1.2",
+    "unique-names-generator": "^4.4.0"
   }
 }

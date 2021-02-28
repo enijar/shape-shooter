@@ -1,9 +1,8 @@
 import { BulletType, ModifierStatus, PlayerType, Shape } from "../../types";
-import { clamp, closestPlayer, collision, deg2rad, dist } from "../../utils";
+import { clamp, closestPlayer, collision, deg2rad } from "../../utils";
 import Bullet from "./bullet";
 import Engine from "../engine";
 import Transport from "../transport";
-import { utils } from "../../../build";
 
 export default class Player {
   id: number = -1;

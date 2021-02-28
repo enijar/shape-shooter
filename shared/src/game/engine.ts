@@ -1,4 +1,5 @@
 import type { Server } from "socket.io";
+import { uniqueNamesGenerator, names } from "unique-names-generator";
 import { GameEngineContext, ModifierStatus, PlayerType, Shape } from "../types";
 import Player from "./entities/player";
 import { rand } from "../utils";
@@ -48,7 +49,10 @@ export default class Engine {
   addBot(): Player {
     const bot = new Player(this);
     bot.id = this.nextPlayerId;
-    bot.name = `Bot ${this.nextPlayerId}`;
+    bot.name = uniqueNamesGenerator({
+      dictionaries: [names],
+      length: 1,
+    });
     bot.shape = Shape.triangle;
     bot.color = "#2979f5";
     // todo: place random location that is not already occupied by another player

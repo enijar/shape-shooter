@@ -35,7 +35,7 @@ export default class Engine {
   private lastModifierSpawnTime: number = 0;
   private maxModifierEntities: number = 10;
   private modifierSpawnRate: number = 1500;
-  private maxBots: number = MODE === "dev" ? 1 : 5;
+  private maxBots: number = MODE === "dev" ? 1 : 3;
 
   constructor(
     socket: Server,

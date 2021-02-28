@@ -17,6 +17,7 @@ type DeathMenuProps = {
 };
 export const DeathMenu = styled.div<DeathMenuProps>`
   position: absolute;
+  user-select: none;
   top: 0;
   left: 0;
   z-index: ${vars.zIndex.game + 1};

@@ -19,6 +19,7 @@ export type BulletData = {
 
 export type PlayerData = {
   id: number;
+  kills: number;
   name: string;
   shape: Shape;
   type: PlayerType;

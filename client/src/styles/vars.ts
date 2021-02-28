@@ -12,6 +12,7 @@ export default {
     white: "#ffffff",
     healthBar: "#00ff00",
     blue: "#3399cc",
+    kills: "#e04a4a",
     red: "#ff0000",
     green: "#07930e",
     hp: "#00ff00",
@@ -31,5 +32,7 @@ export default {
   },
   zIndex: {
     game: 1,
+    leaderboard: 2,
+    deathMenu: 3,
   },
 };

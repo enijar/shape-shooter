@@ -20,7 +20,7 @@ export const DeathMenu = styled.div<DeathMenuProps>`
   user-select: none;
   top: 0;
   left: 0;
-  z-index: ${vars.zIndex.game + 1};
+  z-index: ${vars.zIndex.deathMenu};
   pointer-events: ${({ show }) => (show ? "all" : "none")};
   width: 100vw;
   height: 100vh;
@@ -56,4 +56,46 @@ export const DeathMenu = styled.div<DeathMenuProps>`
       background-color: ${lighten(0.25, vars.color.black)};
     }
   }
+`;
+
+export const Leaderboard = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: ${vars.zIndex.leaderboard};
+  color: ${vars.color.white};
+  padding: 1em;
+  pointer-events: none;
+  user-select: none;
+`;
+
+export const LeaderboardPlayer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+  font-size: 0.75em;
+  line-height: 1em;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+export const LeaderboardPlayerName = styled.div`
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 7em;
+  text-align: right;
+  padding: 0.25rem;
+  margin-right: 0.5rem;
+  background-color: ${vars.color.black};
+`;
+
+export const LeaderboardPlayerKills = styled.div`
+  width: 4.25em;
+  padding: 0.25rem;
+  background-color: ${vars.color.kills};
+  text-align: right;
 `;

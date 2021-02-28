@@ -3,7 +3,14 @@ import * as THREE from "three";
 import { Canvas } from "react-three-fiber";
 import { OrthographicCamera } from "@react-three/drei";
 import { useHistory } from "react-router-dom";
-import { DeathMenu, GameWrapper } from "./styles";
+import {
+  DeathMenu,
+  Leaderboard,
+  GameWrapper,
+  LeaderboardPlayer,
+  LeaderboardPlayerName,
+  LeaderboardPlayerKills,
+} from "./styles";
 import io from "../services/io";
 import { useGame } from "./state";
 import World from "./world/world";
@@ -11,7 +18,7 @@ import Player from "./entities/player";
 import Bullets from "./entities/bullets";
 import vars from "../styles/vars";
 import gameState from "./game-state";
-import { ModifierData } from "@shape-shooter/shared";
+import { ModifierData, PlayerData } from "@shape-shooter/shared";
 import Modifier from "./entities/modifier";
 
 export default function Game() {
@@ -28,6 +35,9 @@ export default function Game() {
     modifiers,
   } = useGame();
   const [dead, setDead] = React.useState<boolean>(false);
+  const topScoringPlayers = React.useMemo<PlayerData[]>(() => {
+    return players.sort((a, b) => b.kills - a.kills).slice(0, 3);
+  }, [players]);
 
   React.useEffect(() => {
     if (!name || !shape || !color) {
@@ -60,6 +70,18 @@ export default function Game() {
       }
     }
 
+    function onPlayerKill(state: any) {
+      const { players, setPlayers } = useGame.getState();
+      setPlayers(
+        players.map((player) => {
+          if (player.id === state.playerId) {
+            player.kills = state.kills;
+          }
+          return player;
+        })
+      );
+    }
+
     function onTick(state: any) {
       const { players, setPlayers } = useGame.getState();
       gameState.players = state.players;
@@ -86,6 +108,7 @@ export default function Game() {
     useGame.getState().setSocket(socket);
     io.on("game.joined", onJoined);
     io.on("game.player.death", onPlayerDeath, false);
+    io.on("game.player.kill", onPlayerKill);
     io.on("game.modifiers", onModifiers);
     io.on("game.tick", onTick);
     socket.on("connect", onConnect);
@@ -94,6 +117,7 @@ export default function Game() {
     return () => {
       io.off("game.joined", onJoined);
       io.on("game.player.death", onPlayerDeath);
+      io.off("game.player.kill", onPlayerKill);
       io.off("game.modifiers", onModifiers);
       io.off("game.tick", onTick);
       if (socket !== null) {
@@ -136,6 +160,18 @@ export default function Game() {
 
   return (
     <GameWrapper>
+      <Leaderboard>
+        {topScoringPlayers.map((player) => {
+          return (
+            <LeaderboardPlayer key={player.id}>
+              <LeaderboardPlayerName>{player.name}</LeaderboardPlayerName>
+              <LeaderboardPlayerKills>
+                {player.kills} kill{player.kills !== 1 ? "s" : ""}
+              </LeaderboardPlayerKills>
+            </LeaderboardPlayer>
+          );
+        })}
+      </Leaderboard>
       <DeathMenu show={dead}>
         <h3>You died!</h3>
         <button

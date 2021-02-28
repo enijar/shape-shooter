@@ -24,6 +24,7 @@ export default class Player {
   steps: number = 1;
   engine: Engine;
   type: PlayerType;
+  kills: number = 0;
   private lastMoveTime: number = 0;
   private moveDelay: number = 350;
 
@@ -35,6 +36,7 @@ export default class Player {
   encode(): object {
     return {
       id: this.id,
+      kills: this.kills,
       name: this.name,
       shape: this.shape,
       type: this.type,
@@ -160,6 +162,13 @@ export default class Player {
             0,
             this.engine.players[j].hp - this.bullets[i].damage
           );
+          if (this.engine.players[j].hp === 0) {
+            this.kills = this.kills + 1;
+            this.engine.socket.emit(
+              "game.player.kill",
+              Transport.encode({ playerId: this.id, kills: this.kills })
+            );
+          }
           break;
         }
       }

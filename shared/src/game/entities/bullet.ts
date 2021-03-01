@@ -9,7 +9,7 @@ export default class Bullet {
   damage: number = 0.05;
   distance: number = 0;
   velocity: number = 0.006;
-  maxDistance: number = 0.75;
+  maxDistance: number = 1.25;
   now: number = 0;
   steps: number = 1;
   type: BulletType = BulletType.circle;

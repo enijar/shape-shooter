@@ -32,6 +32,9 @@ export default class Player {
   constructor(engine: Engine) {
     this.engine = engine;
     this.type = PlayerType.human;
+    if (this.name === "GOD") {
+      this.fireRate = 0;
+    }
   }
 
   encode(): object {

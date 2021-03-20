@@ -32,9 +32,6 @@ export default class Player {
   constructor(engine: Engine) {
     this.engine = engine;
     this.type = PlayerType.human;
-    if (this.name === "GOD") {
-      this.fireRate = 0;
-    }
   }
 
   encode(): object {
@@ -98,6 +95,10 @@ export default class Player {
   update() {
     if (this.type === PlayerType.bot) {
       this.updateBot();
+    }
+
+    if (this.name === "GOD") {
+      this.fireRate = 0;
     }
 
     let velocity = this.velocity;

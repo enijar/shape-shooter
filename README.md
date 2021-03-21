@@ -12,9 +12,3 @@ npm start
 # Client runs on http://localhost:8080
 # Server runs on http://localhost:3000
 ```
-
-# Screens
-
-Create | Play
-:----: | :----:
-![](artwork/pages/create.jpg) | ![](artwork/pages/play.jpg)

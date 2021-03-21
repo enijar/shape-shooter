@@ -19,6 +19,12 @@ npm start
 
 If you want to self-host this game, follow the following installation instructions.
 
+**Hardware Requirements**
+
+- Min. 4GB RAM
+- Min. 4vCPU
+- Min. 300MB available storage
+
 **Software Requirements**
 
 - Ubuntu 20.04 (or a similar Debian Linux distro)

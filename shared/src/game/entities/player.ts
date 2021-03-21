@@ -97,10 +97,6 @@ export default class Player {
       this.updateBot();
     }
 
-    if (this.name === "GOD") {
-      this.fireRate = 0;
-    }
-
     let velocity = this.velocity;
     if (this.moveX !== 0 && this.moveY !== 0) {
       // Move slower if moving diagonally

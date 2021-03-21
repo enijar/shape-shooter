@@ -17,7 +17,7 @@ type MapBounds = {
   y: { min: number; max: number };
 };
 
-const DEFAULT_MAP_SIZE = MODE === "dev" ? 0.5 : 3;
+const DEFAULT_MAP_SIZE = MODE === "dev" ? 0.7 : 3;
 
 export default class Engine {
   public socket: Server;

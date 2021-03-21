@@ -6,9 +6,15 @@ type Props = {
   center?: boolean;
   position?: [x: number, y: number, z: number];
   visible?: boolean;
+  style?: object;
 };
 
-export default function Html({ children, visible = true, ...props }: Props) {
+export default function Html({
+  children,
+  visible = true,
+  style = {},
+  ...props
+}: Props) {
   return (
     <ThreeHtml
       {...props}
@@ -16,6 +22,7 @@ export default function Html({ children, visible = true, ...props }: Props) {
         pointerEvents: "none",
         userSelect: "none",
         opacity: visible ? 1 : 0,
+        ...style,
       }}
     >
       {children}

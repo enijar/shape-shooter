@@ -9,6 +9,7 @@ type Data = string | number | Object | null;
 const server = {
   id: "",
   emit(eventName: string, data?: Data, options?: any) {
+    if (!useAppStore.getState().connected) return;
     channel.emit(eventName, data, options);
   },
   on(eventName: string, fn: (data: Data) => void) {

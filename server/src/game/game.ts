@@ -24,6 +24,8 @@ export default class Game {
 
   private immediate: NodeJS.Immediate;
 
+  private maxItems: number = 0;
+
   constructor(options: GameOptions = {}) {
     this.arenaSize = options.arenaSize ?? this.arenaSize;
     this.fps = options.fps ?? this.fps;
@@ -33,6 +35,7 @@ export default class Game {
   addPlayer(player: Player) {
     player.color = `hsl(${THREE.MathUtils.randInt(1, 360)}, 50%, 50%)`;
     this.players.push(player);
+    this.maxItems = Math.round(Math.sqrt(this.arenaSize * this.players.length));
   }
 
   removePlayer(player: Player) {
@@ -58,10 +61,8 @@ export default class Game {
     if (now - this.lastTickTime < this.tickInterval) return;
     this.lastTickTime = now;
 
-    // Add new items (10 per player)
-    const maxItems = Math.sqrt(this.arenaSize * this.players.length);
-    const itemsToAdd = maxItems - this.items.length;
-    for (let i = 0; i < itemsToAdd; i++) {
+    // Add new items
+    for (let i = 0; i < this.maxItems - this.items.length; i++) {
       this.items.push(new Item(this));
     }
 

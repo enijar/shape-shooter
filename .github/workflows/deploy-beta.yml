@@ -22,7 +22,7 @@ jobs:
             git pull
             npm install
             npm run build
-            pm2 reload game
+            pm2 reload game-beta
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           privateKey: ${{ secrets.PRIVATE_KEY }}

@@ -40,6 +40,7 @@ export default function Items() {
         if (!state.items[i]) {
           instanceRefs.current[i].scale.x = 0;
           htmlRefs.current[i].style.opacity = "0";
+          healthBarRefs.current[i].style.width = "100%";
           continue;
         }
 
@@ -100,6 +101,7 @@ export default function Items() {
                       healthBarRefs.current[index] = ref;
                     }
                   }}
+                  style={{ width: "100%" }}
                   color="hsl(120, 83%, 37%)"
                 />
               </Bar>

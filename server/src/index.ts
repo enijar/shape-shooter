@@ -1,62 +1,55 @@
-import { Engine, Player, Transport } from "@shape-shooter/shared";
-import config from "./config/config";
-import { http, socket as io } from "./services/app";
+import config from "./config";
+import database from "./services/database";
+import { io, server } from "./services/app";
+import Game from "./game/game";
+import Player from "./game/player";
 
 (async () => {
   try {
-    const game = new Engine(io);
-    game.start();
+    await database.sync({ alter: true });
 
-    // todo: type definitions
-    io.on("connection", (socket) => {
-      let currentPlayer: Player = null;
+    const game = new Game();
+    game.start(() => {
+      io.emit("tick", { players: game.players, bullets: game.bullets });
+    });
 
-      socket.on("game.join", (player: any) => {
-        player = Transport.decode(player);
-        currentPlayer = game.addPlayer(player.name, player.shape, player.color);
-        const players = game.players.map((player) => player.encode());
-        socket.emit(
-          "game.joined",
-          Transport.encode({
-            currentPlayer: currentPlayer.encode(),
-            players,
-            modifiers: game.modifiers,
-            mapSize: game.mapSize,
-            mapBounds: game.mapBounds,
-          })
-        );
+    io.onConnection((channel) => {
+      const player = new Player(channel.id);
+      game.addPlayer(player);
+
+      io.emit("player.connected", player, { reliable: true });
+      channel.emit(
+        "connected",
+        { player, players: game.players, bullets: game.bullets },
+        { reliable: true }
+      );
+
+      channel.on("actions", (actions: any) => {
+        player.actions = actions;
       });
 
-      socket.on("game.leave", () => {
-        if (currentPlayer !== null) {
-          game.removePlayer(currentPlayer.id);
-        }
+      channel.on("rotation", (rotation: number) => {
+        player.rotation = rotation;
       });
 
-      socket.on("controls", (controls: any) => {
-        controls = Transport.decode(controls);
-        if (currentPlayer !== null) {
-          currentPlayer.moveX = controls.moveX;
-          currentPlayer.moveY = controls.moveY;
-          currentPlayer.firing = controls.firing;
-        }
+      channel.on("shooting", (shooting: boolean) => {
+        player.shooting = shooting;
       });
 
-      socket.on("rotate", (r: number) => {
-        if (currentPlayer !== null) {
-          currentPlayer.r = r;
-        }
-      });
-
-      socket.on("disconnect", () => {
-        if (currentPlayer !== null) {
-          game.removePlayer(currentPlayer.id);
-        }
+      channel.on("disconnect", () => {
+        game.removePlayer(player);
+        io.connectionsManager.connections.delete(channel.id);
+        io.emit("player.disconnected", player, { reliable: true });
       });
     });
 
-    http.listen(config.port, () => {
+    server.listen(config.port, () => {
       console.log(`Server running: http://localhost:${config.port}`);
+    });
+
+    server.on("close", () => {
+      console.log("Closing down gracefully...");
+      game.destroy();
     });
   } catch (err) {
     console.error(err);

@@ -1,15 +1,14 @@
 {
   "compilerOptions": {
     "sourceMap": true,
-    "module": "commonjs",
-    "target": "es2017",
-    "outDir": "build",
-    "baseUrl": "./",
+    "module": "CommonJS",
+    "target": "ES6",
+    "moduleResolution": "Node",
     "alwaysStrict": true,
     "noImplicitAny": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
-  },
-  "include": ["src/index.ts", "env.ts"],
-  "exclude": ["node_modules"]
+    "emitDecoratorMetadata": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true
+  }
 }

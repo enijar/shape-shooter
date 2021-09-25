@@ -1,21 +1,16 @@
 import React from "react";
 import { Route, Switch } from "react-router-dom";
-import { AppVersion, AppWrapper } from "./styles";
-import Loading from "../loading/loading";
 
-const Play = React.lazy(() => import("../../pages/play/play"));
 const Home = React.lazy(() => import("../../pages/home/home"));
+const Play = React.lazy(() => import("../../pages/play/play"));
 
 export default function App() {
   return (
-    <AppWrapper>
-      <React.Suspense fallback={<Loading />}>
-        <Switch>
-          <Route exact path="/" component={Home} />
-          <Route exact path="/play" component={Play} />
-        </Switch>
-      </React.Suspense>
-      <AppVersion>v0.0.1-beta</AppVersion>
-    </AppWrapper>
+    <React.Suspense fallback="Loading...">
+      <Switch>
+        <Route exact path="/" component={Home} />
+        <Route exact path="/play" component={Play} />
+      </Switch>
+    </React.Suspense>
   );
 }

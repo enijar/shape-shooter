@@ -1,24 +1,38 @@
-import { createServer } from "http";
-import * as express from "express";
-import { Server as SocketServer } from "socket.io";
+import http from "http";
+import geckos from "@geckos.io/server";
+import express from "express";
 import { json } from "body-parser";
-import * as cors from "cors";
-import config from "../config/config";
+import cors from "cors";
+import config from "../config";
+import router from "../router";
 
-export const app = express();
-export const http = createServer(app);
-export const socket = new SocketServer(http, {
+const app = express();
+
+export const server = http.createServer(app);
+export const io = geckos({
   cors: {
-    origin: config.clientUrl,
-    methods: ["GET", "POST"],
+    origin: config.appUrl,
   },
 });
+
+io.addServer(server);
 
 app.use(json());
 app.use(
   cors({
-    origin: config.clientUrl,
-    methods: ["GET", "POST"],
+    origin(origin, next) {
+      if (origin && !config.corsOrigins.includes(origin)) {
+        return next(new Error("Not allowed by CORS"));
+      }
+      next(null, true);
+    },
     credentials: true,
   })
 );
+app.use([router]);
+
+app.all("*", (req, res) => {
+  res.status(404).json({ errors: { server: "Not found" } });
+});
+
+export default app;

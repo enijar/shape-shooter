@@ -1,221 +1,112 @@
 import React from "react";
 import * as THREE from "three";
-import { useFrame, useLoader, useThree } from "react-three-fiber";
-import { OrthographicCamera, useTexture } from "@react-three/drei";
-import { Shape, utils } from "@shape-shooter/shared";
-import createShape from "../shape";
-import { useGame } from "../state";
-import vars from "../../styles/vars";
-import Minimap from "../minimap";
-import gameState from "../game-state";
+import { Html } from "@react-three/drei";
+import server from "../../services/server";
+import { useThree } from "@react-three/fiber";
+import useRotation from "../hooks/use-rotation";
+import styled from "styled-components";
 
-type Props = {
-  id: number;
-  name: string;
-  shape: Shape;
-  color: string;
-  currentPlayer?: boolean;
+const HEALTH_BAR_HEIGHT = 4;
+
+export type PlayerType = {
+  id?: string;
+  color?: string;
+  size?: number;
+  name?: string;
+  x: number;
+  y: number;
+  rotation: number;
+  health: number;
+  maxHealth: number;
 };
 
-const HP_BORDER_WIDTH = 0.005;
+type Props = {
+  id: string;
+  color?: string;
+  size?: number;
+  name?: string;
+  current?: boolean;
+};
 
 export default function Player({
+  color = "crimson",
+  size = 100,
+  name = "Noob",
   id,
-  name,
-  shape,
-  color,
-  currentPlayer = false,
+  current = false,
 }: Props) {
-  const font = useLoader(
-    THREE.FontLoader,
-    "/assets/3d/fonts/OpenSans_Bold.json"
-  );
-  const shapeImage = React.useMemo(() => createShape(shape, color), [
-    shape,
-    color,
-  ]);
-  const texture = useTexture(shapeImage);
-  const { raycaster } = useThree();
-  const { size, zoom } = useGame();
-  const lastR = React.useRef<number>(0);
-  const group = React.useRef<THREE.Group>();
-  const meshGroup = React.useRef<THREE.Group>();
-  const mesh = React.useRef<THREE.Mesh>();
-  const material = React.useRef<THREE.MeshBasicMaterial>();
-  const textGeometry = React.useRef<THREE.TextGeometry>();
-  const textHpStatsGeometry = React.useRef<THREE.TextGeometry>();
-  const box = React.useMemo<THREE.Box3>(() => new THREE.Box3(), []);
-  const [hp, setHp] = React.useState<number>(1);
-  const [armor, setArmor] = React.useState<number>(0);
+  const groupRef = React.useRef<THREE.Group>();
+  const meshRef = React.useRef<THREE.Mesh>();
+  const healthBarRef = React.useRef<HTMLDivElement>();
 
-  useFrame(() => {
-    let player;
-    for (let i = 0, length = gameState.players.length; i < length; i++) {
-      if (gameState.players[i].id === id) {
-        player = gameState.players[i];
-        break;
+  useRotation(meshRef, current);
+
+  const { camera } = useThree();
+
+  React.useEffect(() => {
+    server.on("tick", (state: { players: PlayerType[] }) => {
+      const index = state.players.findIndex((player) => player.id === id);
+      if (index === -1) return;
+      groupRef.current.position.x = state.players[index].x;
+      groupRef.current.position.y = state.players[index].y;
+      meshRef.current.rotation.z = state.players[index].rotation;
+      const health =
+        (100 / state.players[index].maxHealth) * state.players[index].health;
+      healthBarRef.current.style.width = `${health}%`;
+      if (current) {
+        camera.position.copy(groupRef.current.position);
       }
-    }
-    if (!player) return;
-    if (group.current) {
-      group.current.position.x = player.x;
-      group.current.position.y = player.y;
-    }
-    if (meshGroup.current) {
-      meshGroup.current.rotation.z = player.r;
-    }
-    if (player.hp !== hp) {
-      setHp(player.hp);
-    }
-    if (player.armor !== armor) {
-      setArmor(player.armor);
-    }
-  });
-
-  React.useEffect(() => {
-    if (textHpStatsGeometry.current) {
-      textHpStatsGeometry.current.computeBoundingBox();
-      textHpStatsGeometry.current.center();
-      textHpStatsGeometry.current.dispose();
-    }
-  }, [hp, armor]);
-
-  // Update current player's rotation
-  React.useEffect(() => {
-    if (!currentPlayer) return;
-
-    function onMove() {
-      if (!meshGroup.current || !mesh.current) return;
-      box.setFromObject(meshGroup.current);
-      const cX = (box.max.x + box.min.x) / 2;
-      const cY = (box.max.y + box.min.y) / 2;
-      const { x: oX, y: oY } = raycaster.ray.origin;
-      let r = Math.atan2(oY - cY, oX - cX) - utils.deg2rad(90);
-      r = parseFloat(r.toFixed(2));
-      if (r !== lastR.current) {
-        lastR.current = r;
-        const { socket } = useGame.getState();
-        if (socket !== null) {
-          socket.emit("rotate", r);
-        }
-      }
-    }
-
-    window.addEventListener("pointermove", onMove);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-    };
-  }, [raycaster, currentPlayer, box]);
-
-  React.useEffect(() => {
-    if (!textGeometry.current) return;
-    textGeometry.current.computeBoundingBox();
-    textGeometry.current.center();
-    textGeometry.current.dispose();
-  }, []);
+    });
+  }, [camera, id, current]);
 
   return (
-    <group ref={group}>
-      {/* Name tag + HP bar */}
-      <group position={[0, -0.06, 0]}>
-        {/* Name tag background */}
-        <mesh position={[0, -0.0002, 0]}>
-          <planeGeometry
-            attach="geometry"
-            args={[0.1 + HP_BORDER_WIDTH, 0.02, 1]}
-          />
-          <meshBasicMaterial attach="material" color={vars.color.black} />
-        </mesh>
-        {/* Name tag text */}
-        <mesh scale={[0.0003, 0.0003, 0.0003]}>
-          <textGeometry
-            ref={textGeometry}
-            attach="geometry"
-            args={[
-              name,
-              {
-                font,
-                size: 30,
-              },
-            ]}
-          />
-          <meshBasicMaterial attach="material" color={vars.color.white} />
-        </mesh>
-        {/* HP bar */}
-        <group position={[0, -0.012 - HP_BORDER_WIDTH, 0]}>
-          {/* HP boarder */}
-          <mesh>
-            <planeGeometry
-              attach="geometry"
-              args={[0.1 + HP_BORDER_WIDTH, 0.01 + HP_BORDER_WIDTH, 1]}
-            />
-            <meshBasicMaterial attach="material" color={vars.color.black} />
-          </mesh>
-          {/* HP fill trail */}
-          <mesh position={[0, 0, 0]}>
-            <planeGeometry attach="geometry" args={[0.1, 0.01, 1]} />
-            <meshBasicMaterial
-              attach="material"
-              color={vars.color.hp}
-              opacity={0.5}
-            />
-          </mesh>
-          {/* HP fill */}
-          {/* @ts-ignore */}
-          <mesh position={[utils.map(hp, 0, 1, -0.05, 0), 0, 0]}>
-            <planeGeometry attach="geometry" args={[0.1 * hp, 0.01, 1]} />
-            <meshBasicMaterial attach="material" color={vars.color.hp} />
-          </mesh>
-          {/* Armor fill */}
-          {/* @ts-ignore */}
-          <mesh position={[utils.map(armor, 0, 1, -0.05, 0), 0, 0]}>
-            <planeGeometry attach="geometry" args={[0.1 * armor, 0.01, 1]} />
-            <meshBasicMaterial attach="material" color={vars.color.armor} />
-          </mesh>
-          {/* HP stats */}
-          <mesh scale={[0.0003, 0.0003, 0.0003]}>
-            <textGeometry
-              ref={textHpStatsGeometry}
-              attach="geometry"
-              args={[
-                `${Math.floor((hp + armor) * 100)}/200`,
-                {
-                  font,
-                  size: 20,
-                },
-              ]}
-            />
-            <meshBasicMaterial
-              attach="material"
-              color={vars.color.black}
-              opacity={0.75}
-            />
-          </mesh>
-        </group>
-      </group>
-
-      {/* Player shape */}
-      <group ref={meshGroup}>
-        <mesh ref={mesh}>
-          <planeBufferGeometry attach="geometry" args={[0.1, 0.1, 1]} />
-          <meshBasicMaterial
-            ref={material}
-            attach="material"
-            map={texture}
-            transparent={true}
-          />
-        </mesh>
-      </group>
-      {currentPlayer && (
-        <>
-          <Minimap />
-          <OrthographicCamera
-            makeDefault
-            position={[0, 0, size]}
-            zoom={size * zoom}
-          />
-        </>
-      )}
+    <group ref={groupRef}>
+      <mesh ref={meshRef}>
+        <planeBufferGeometry args={[size, size]} />
+        <meshStandardMaterial color={color} />
+      </mesh>
+      <Html
+        style={{
+          transform: "translate(-50%, 50%)",
+          pointerEvents: "none",
+          userSelect: "none",
+        }}
+        position={[0, -size * 0.5, 0]}
+      >
+        <HealthBar size={size}>
+          <HealthBarFill ref={healthBarRef} />
+        </HealthBar>
+        <Name size={size}>{name}</Name>
+      </Html>
     </group>
   );
 }
+
+type HealthBarProps = {
+  size: number;
+};
+
+const HealthBar = styled.div<HealthBarProps>`
+  width: ${({ size }) => size}px;
+  height: ${HEALTH_BAR_HEIGHT}px;
+  background-color: #000000;
+`;
+
+const HealthBarFill = styled.div`
+  width: 100%;
+  height: 100%;
+  background: green;
+  transition: width 0.2s linear;
+`;
+
+type NameProps = {
+  size: number;
+};
+
+const Name = styled.div<NameProps>`
+  text-align: center;
+  width: ${({ size }) => size}px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 0.25em;
+`;

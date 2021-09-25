@@ -1,10 +1,10 @@
-import Page from "../../components/page/page";
+import React from "react";
 import Game from "../../game/game";
 
 export default function Play() {
   return (
-    <Page>
+    <main>
       <Game />
-    </Page>
+    </main>
   );
 }

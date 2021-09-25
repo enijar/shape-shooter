@@ -1,31 +1,45 @@
-import { createGlobalStyle } from "styled-components";
+import { createGlobalStyle } from "styled-components/macro";
+import { fluidRange } from "polished";
 import vars from "./vars";
 
 export default createGlobalStyle`
-  *, &:before, &:after {
+  * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: inherit;
     font-size: inherit;
-    font-weight: inherit;
+    line-height: inherit;
+    color: inherit;
   }
 
-  html, body, #root {
+  html,
+  body,
+  #root,
+  main {
+    width: 100%;
     height: 100%;
     overflow: hidden;
   }
 
   html {
-    font-family: ${vars.font.primary};
-    font-size: ${vars.rootSize}px;
-    font-weight: 600;
-    color: ${vars.color.white};
+    ${fluidRange(
+      {
+        prop: "font-size",
+        fromSize: `${vars.rootSize * 0.8}px`,
+        toSize: `${vars.rootSize}px`,
+      },
+      `${vars.responsiveMin}px`,
+      `${vars.responsiveMax}px`
+    )};
+    font-family: ${vars.fontBody};
+    font-weight: normal;
+    line-height: 1.2;
+    background-color: #1e1e1e;
+    color: #fefefe;
   }
 
-  svg, img, iframe, canvas {
-    max-width: 100%;
-    align-self: center;
-    flex-shrink: 0;
+  main {
+    overflow: auto;
   }
 `;

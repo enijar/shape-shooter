@@ -66,7 +66,8 @@ server {
     listen 443 ssl;
     server_name shapeshooter.io;
 
-    location /socket.io/ {
+    location /api {
+        listen 3000 udp;
         proxy_http_version 1.1;
         proxy_cache_bypass $http_upgrade;
         proxy_set_header Upgrade $http_upgrade;

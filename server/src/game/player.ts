@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { Action } from "@app/shared";
+import { Action, settings } from "@app/shared";
 import Game from "./game";
 import Bullet from "./bullet";
 import { Box } from "../types";
@@ -14,7 +14,7 @@ export default class Player {
   y: number = 0;
   actions: Actions = {};
   speed = 5;
-  size = 100;
+  size = settings.player.size;
   color: string;
   rotation: number = 0;
   shooting = false;
@@ -24,6 +24,7 @@ export default class Player {
   dy: number = 0;
   box: Box;
   health: number = 0;
+  exp: number = 0;
   readonly maxHealth: number = 100;
 
   constructor(id: string) {

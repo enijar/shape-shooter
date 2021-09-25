@@ -37,6 +37,7 @@ export default createGlobalStyle`
     line-height: 1.2;
     background-color: #1e1e1e;
     color: #fefefe;
+    text-rendering: geometricPrecision;
   }
 
   main {

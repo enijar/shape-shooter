@@ -69,8 +69,7 @@ export default function PlayScene() {
         return (
           <Player
             key={player.id}
-            id={player.id}
-            color={player.color}
+            {...player}
             current={player.id === currentPlayer?.id}
           />
         );

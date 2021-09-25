@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { settings } from "@app/shared";
 import Player from "./player";
 import Bullet from "./bullet";
 import { intersect } from "./utils";
@@ -84,6 +85,13 @@ export default class Game {
 
           // Remove player when their health runs out
           if (this.players[p].health === 0) {
+            // Increase exp for player who shot the bullet that killed this player
+            const playerKiller = this.players.find((player) => {
+              return player.id === this.bullets[b].playerId;
+            });
+            if (playerKiller) {
+              playerKiller.exp += settings.exp.playerKill;
+            }
             io.emit("player.killed", this.players[p], { reliable: true });
             this.players.splice(p, 1);
           }

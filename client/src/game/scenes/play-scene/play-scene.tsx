@@ -1,14 +1,21 @@
 import React from "react";
-import Player, { PlayerType } from "../../entities/player";
 import server from "../../../services/server";
+import { useAppStore } from "../../../state/use-app-store";
 import Arena from "./arena";
 import Bullets from "./bullets";
+import Player, { PlayerType } from "../../entities/player";
 
 export default function PlayScene() {
   const [currentPlayer, setCurrentPlayer] = React.useState<PlayerType>(null);
   const [players, setPlayers] = React.useState<PlayerType[]>([]);
 
+  const { connected } = useAppStore();
+
   React.useEffect(() => {
+    console.log({ connected });
+
+    if (!connected) return;
+
     function addPlayer(player: PlayerType) {
       setPlayers((players) => {
         if (players.find((p) => p.id === player.id)) {
@@ -55,7 +62,7 @@ export default function PlayScene() {
         return players.filter((p) => p.id !== player.id);
       });
     });
-  }, [currentPlayer]);
+  }, [currentPlayer, connected]);
 
   return (
     <group>

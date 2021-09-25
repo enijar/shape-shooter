@@ -1,5 +1,6 @@
 import geckos from "@geckos.io/client";
 import config from "../config";
+import { useAppStore } from "../state/use-app-store";
 
 const channel = geckos({ url: config.apiUrl, port: null });
 
@@ -25,6 +26,7 @@ channel.onConnect((err) => {
   console.log("connected");
   server.id = channel.id;
   server.connected = true;
+  useAppStore.getState().setConnected(true);
 });
 
 channel.onDisconnect((err) => {
@@ -33,6 +35,7 @@ channel.onDisconnect((err) => {
   }
   console.log("disconnected");
   server.connected = false;
+  useAppStore.getState().setConnected(false);
 });
 
 window.addEventListener("unload", () => {

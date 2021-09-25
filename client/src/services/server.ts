@@ -22,6 +22,7 @@ channel.onConnect((err) => {
   if (err) {
     return console.error(err);
   }
+  console.log("connected");
   server.id = channel.id;
   server.connected = true;
 });
@@ -30,6 +31,7 @@ channel.onDisconnect((err) => {
   if (err) {
     return console.error(err);
   }
+  console.log("disconnected");
   server.connected = false;
 });
 

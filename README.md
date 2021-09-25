@@ -7,7 +7,7 @@ Battle-Royale, but you're all shapes...
 ### Getting Started
 
 ```shell
-cp client/src/env.example.ts client/src/env.ts
+cp client/env.example.ts client/env.ts
 cp server/env.example.ts server/env.ts
 npm install
 npm start
@@ -43,7 +43,7 @@ git clone https://github.com/Enijar/shape-shooter /var/www/shape-shooter
 cd /var/www/shape-shooter
 
 # Create env files
-cp client/src/env.example.ts client/src/env.ts
+cp client/env.example.ts client/env.ts
 cp server/env.example.ts server/env.ts
 # Modify the newly created env files to change default game settings 👆
 

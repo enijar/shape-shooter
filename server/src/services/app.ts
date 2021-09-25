@@ -1,5 +1,5 @@
 import http from "http";
-import geckos from "@geckos.io/server";
+import geckos, { iceServers } from "@geckos.io/server";
 import express from "express";
 import { json } from "body-parser";
 import cors from "cors";
@@ -10,6 +10,7 @@ const app = express();
 
 export const server = http.createServer(app);
 export const io = geckos({
+  iceServers,
   cors: {
     origin: config.appUrl,
   },

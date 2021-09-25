@@ -1,7 +1,7 @@
 import geckos from "@geckos.io/client";
 import config from "../config";
 
-const channel = geckos({ url: config.apiUrl, port: config.serverPort });
+const channel = geckos({ url: config.apiUrl, port: null });
 
 type Data = string | number | Object | null;
 

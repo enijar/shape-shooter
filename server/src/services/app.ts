@@ -10,7 +10,7 @@ const app = express();
 
 export const server = http.createServer(app);
 export const io = geckos({
-  // iceServers,
+  iceServers,
   cors: {
     origin: config.appUrl,
   },

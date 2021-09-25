@@ -16,7 +16,7 @@ export default class Game {
   bullets: Bullet[] = [];
   items: Item[] = [];
 
-  readonly arenaSize: number = 900;
+  readonly arenaSize: number = settings.arena.size;
 
   private readonly fps: number = 60;
   private readonly tickInterval: number;
@@ -59,7 +59,7 @@ export default class Game {
     this.lastTickTime = now;
 
     // Add new items (10 per player)
-    const maxItems = this.players.length * 10;
+    const maxItems = Math.sqrt(this.arenaSize * this.players.length);
     const itemsToAdd = maxItems - this.items.length;
     for (let i = 0; i < itemsToAdd; i++) {
       this.items.push(new Item(this));

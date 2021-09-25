@@ -17,7 +17,7 @@ export default class Bullet {
   size = 10;
   box: Box;
   damage: number = settings.bullet.damage;
-  readonly maxDistance = 800;
+  readonly maxDistance = 1000;
   private readonly startX: number = 0;
   private readonly startY: number = 0;
 

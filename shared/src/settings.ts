@@ -17,7 +17,7 @@ const settings = {
     maxHealth: 30,
   },
   arena: {
-    size: 900,
+    size: 5000,
   },
 };
 

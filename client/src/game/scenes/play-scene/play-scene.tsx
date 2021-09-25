@@ -5,6 +5,7 @@ import Arena from "./arena";
 import Bullets from "./bullets";
 import Items from "./items";
 import Player, { PlayerType } from "../../entities/player";
+import Minimap from "./minimap";
 
 export default function PlayScene() {
   const [currentPlayer, setCurrentPlayer] = React.useState<PlayerType>(null);
@@ -77,6 +78,7 @@ export default function PlayScene() {
       })}
       <Bullets />
       <Items />
+      <Minimap players={players} />
     </group>
   );
 }

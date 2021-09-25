@@ -12,8 +12,6 @@ export default function PlayScene() {
   const { connected } = useAppStore();
 
   React.useEffect(() => {
-    console.log({ connected });
-
     if (!connected) return;
 
     function addPlayer(player: PlayerType) {

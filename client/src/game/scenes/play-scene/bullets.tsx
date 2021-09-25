@@ -1,4 +1,5 @@
 import React from "react";
+import { settings } from "@app/shared";
 import * as THREE from "three";
 import { Instance, Instances } from "@react-three/drei";
 import server from "../../../services/server";
@@ -70,7 +71,9 @@ export default function Bullets() {
 
   return (
     <Instances limit={bullets.length}>
-      <circleBufferGeometry args={[10, 10, 32]} />
+      <circleBufferGeometry
+        args={[settings.bullet.size, settings.bullet.size, 32]}
+      />
       <meshStandardMaterial />
       {bullets.map((bullet, index) => {
         return (

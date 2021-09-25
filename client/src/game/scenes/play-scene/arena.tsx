@@ -1,6 +1,6 @@
 import React from "react";
+import { settings } from "@app/shared";
 import * as THREE from "three";
-import config from "../../config";
 
 export default function Arena() {
   const texture = React.useMemo(() => {
@@ -15,8 +15,8 @@ export default function Arena() {
     texture.wrapT = THREE.RepeatWrapping;
     texture.wrapS = THREE.RepeatWrapping;
     texture.repeat.set(
-      config.arena.size / canvas.width,
-      config.arena.size / canvas.height
+      settings.arena.size / canvas.width,
+      settings.arena.size / canvas.height
     );
     return texture;
   }, []);
@@ -24,7 +24,9 @@ export default function Arena() {
   return (
     <group position={[0, 0, -1]}>
       <mesh>
-        <planeBufferGeometry args={[config.arena.size, config.arena.size]} />
+        <planeBufferGeometry
+          args={[settings.arena.size, settings.arena.size]}
+        />
         <meshStandardMaterial map={texture} />
       </mesh>
     </group>

@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { Action, settings } from "@app/shared";
-import Game from "./game";
+import Game from "../game";
 import Bullet from "./bullet";
 import { Box } from "../types";
 
@@ -25,7 +25,7 @@ export default class Player {
   box: Box;
   health: number = 0;
   exp: number = 0;
-  readonly maxHealth: number = 100;
+  readonly maxHealth: number = settings.player.maxHealth;
 
   constructor(id: string) {
     this.id = id;

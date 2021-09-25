@@ -1,8 +1,9 @@
 import * as THREE from "three";
+import { settings } from "@app/shared";
 import Player from "./player";
-import Game from "./game";
-import { distance } from "./utils";
+import Game from "../game";
 import { Box } from "../types";
+import { distance } from "../utils";
 
 export default class Bullet {
   id: string;
@@ -10,12 +11,12 @@ export default class Bullet {
   color: string;
   x = 0;
   y = 0;
-  speed = 10;
+  speed = settings.bullet.size;
   rotation = 0;
   distance = 0;
   size = 10;
   box: Box;
-  damage: number = 5;
+  damage: number = settings.bullet.damage;
   readonly maxDistance = 800;
   private readonly startX: number = 0;
   private readonly startY: number = 0;

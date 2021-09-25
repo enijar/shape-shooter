@@ -2,7 +2,7 @@ import config from "./config";
 import database from "./services/database";
 import { io, server } from "./services/app";
 import Game from "./game/game";
-import Player from "./game/player";
+import Player from "./game/entities/player";
 
 (async () => {
   try {
@@ -10,7 +10,7 @@ import Player from "./game/player";
 
     const game = new Game();
     game.start(() => {
-      io.emit("tick", { players: game.players, bullets: game.bullets });
+      io.emit("tick", game.getState());
     });
 
     io.onConnection((channel) => {
@@ -20,7 +20,7 @@ import Player from "./game/player";
       io.emit("player.connected", player, { reliable: true });
       channel.emit(
         "connected",
-        { player, players: game.players, bullets: game.bullets },
+        { player, ...game.getState() },
         { reliable: true }
       );
 

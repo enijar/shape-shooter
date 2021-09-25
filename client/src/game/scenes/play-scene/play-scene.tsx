@@ -3,6 +3,7 @@ import server from "../../../services/server";
 import { useAppStore } from "../../../state/use-app-store";
 import Arena from "./arena";
 import Bullets from "./bullets";
+import Items from "./items";
 import Player, { PlayerType } from "../../entities/player";
 
 export default function PlayScene() {
@@ -75,6 +76,7 @@ export default function PlayScene() {
         );
       })}
       <Bullets />
+      <Items />
     </group>
   );
 }

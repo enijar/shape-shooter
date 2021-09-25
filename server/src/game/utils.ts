@@ -1,4 +1,4 @@
-import { Box } from "../types";
+import { Box } from "./types";
 
 export function distance(
   x1: number,

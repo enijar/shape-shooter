@@ -1,9 +1,10 @@
 import * as THREE from "three";
 import { settings } from "@app/shared";
-import Player from "./player";
-import Bullet from "./bullet";
-import { intersect } from "./utils";
 import { io } from "../services/app";
+import { intersect } from "./utils";
+import Player from "./entities/player";
+import Bullet from "./entities/bullet";
+import Item from "./entities/item";
 
 export type GameOptions = {
   arenaSize?: number;
@@ -13,6 +14,7 @@ export type GameOptions = {
 export default class Game {
   players: Player[] = [];
   bullets: Bullet[] = [];
+  items: Item[] = [];
 
   readonly arenaSize: number = 900;
 
@@ -56,9 +58,21 @@ export default class Game {
     if (now - this.lastTickTime < this.tickInterval) return;
     this.lastTickTime = now;
 
+    // Add new items (10 per player)
+    const maxItems = this.players.length * 10;
+    const itemsToAdd = maxItems - this.items.length;
+    for (let i = 0; i < itemsToAdd; i++) {
+      this.items.push(new Item(this));
+    }
+
     // Update players
     for (let p = 0, length = this.players.length; p < length; p++) {
       this.players[p].update(this);
+    }
+
+    // Update items
+    for (let i = 0, length = this.items.length; i < length; i++) {
+      this.items[i].update(this);
     }
 
     // Update bullets
@@ -99,6 +113,32 @@ export default class Game {
         }
       }
 
+      // Damage items that get hit by bullets
+      for (let i = 0, length = this.items.length; i < length; i++) {
+        // Damage item if bullet box intersects with item box
+        if (intersect(this.items[i].box, this.bullets[b].box)) {
+          removeBullet = true;
+          this.items[i].health = THREE.MathUtils.clamp(
+            this.items[i].health - this.bullets[b].damage,
+            0,
+            this.items[i].maxHealth
+          );
+
+          // Remove item when its health runs out
+          if (this.items[i].health === 0) {
+            // Increase exp for player who shot the bullet that killed this item
+            const playerKiller = this.players.find((player) => {
+              return player.id === this.bullets[b].playerId;
+            });
+            if (playerKiller) {
+              playerKiller.exp += settings.exp.itemKill;
+            }
+            this.items.splice(i, 1);
+          }
+          break;
+        }
+      }
+
       // Remove bullets that have reached their max distance
       if (this.bullets[b].distance === this.bullets[b].maxDistance) {
         removeBullet = true;
@@ -110,5 +150,9 @@ export default class Game {
     }
 
     onTick();
+  }
+
+  getState() {
+    return { players: this.players, bullets: this.bullets, items: this.items };
   }
 }

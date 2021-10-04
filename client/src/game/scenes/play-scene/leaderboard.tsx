@@ -8,7 +8,7 @@ import server from "../../../services/server";
 
 const LEADERBOARD_SIZE = {
   x: 200,
-  y: 400,
+  y: 345,
 };
 
 type Props = {

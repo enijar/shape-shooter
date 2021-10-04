@@ -8,7 +8,7 @@ import server from "../../../services/server";
 
 const LEADERBOARD_SIZE = {
   x: 200,
-  y: 345,
+  y: 330,
 };
 
 type Props = {
@@ -47,11 +47,12 @@ export default function Leaderboard({ gap = 20 }: Props) {
         <meshStandardMaterial color="#000000" transparent opacity={0.5} />
       </mesh>
       <Html
-        style={{ width: `${LEADERBOARD_SIZE.x}px` }}
+        style={{ width: `${LEADERBOARD_SIZE.x}px`, padding: "0.25em 0.5em" }}
         calculatePosition={() => {
           return [size.width - LEADERBOARD_SIZE.x - gap, gap];
         }}
       >
+        <h3>Leaderboard</h3>
         {topPlayers.map((player) => {
           return (
             <Item key={player.id}>
@@ -69,5 +70,6 @@ const Item = styled.div`
   text-overflow: ellipsis;
   overflow: hidden;
   width: 100%;
-  padding: 0.25em 0.5em;
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
 `;

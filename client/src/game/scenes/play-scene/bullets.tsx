@@ -46,6 +46,7 @@ export default function Bullets({ currentPlayer }: Props) {
           instanceRefs.current[i].scale.x = 0;
           continue;
         }
+        instanceRefs.current[i].scale.x = 1;
         instanceRefs.current[i].rotateZ(state.bullets[i].rotation);
         instanceRefs.current[i].color.set(state.bullets[i].color);
         instanceRefs.current[i].position.set(
@@ -53,7 +54,6 @@ export default function Bullets({ currentPlayer }: Props) {
           state.bullets[i].y,
           0
         );
-        instanceRefs.current[i].scale.x = 1;
       }
     });
   }, []);

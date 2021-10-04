@@ -1,10 +1,9 @@
 import React from "react";
 import { settings } from "@app/shared";
 import * as THREE from "three";
-import { Html, Instance, Instances } from "@react-three/drei";
-import server from "../../../services/server";
+import { Instance, Instances } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
-import { Bar, BarFill } from "../../styles";
+import server from "../../../services/server";
 
 type Item = {
   id: string;
@@ -30,8 +29,7 @@ const items: ItemState[] = Array.from({ length: 100 }).map(() => {
 
 export default function Items() {
   const instanceRefs = React.useRef<Position[]>([]);
-  const htmlRefs = React.useRef<HTMLDivElement[]>([]);
-  const healthBarRefs = React.useRef<HTMLDivElement[]>([]);
+  const healthBarRefs = React.useRef<THREE.Mesh[]>([]);
 
   React.useEffect(() => {
     server.on("tick", (state: { items: Item[] }) => {
@@ -39,25 +37,20 @@ export default function Items() {
         if (!instanceRefs.current[i]) continue;
         if (!state.items[i]) {
           instanceRefs.current[i].scale.x = 0;
-          htmlRefs.current[i].style.opacity = "0";
-          healthBarRefs.current[i].style.width = "100%";
           continue;
         }
 
         const item = state.items[i];
 
-        // Health
-        const health = (100 / item.maxHealth) * item.health;
-        healthBarRefs.current[i].style.width = `${health}%`;
-
-        htmlRefs.current[i].style.opacity = "1";
-        instanceRefs.current[i].color.set(state.items[i].color);
-        instanceRefs.current[i].position.set(
-          state.items[i].x,
-          state.items[i].y,
-          0
-        );
         instanceRefs.current[i].scale.x = 1;
+        instanceRefs.current[i].position.set(item.x, item.y, 0);
+        instanceRefs.current[i].color.setStyle(item.color);
+
+        // Health
+        const health = (1 / item.maxHealth) * item.health;
+        healthBarRefs.current[i].scale.x = health;
+        healthBarRefs.current[i].position.x =
+          settings.item.size * -2 * (1 - health) * 0.5;
       }
     });
   }, []);
@@ -79,33 +72,19 @@ export default function Items() {
             }}
             key={index}
           >
-            <Html
+            <mesh position={[0, -22, -0.01]}>
+              <planeBufferGeometry args={[settings.item.size * 2, 5]} />
+              <meshStandardMaterial color="#000000" />
+            </mesh>
+            <mesh
+              position={[0, -22, 0]}
               ref={(ref) => {
-                if (ref instanceof HTMLDivElement) {
-                  htmlRefs.current[index] = ref;
-                }
+                healthBarRefs.current[index] = ref as THREE.Mesh;
               }}
-              style={{
-                pointerEvents: "none",
-                userSelect: "none",
-                opacity: "0",
-                width: `${settings.item.size * (Math.PI * 0.5)}px`,
-                transform: "translate(-50%, 0.5em)",
-              }}
-              position={[0, -settings.item.size, 0]}
             >
-              <Bar height={5}>
-                <BarFill
-                  ref={(ref) => {
-                    if (ref instanceof HTMLDivElement) {
-                      healthBarRefs.current[index] = ref;
-                    }
-                  }}
-                  style={{ width: "100%" }}
-                  color="hsl(120, 83%, 37%)"
-                />
-              </Bar>
-            </Html>
+              <planeBufferGeometry args={[settings.item.size * 2, 5]} />
+              <meshStandardMaterial color="hsl(120, 83%, 37%)" />
+            </mesh>
           </Instance>
         );
       })}

@@ -25,6 +25,8 @@ export default class Player {
   box: Box;
   health: number = 0;
   exp: number = 0;
+  inGame: boolean = false;
+  name: string = "Noob";
   readonly maxHealth: number = settings.player.maxHealth;
 
   constructor(id: string) {

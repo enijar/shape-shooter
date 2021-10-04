@@ -24,6 +24,17 @@ import Player from "./game/entities/player";
         { reliable: true }
       );
 
+      channel.on("player.update.name", (name: string) => {
+        player.name = name ?? "Noob";
+        player.inGame = true;
+        io.emit("player.connected", player, { reliable: true });
+        channel.emit(
+          "connected",
+          { player, ...game.getState() },
+          { reliable: true }
+        );
+      });
+
       channel.on("actions", (actions: any) => {
         player.actions = actions;
       });

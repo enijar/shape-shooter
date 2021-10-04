@@ -9,6 +9,11 @@ export default function useRotation(
   objectRef: React.MutableRefObject<THREE.Object3D>,
   enabled: boolean
 ) {
+  const enabledRef = React.useRef(enabled);
+  React.useEffect(() => {
+    enabledRef.current = enabled;
+  }, [enabled]);
+
   const { raycaster } = useThree();
 
   React.useEffect(() => {
@@ -16,6 +21,7 @@ export default function useRotation(
 
     function onMove() {
       if (!objectRef.current) return;
+      if (!enabledRef.current) return;
       box.setFromObject(objectRef.current);
       const cX = (box.max.x + box.min.x) / 2;
       const cY = (box.max.y + box.min.y) / 2;
@@ -31,4 +37,8 @@ export default function useRotation(
       window.removeEventListener("touchmove", onMove);
     };
   }, [raycaster, enabled]);
+
+  return {
+    enabled: enabledRef.current,
+  };
 }

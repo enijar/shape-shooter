@@ -29,6 +29,7 @@ export default function Minimap({ players, gap = 20 }: Props) {
       for (let i = 0, length = state.players.length; i < length; i++) {
         if (!meshRefs.current[i]) continue;
         const player = state.players[i];
+        meshRefs.current[i].visible = player.inGame;
         meshRefs.current[i].position.x = THREE.MathUtils.mapLinear(
           player.x,
           0,
@@ -56,6 +57,7 @@ export default function Minimap({ players, gap = 20 }: Props) {
       {players.map((player, index) => {
         return (
           <mesh
+            visible={false}
             key={player.id}
             ref={(ref) => {
               if (ref instanceof THREE.Mesh) {

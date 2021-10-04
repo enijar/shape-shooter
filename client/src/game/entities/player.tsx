@@ -19,6 +19,7 @@ export type PlayerType = {
   health: number;
   maxHealth: number;
   exp: number;
+  inGame: boolean;
 };
 
 type Props = PlayerType & {
@@ -34,13 +35,14 @@ export default function Player({
   current = false,
 }: Props) {
   const groupRef = React.useRef<THREE.Group>();
+  const htmlRef = React.useRef<HTMLDivElement>();
   const meshRef = React.useRef<THREE.Mesh>();
   const healthBarRef = React.useRef<HTMLDivElement>();
   const healthTextRef = React.useRef<HTMLDivElement>();
   const expBarRef = React.useRef<HTMLDivElement>();
   const expTextRef = React.useRef<HTMLDivElement>();
 
-  useRotation(meshRef, current);
+  const rotationControls = useRotation(meshRef, current);
 
   const { camera } = useThree();
 
@@ -49,6 +51,10 @@ export default function Player({
       const index = state.players.findIndex((player) => player.id === id);
       if (index === -1) return;
       const player = state.players[index];
+      rotationControls.enabled = player.inGame;
+      groupRef.current.visible = player.inGame;
+      htmlRef.current.style.visibility = player.inGame ? "visible" : "hidden";
+      if (!player.inGame) return;
 
       // Update position
       groupRef.current.position.x = player.x;
@@ -75,12 +81,13 @@ export default function Player({
   }, [camera, id, current]);
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} visible={false}>
       <mesh ref={meshRef}>
         <planeBufferGeometry args={[size, size]} />
         <meshStandardMaterial color={color} />
       </mesh>
       <Html
+        ref={htmlRef}
         style={{
           transform: "translate(-50%, 1em)",
           pointerEvents: "none",

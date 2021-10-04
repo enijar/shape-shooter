@@ -4,6 +4,7 @@ import * as THREE from "three";
 import { Instance, Instances } from "@react-three/drei";
 import server from "../../../services/server";
 import { Position } from "@react-three/drei/helpers/Position";
+import { PlayerType } from "../../entities/player";
 
 type Bullet = {
   id: string;
@@ -30,7 +31,11 @@ const bullets: BulletState[] = Array.from({ length: 100 }).map(() => {
   };
 });
 
-export default function Bullets() {
+type Props = {
+  currentPlayer?: PlayerType;
+};
+
+export default function Bullets({ currentPlayer }: Props) {
   const instanceRefs = React.useRef<Position[]>([]);
 
   React.useEffect(() => {
@@ -54,6 +59,7 @@ export default function Bullets() {
   }, []);
 
   React.useEffect(() => {
+    if (!currentPlayer?.inGame) return;
     let shooting = false;
 
     function shoot() {
@@ -67,7 +73,7 @@ export default function Bullets() {
       window.removeEventListener("pointerdown", shoot);
       window.removeEventListener("pointerup", shoot);
     };
-  }, []);
+  }, [currentPlayer]);
 
   return (
     <Instances limit={bullets.length}>

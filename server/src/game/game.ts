@@ -85,6 +85,9 @@ export default class Game {
       // @todo how does one optimise this inner player loop?
       // Damage players that get hit by bullets
       for (let p = 0, length = this.players.length; p < length; p++) {
+        // Ignore players that are not in the game
+        if (!this.players[p].inGame) continue;
+
         // Players own bullet can't hit them
         if (this.players[p].id === this.bullets[b].playerId) continue;
         // Damage player if bullet box intersects with player box

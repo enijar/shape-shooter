@@ -110,8 +110,8 @@ export default class Game {
             if (playerKiller) {
               playerKiller.exp += settings.exp.playerKill;
             }
+            this.players[p].inGame = false;
             io.emit("player.killed", this.players[p], { reliable: true });
-            this.players.splice(p, 1);
           }
           break;
         }

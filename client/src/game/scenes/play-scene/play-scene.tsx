@@ -22,6 +22,8 @@ export default function PlayScene() {
   React.useEffect(() => {
     if (!connected) return;
 
+    console.log(currentPlayer);
+
     function addPlayer(player: PlayerType) {
       setPlayers((players) => {
         if (players.find((p) => p.id === player.id)) {
@@ -44,11 +46,10 @@ export default function PlayScene() {
     });
 
     server.on("player.killed", (player: PlayerType) => {
-      setPlayers((players) => {
-        return players.filter((p) => p.id !== player.id);
-      });
-      if (currentPlayer !== null && player.id === currentPlayer.id) {
-        setCurrentPlayer(null);
+      console.log("player.killed->player", currentPlayer, player.id);
+      if (player.id === currentPlayer?.id) {
+        console.log("p", player);
+        setCurrentPlayer({ ...player });
       }
     });
 

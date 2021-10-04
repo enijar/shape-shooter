@@ -2,7 +2,6 @@ import React from "react";
 import { settings } from "@app/shared";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
-import { Position } from "@react-three/drei/helpers/Position";
 import { PlayerType } from "../../entities/player";
 import server from "../../../services/server";
 

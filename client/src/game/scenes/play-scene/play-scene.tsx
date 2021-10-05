@@ -1,5 +1,5 @@
 import React from "react";
-import { Action } from "@app/shared";
+import { Action, PlayerEntity, GameState } from "@app/shared";
 import { Html } from "@react-three/drei";
 import styled from "styled-components";
 import server from "../../../services/server";
@@ -7,14 +7,15 @@ import { useAppStore } from "../../../state/use-app-store";
 import Arena from "./arena";
 import Bullets from "./bullets";
 import Items from "./items";
-import Player, { PlayerType } from "../../entities/player";
+import Player from "../../entities/player";
 import Minimap from "./minimap";
 import Leaderboard from "./leaderboard";
 import Actions from "../../globals/actions";
+import gameState from "../../game-state";
 
 export default function PlayScene() {
-  const [currentPlayer, setCurrentPlayer] = React.useState<PlayerType>(null);
-  const [players, setPlayers] = React.useState<PlayerType[]>([]);
+  const [currentPlayer, setCurrentPlayer] = React.useState<PlayerEntity>(null);
+  const [players, setPlayers] = React.useState<PlayerEntity[]>([]);
   const nameInputRef = React.useRef<HTMLInputElement>();
 
   const { connected } = useAppStore();
@@ -24,7 +25,7 @@ export default function PlayScene() {
 
     console.log(currentPlayer);
 
-    function addPlayer(player: PlayerType) {
+    function addPlayer(player: PlayerEntity) {
       setPlayers((players) => {
         if (players.find((p) => p.id === player.id)) {
           return players;
@@ -35,17 +36,23 @@ export default function PlayScene() {
 
     server.on(
       "connected",
-      ({ player, players }: { player: PlayerType; players: PlayerType[] }) => {
+      ({
+        player,
+        players,
+      }: {
+        player: PlayerEntity;
+        players: PlayerEntity[];
+      }) => {
         setCurrentPlayer(player);
         setPlayers(players);
       }
     );
 
-    server.on("player.connected", (player: PlayerType) => {
+    server.on("player.connected", (player: PlayerEntity) => {
       addPlayer(player);
     });
 
-    server.on("player.killed", (player: PlayerType) => {
+    server.on("player.killed", (player: PlayerEntity) => {
       console.log("player.killed->player", currentPlayer, player.id);
       if (player.id === currentPlayer?.id) {
         console.log("p", player);
@@ -53,7 +60,7 @@ export default function PlayScene() {
       }
     });
 
-    server.on("player.damaged", (player: PlayerType) => {
+    server.on("player.damaged", (player: PlayerEntity) => {
       setPlayers((players) => {
         return players.map((p) => {
           if (p.id === player.id) {
@@ -64,12 +71,21 @@ export default function PlayScene() {
       });
     });
 
-    server.on("player.disconnected", (player: PlayerType) => {
+    server.on("player.disconnected", (player: PlayerEntity) => {
       setPlayers((players) => {
         return players.filter((p) => p.id !== player.id);
       });
     });
   }, [currentPlayer, connected]);
+
+  React.useEffect(() => {
+    if (!connected) return;
+    server.on("tick", (state: GameState) => {
+      gameState.players = state.players;
+      gameState.bullets = state.bullets;
+      gameState.items = state.items;
+    });
+  }, [connected]);
 
   const play = React.useCallback((event: React.FormEvent) => {
     event.preventDefault();

@@ -1,28 +1,14 @@
 import React from "react";
 import styled from "styled-components";
-import { settings } from "@app/shared";
+import { PlayerEntity, settings } from "@app/shared";
 import * as THREE from "three";
-import { useThree } from "@react-three/fiber";
+import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
-import server from "../../services/server";
 import useRotation from "../hooks/use-rotation";
 import { Bar, BarFill } from "../styles";
+import gameState from "../game-state";
 
-export type PlayerType = {
-  id?: string;
-  color?: string;
-  size?: number;
-  name?: string;
-  x: number;
-  y: number;
-  rotation: number;
-  health: number;
-  maxHealth: number;
-  exp: number;
-  inGame: boolean;
-};
-
-type Props = PlayerType & {
+type Props = PlayerEntity & {
   current?: boolean;
 };
 
@@ -44,41 +30,37 @@ export default function Player({
 
   const rotationControls = useRotation(meshRef, current);
 
-  const { camera } = useThree();
+  useFrame(({ camera }) => {
+    const index = gameState.players.findIndex((player) => player.id === id);
+    if (index === -1) return;
+    const player = gameState.players[index];
+    rotationControls.enabled = player.inGame;
+    groupRef.current.visible = player.inGame;
+    htmlRef.current.style.visibility = player.inGame ? "visible" : "hidden";
+    if (!player.inGame) return;
 
-  React.useEffect(() => {
-    server.on("tick", (state: { players: PlayerType[] }) => {
-      const index = state.players.findIndex((player) => player.id === id);
-      if (index === -1) return;
-      const player = state.players[index];
-      rotationControls.enabled = player.inGame;
-      groupRef.current.visible = player.inGame;
-      htmlRef.current.style.visibility = player.inGame ? "visible" : "hidden";
-      if (!player.inGame) return;
+    // Update position
+    groupRef.current.position.x = player.x;
+    groupRef.current.position.y = player.y;
+    meshRef.current.rotation.z = player.rotation;
 
-      // Update position
-      groupRef.current.position.x = player.x;
-      groupRef.current.position.y = player.y;
-      meshRef.current.rotation.z = player.rotation;
+    // Health
+    const health = (100 / player.maxHealth) * player.health;
+    healthBarRef.current.style.width = `${health}%`;
+    healthTextRef.current.innerText = `${health}%`;
 
-      // Health
-      const health = (100 / player.maxHealth) * player.health;
-      healthBarRef.current.style.width = `${health}%`;
-      healthTextRef.current.innerText = `${health}%`;
+    // Exp/level
+    const level = Math.floor(player.exp / settings.exp.perLevel);
+    const levelExp = player.exp - level * settings.exp.perLevel;
+    const exp = (100 / settings.exp.perLevel) * levelExp;
+    expBarRef.current.style.width = `${exp}%`;
+    expTextRef.current.innerText = `lvl. ${level}`;
 
-      // Exp/level
-      const level = Math.floor(player.exp / settings.exp.perLevel);
-      const levelExp = player.exp - level * settings.exp.perLevel;
-      const exp = (100 / settings.exp.perLevel) * levelExp;
-      expBarRef.current.style.width = `${exp}%`;
-      expTextRef.current.innerText = `lvl. ${level}`;
-
-      // Camera follow player
-      if (current) {
-        camera.position.copy(groupRef.current.position);
-      }
-    });
-  }, [camera, id, current]);
+    // Camera follow player
+    if (current) {
+      camera.position.copy(groupRef.current.position);
+    }
+  });
 
   return (
     <group ref={groupRef} visible={false}>

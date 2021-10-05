@@ -1,43 +1,11 @@
 import * as THREE from "three";
-import { Action, settings } from "@app/shared";
+import { Action, PlayerEntity, settings } from "@app/shared";
 import Game from "../game";
 import Bullet from "./bullet";
-import { Box } from "../types";
 
-type Actions = {
-  [action: string]: boolean;
-};
-
-export default class Player {
-  id: string;
-  x: number = 0;
-  y: number = 0;
-  actions: Actions = {};
-  speed = 5;
-  size = settings.player.size;
-  color: string;
-  rotation: number = 0;
-  shooting = false;
-  shootingInterval = 150;
-  lastShotTime = 0;
-  dx: number = 0;
-  dy: number = 0;
-  box: Box;
-  health: number = 0;
-  exp: number = 0;
-  inGame: boolean = false;
-  name: string = "Noob";
-  readonly maxHealth: number = settings.player.maxHealth;
-
+export default class Player extends PlayerEntity {
   constructor(id: string) {
-    this.id = id;
-    this.box = {
-      width: this.size,
-      height: this.size,
-      x: this.x,
-      y: this.y,
-    };
-    this.health = this.maxHealth;
+    super(id);
   }
 
   update(game: Game) {
@@ -67,7 +35,7 @@ export default class Player {
       }
     }
 
-    const a = game.arenaSize * 0.5;
+    const a = settings.arena.size * 0.5;
     const p = this.speed * 0.5;
     this.x = THREE.MathUtils.clamp(
       this.x + this.speed * this.dx,

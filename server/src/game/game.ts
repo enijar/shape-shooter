@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { settings } from "@app/shared";
+import { GameState, settings } from "@app/shared";
 import { io } from "../services/app";
 import { intersect } from "./utils";
 import Player from "./entities/player";
@@ -7,7 +7,6 @@ import Bullet from "./entities/bullet";
 import Item from "./entities/item";
 
 export type GameOptions = {
-  arenaSize?: number;
   fps?: number;
 };
 
@@ -15,8 +14,6 @@ export default class Game {
   players: Player[] = [];
   bullets: Bullet[] = [];
   items: Item[] = [];
-
-  readonly arenaSize: number = settings.arena.size;
 
   private readonly fps: number = 60;
   private readonly tickInterval: number;
@@ -27,7 +24,6 @@ export default class Game {
   private maxItems: number = 0;
 
   constructor(options: GameOptions = {}) {
-    this.arenaSize = options.arenaSize ?? this.arenaSize;
     this.fps = options.fps ?? this.fps;
     this.tickInterval = 1000 / this.fps;
   }
@@ -35,7 +31,9 @@ export default class Game {
   addPlayer(player: Player) {
     player.color = `hsl(${THREE.MathUtils.randInt(1, 360)}, 50%, 50%)`;
     this.players.push(player);
-    this.maxItems = Math.round(Math.sqrt(this.arenaSize * this.players.length));
+    this.maxItems = Math.round(
+      Math.sqrt(settings.arena.size * this.players.length)
+    );
   }
 
   removePlayer(player: Player) {
@@ -55,6 +53,10 @@ export default class Game {
     clearImmediate(this.immediate);
   }
 
+  getState(): GameState {
+    return { players: this.players, bullets: this.bullets, items: this.items };
+  }
+
   private tick(onTick: Function) {
     this.immediate = setImmediate(() => this.tick(onTick));
     const now = Date.now();
@@ -63,7 +65,7 @@ export default class Game {
 
     // Add new items
     for (let i = 0; i < this.maxItems - this.items.length; i++) {
-      this.items.push(new Item(this));
+      this.items.push(new Item());
     }
 
     // Update players
@@ -154,9 +156,5 @@ export default class Game {
     }
 
     onTick();
-  }
-
-  getState() {
-    return { players: this.players, bullets: this.bullets, items: this.items };
   }
 }

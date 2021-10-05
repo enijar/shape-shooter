@@ -3,16 +3,8 @@ import { settings } from "@app/shared";
 import * as THREE from "three";
 import { Instance, Instances } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
-import server from "../../../services/server";
-
-type Item = {
-  id: string;
-  color: string;
-  x: number;
-  y: number;
-  health: number;
-  maxHealth: number;
-};
+import { useFrame } from "@react-three/fiber";
+import gameState from "../../game-state";
 
 type ItemState = {
   id?: string;
@@ -31,29 +23,27 @@ export default function Items() {
   const instanceRefs = React.useRef<Position[]>([]);
   const healthBarRefs = React.useRef<THREE.Mesh[]>([]);
 
-  React.useEffect(() => {
-    server.on("tick", (state: { items: Item[] }) => {
-      for (let i = 0, length = items.length; i < length; i++) {
-        if (!instanceRefs.current[i]) continue;
-        if (!state.items[i]) {
-          instanceRefs.current[i].scale.x = 0;
-          continue;
-        }
-
-        const item = state.items[i];
-
-        instanceRefs.current[i].scale.x = 1;
-        instanceRefs.current[i].position.set(item.x, item.y, 0);
-        instanceRefs.current[i].color.setStyle(item.color);
-
-        // Health
-        const health = (1 / item.maxHealth) * item.health;
-        healthBarRefs.current[i].scale.x = health;
-        healthBarRefs.current[i].position.x =
-          settings.item.size * -2 * (1 - health) * 0.5;
+  useFrame(() => {
+    for (let i = 0, length = items.length; i < length; i++) {
+      if (!instanceRefs.current[i]) continue;
+      if (!gameState.items[i]) {
+        instanceRefs.current[i].scale.x = 0;
+        continue;
       }
-    });
-  }, []);
+
+      const item = gameState.items[i];
+
+      instanceRefs.current[i].scale.x = 1;
+      instanceRefs.current[i].position.set(item.x, item.y, 0);
+      instanceRefs.current[i].color.setStyle(item.color);
+
+      // Health
+      const health = (1 / item.maxHealth) * item.health;
+      healthBarRefs.current[i].scale.x = health;
+      healthBarRefs.current[i].position.x =
+        settings.item.size * -2 * (1 - health) * 0.5;
+    }
+  });
 
   return (
     <Instances limit={items.length}>

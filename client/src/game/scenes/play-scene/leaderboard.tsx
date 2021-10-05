@@ -3,8 +3,7 @@ import styled from "styled-components";
 import * as THREE from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
-import { PlayerType } from "../../entities/player";
-import server from "../../../services/server";
+import gameState from "../../game-state";
 
 const LEADERBOARD_SIZE = {
   x: 200,
@@ -21,16 +20,12 @@ export default function Leaderboard({ gap = 20 }: Props) {
 
   const { size } = useThree();
 
-  React.useEffect(() => {
-    server.on("tick", (state: { players: PlayerType[] }) => {
-      const topPlayers = state.players
-        .sort((a, b) => {
-          return b.exp - a.exp;
-        })
-        .slice(0, 10);
-      setTopPlayers(topPlayers);
-    });
-  }, []);
+  useFrame(() => {
+    const topPlayers = gameState.players
+      .sort((a, b) => b.exp - a.exp)
+      .slice(0, 10);
+    setTopPlayers(topPlayers);
+  });
 
   useFrame(({ camera, size }) => {
     groupRef.current.position.copy(camera.position);

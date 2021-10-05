@@ -1,19 +1,11 @@
 import React from "react";
-import { settings } from "@app/shared";
+import { PlayerEntity, settings } from "@app/shared";
 import * as THREE from "three";
 import { Instance, Instances } from "@react-three/drei";
 import server from "../../../services/server";
 import { Position } from "@react-three/drei/helpers/Position";
-import { PlayerType } from "../../entities/player";
-
-type Bullet = {
-  id: string;
-  playerId: string;
-  color: string;
-  x: number;
-  y: number;
-  rotation: number;
-};
+import { useFrame } from "@react-three/fiber";
+import gameState from "../../game-state";
 
 type BulletState = {
   id?: string;
@@ -32,31 +24,29 @@ const bullets: BulletState[] = Array.from({ length: 100 }).map(() => {
 });
 
 type Props = {
-  currentPlayer?: PlayerType;
+  currentPlayer?: PlayerEntity;
 };
 
 export default function Bullets({ currentPlayer }: Props) {
   const instanceRefs = React.useRef<Position[]>([]);
 
-  React.useEffect(() => {
-    server.on("tick", (state: { bullets: Bullet[] }) => {
-      for (let i = 0, length = bullets.length; i < length; i++) {
-        if (!instanceRefs.current[i]) continue;
-        if (!state.bullets[i]) {
-          instanceRefs.current[i].scale.x = 0;
-          continue;
-        }
-        instanceRefs.current[i].scale.x = 1;
-        instanceRefs.current[i].rotateZ(state.bullets[i].rotation);
-        instanceRefs.current[i].color.set(state.bullets[i].color);
-        instanceRefs.current[i].position.set(
-          state.bullets[i].x,
-          state.bullets[i].y,
-          0
-        );
+  useFrame(() => {
+    for (let i = 0, length = bullets.length; i < length; i++) {
+      if (!instanceRefs.current[i]) continue;
+      if (!gameState.bullets[i]) {
+        instanceRefs.current[i].scale.x = 0;
+        continue;
       }
-    });
-  }, []);
+      instanceRefs.current[i].scale.x = 1;
+      instanceRefs.current[i].rotateZ(gameState.bullets[i].rotation);
+      instanceRefs.current[i].color.set(gameState.bullets[i].color);
+      instanceRefs.current[i].position.set(
+        gameState.bullets[i].x,
+        gameState.bullets[i].y,
+        0
+      );
+    }
+  });
 
   React.useEffect(() => {
     if (!currentPlayer?.inGame) return;

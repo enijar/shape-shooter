@@ -1,16 +1,15 @@
 import React from "react";
-import { settings } from "@app/shared";
+import { PlayerEntity, settings } from "@app/shared";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
-import { PlayerType } from "../../entities/player";
-import server from "../../../services/server";
+import gameState from "../../game-state";
 
 const MAP_SIZE = 200;
 
 const PLAYER_SIZE = (1 / settings.arena.size) * settings.player.size;
 
 type Props = {
-  players: PlayerType[];
+  players: PlayerEntity[];
   gap?: number;
 };
 
@@ -22,31 +21,27 @@ export default function Minimap({ players, gap = 20 }: Props) {
     groupRef.current.position.copy(camera.position);
     groupRef.current.position.x -= size.width * 0.5 - MAP_SIZE * 0.5 - gap;
     groupRef.current.position.y -= size.height * 0.5 - MAP_SIZE * 0.5 - gap;
-  });
 
-  React.useEffect(() => {
-    server.on("tick", (state: { players: PlayerType[] }) => {
-      for (let i = 0, length = state.players.length; i < length; i++) {
-        if (!meshRefs.current[i]) continue;
-        const player = state.players[i];
-        meshRefs.current[i].visible = player.inGame;
-        meshRefs.current[i].position.x = THREE.MathUtils.mapLinear(
-          player.x,
-          0,
-          settings.arena.size,
-          0,
-          MAP_SIZE
-        );
-        meshRefs.current[i].position.y = THREE.MathUtils.mapLinear(
-          player.y,
-          0,
-          settings.arena.size,
-          0,
-          MAP_SIZE
-        );
-      }
-    });
-  }, []);
+    for (let i = 0, length = gameState.players.length; i < length; i++) {
+      if (!meshRefs.current[i]) continue;
+      const player = gameState.players[i];
+      meshRefs.current[i].visible = player.inGame;
+      meshRefs.current[i].position.x = THREE.MathUtils.mapLinear(
+        player.x,
+        0,
+        settings.arena.size,
+        0,
+        MAP_SIZE
+      );
+      meshRefs.current[i].position.y = THREE.MathUtils.mapLinear(
+        player.y,
+        0,
+        settings.arena.size,
+        0,
+        MAP_SIZE
+      );
+    }
+  });
 
   return (
     <group ref={groupRef}>

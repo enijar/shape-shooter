@@ -4,6 +4,7 @@ type Settings = {
   };
   player: {
     size: number;
+    speed: number;
   };
 };
 
@@ -13,6 +14,7 @@ const settings: Settings = {
   },
   player: {
     size: 10,
+    speed: 0.1,
   },
 };
 

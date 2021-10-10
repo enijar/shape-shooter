@@ -27,7 +27,7 @@ export default function Arena() {
         <planeBufferGeometry
           args={[settings.arena.size, settings.arena.size]}
         />
-        <meshStandardMaterial map={texture} />
+        <meshBasicMaterial map={texture} />
       </mesh>
     </group>
   );

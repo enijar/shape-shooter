@@ -1,10 +1,13 @@
 import React from "react";
 import { settings } from "@app/shared";
 import * as THREE from "three";
-import { Instance, Instances } from "@react-three/drei";
+import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
 import { useFrame } from "@react-three/fiber";
 import gameState from "../../game-state";
+import { encodeSvg } from "../../utils";
+
+const SIZE = settings.item.size;
 
 type ItemState = {
   id?: string;
@@ -40,17 +43,22 @@ export default function Items() {
       // Health
       const health = (1 / item.maxHealth) * item.health;
       healthBarRefs.current[i].scale.x = health;
-      healthBarRefs.current[i].position.x =
-        settings.item.size * -2 * (1 - health) * 0.5;
+      healthBarRefs.current[i].position.x = SIZE * -2 * (1 - health) * 0.5;
     }
   });
 
+  const texture = useTexture(
+    encodeSvg(
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}" width="10" height="10">
+<circle cx="${SIZE * 0.5}" cy="${SIZE * 0.5}" r="${SIZE * 0.5}" fill="white"/>
+</svg>`
+    )
+  );
+
   return (
     <Instances limit={items.length}>
-      <circleBufferGeometry
-        args={[settings.item.size, settings.item.size, 32]}
-      />
-      <meshStandardMaterial />
+      <circleBufferGeometry args={[settings.item.size, 32]} />
+      <meshBasicMaterial map={texture} />
       {items.map((item, index) => {
         return (
           <Instance
@@ -64,7 +72,7 @@ export default function Items() {
           >
             <mesh position={[0, -22, -0.01]}>
               <planeBufferGeometry args={[settings.item.size * 2, 5]} />
-              <meshStandardMaterial color="#000000" />
+              <meshBasicMaterial color="#000000" />
             </mesh>
             <mesh
               position={[0, -22, 0]}
@@ -73,7 +81,7 @@ export default function Items() {
               }}
             >
               <planeBufferGeometry args={[settings.item.size * 2, 5]} />
-              <meshStandardMaterial color="hsl(120, 83%, 37%)" />
+              <meshBasicMaterial color="hsl(120, 83%, 37%)" />
             </mesh>
           </Instance>
         );

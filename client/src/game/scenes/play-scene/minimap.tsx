@@ -47,7 +47,7 @@ export default function Minimap({ players, gap = 20 }: Props) {
     <group ref={groupRef}>
       <mesh>
         <planeBufferGeometry args={[MAP_SIZE, MAP_SIZE]} />
-        <meshStandardMaterial color="#000000" transparent opacity={0.5} />
+        <meshBasicMaterial color="#000000" transparent opacity={0.5} />
       </mesh>
       {players.map((player, index) => {
         return (
@@ -64,7 +64,7 @@ export default function Minimap({ players, gap = 20 }: Props) {
             <planeBufferGeometry
               args={[MAP_SIZE * PLAYER_SIZE, MAP_SIZE * PLAYER_SIZE]}
             />
-            <meshStandardMaterial color={player.color} />
+            <meshBasicMaterial color={player.color} />
           </mesh>
         );
       })}

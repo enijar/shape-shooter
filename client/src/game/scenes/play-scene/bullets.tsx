@@ -1,11 +1,12 @@
 import React from "react";
 import { PlayerEntity, settings } from "@app/shared";
 import * as THREE from "three";
-import { Instance, Instances } from "@react-three/drei";
+import { Instance, Instances, useTexture } from "@react-three/drei";
 import server from "../../../services/server";
 import { Position } from "@react-three/drei/helpers/Position";
 import { useFrame } from "@react-three/fiber";
 import gameState from "../../game-state";
+import { encodeSvg } from "../../utils";
 
 type BulletState = {
   id?: string;
@@ -14,6 +15,8 @@ type BulletState = {
   position: THREE.Vector3;
   rotation: THREE.Euler;
 };
+
+const SIZE = settings.bullet.size;
 
 const bullets: BulletState[] = Array.from({ length: 100 }).map(() => {
   return {
@@ -65,10 +68,18 @@ export default function Bullets({ currentPlayer }: Props) {
     };
   }, [currentPlayer]);
 
+  const texture = useTexture(
+    encodeSvg(
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}" width="${SIZE}" height="${SIZE}">
+<circle cx="${SIZE * 0.5}" cy="${SIZE * 0.5}" r="${SIZE * 0.5}" fill="white"/>
+</svg>`
+    )
+  );
+
   return (
     <Instances limit={bullets.length}>
       <circleBufferGeometry args={[settings.bullet.size, 32]} />
-      <meshStandardMaterial />
+      <meshBasicMaterial map={texture} />
       {bullets.map((bullet, index) => {
         return (
           <Instance

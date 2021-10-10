@@ -39,7 +39,7 @@ export default function Leaderboard({ gap = 20 }: Props) {
     <group ref={groupRef}>
       <mesh>
         <planeBufferGeometry args={[LEADERBOARD_SIZE.x, LEADERBOARD_SIZE.y]} />
-        <meshStandardMaterial color="#000000" transparent opacity={0.5} />
+        <meshBasicMaterial color="#000000" transparent opacity={0.5} />
       </mesh>
       <Html
         style={{ width: `${LEADERBOARD_SIZE.x}px`, padding: "0.25em 0.5em" }}

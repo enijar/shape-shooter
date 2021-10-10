@@ -3,10 +3,13 @@ import styled from "styled-components";
 import { PlayerEntity, settings } from "@app/shared";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
-import { Html } from "@react-three/drei";
+import { Html, useTexture } from "@react-three/drei";
 import useRotation from "../hooks/use-rotation";
 import { Bar, BarFill } from "../styles";
 import gameState from "../game-state";
+import { encodeSvg } from "../utils";
+
+const SIZE = settings.player.size;
 
 type Props = PlayerEntity & {
   current?: boolean;
@@ -14,7 +17,6 @@ type Props = PlayerEntity & {
 
 export default function Player({
   color = "crimson",
-  size = 100,
   name = "Noob",
   id,
   exp,
@@ -62,11 +64,19 @@ export default function Player({
     }
   });
 
+  const texture = useTexture(
+    encodeSvg(
+      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}" width="${SIZE}" height="${SIZE}">
+<rect x="0" y="0" width="${SIZE}" height="${SIZE}" fill="white"/>
+</svg>`
+    )
+  );
+
   return (
     <group ref={groupRef} visible={false}>
       <mesh ref={meshRef}>
-        <planeBufferGeometry args={[size, size]} />
-        <meshStandardMaterial color={color} />
+        <planeBufferGeometry args={[SIZE, SIZE]} />
+        <meshBasicMaterial map={texture} color={color} />
       </mesh>
       <Html
         ref={htmlRef}
@@ -74,9 +84,9 @@ export default function Player({
           transform: "translate(-50%, 1em)",
           pointerEvents: "none",
           userSelect: "none",
-          width: `${size}px`,
+          width: `${SIZE}px`,
         }}
-        position={[0, -size * 0.5, 0]}
+        position={[0, -SIZE * 0.5, 0]}
       >
         <Bar height={14}>
           <BarFill ref={healthBarRef} color="hsl(120, 83%, 37%)">

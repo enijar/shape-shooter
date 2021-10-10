@@ -67,9 +67,7 @@ export default function Bullets({ currentPlayer }: Props) {
 
   return (
     <Instances limit={bullets.length}>
-      <circleBufferGeometry
-        args={[settings.bullet.size, settings.bullet.size, 32]}
-      />
+      <circleBufferGeometry args={[settings.bullet.size, 32]} />
       <meshStandardMaterial />
       {bullets.map((bullet, index) => {
         return (

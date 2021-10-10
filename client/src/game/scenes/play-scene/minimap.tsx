@@ -36,9 +36,11 @@ export default function Minimap({ players, gap = 20 }: Props) {
         0,
         settings.arena.size,
         0,
-        -MAP_SIZE
+        -MAP_SIZE / 2
       );
-      playerRefs.current[i].style.left = `${x}px`;
+      playerRefs.current[i].style.transform = `translate3d(calc((${
+        MAP_SIZE / 2
+      }px + ${x}px) - 50%), calc((${MAP_SIZE / 2}px + ${y}px) - 50%), 0px)`;
       playerRefs.current[i].style.top = `${y}px`;
     }
   });
@@ -68,9 +70,9 @@ export default function Minimap({ players, gap = 20 }: Props) {
               position: "absolute",
               top: "0px",
               left: "0px",
-              transform: `translate(calc(${MAP_SIZE / 2}px - 50%), calc(${
+              transform: `translate3d(calc(${MAP_SIZE / 2}px - 50%), calc(${
                 MAP_SIZE / 2
-              }px - 50%))`,
+              }px - 50%), 0px)`,
               backgroundColor: player.color,
               width: `${Math.max(MAP_SIZE * PLAYER_SIZE, 4)}px`,
               height: `${Math.max(MAP_SIZE * PLAYER_SIZE, 4)}px`,

@@ -23,8 +23,6 @@ export default function PlayScene() {
   React.useEffect(() => {
     if (!connected) return;
 
-    console.log(currentPlayer);
-
     function addPlayer(player: PlayerEntity) {
       setPlayers((players) => {
         if (players.find((p) => p.id === player.id)) {

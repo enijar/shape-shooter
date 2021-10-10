@@ -1,8 +1,9 @@
 import React from "react";
 import { PlayerEntity, settings } from "@app/shared";
 import * as THREE from "three";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import gameState from "../../game-state";
+import { Html } from "@react-three/drei";
 
 const MAP_SIZE = 200;
 
@@ -14,60 +15,69 @@ type Props = {
 };
 
 export default function Minimap({ players, gap = 20 }: Props) {
-  const groupRef = React.useRef<THREE.Group>();
-  const meshRefs = React.useRef<THREE.Mesh[]>([]);
+  const playerRefs = React.useRef<HTMLDivElement[]>([]);
 
-  useFrame(({ camera, size }) => {
-    groupRef.current.position.copy(camera.position);
-    groupRef.current.position.x -= size.width * 0.5 - MAP_SIZE * 0.5 - gap;
-    groupRef.current.position.y -= size.height * 0.5 - MAP_SIZE * 0.5 - gap;
-
+  useFrame(() => {
     for (let i = 0, length = gameState.players.length; i < length; i++) {
-      if (!meshRefs.current[i]) continue;
+      if (!playerRefs.current[i]) continue;
       const player = gameState.players[i];
-      meshRefs.current[i].visible = player.inGame;
-      meshRefs.current[i].position.x = THREE.MathUtils.mapLinear(
+      playerRefs.current[i].style.visibility = player.inGame
+        ? "visible"
+        : "hidden";
+      const x = THREE.MathUtils.mapLinear(
         player.x,
         0,
         settings.arena.size,
         0,
         MAP_SIZE
       );
-      meshRefs.current[i].position.y = THREE.MathUtils.mapLinear(
+      const y = THREE.MathUtils.mapLinear(
         player.y,
         0,
         settings.arena.size,
         0,
-        MAP_SIZE
+        -MAP_SIZE
       );
+      playerRefs.current[i].style.left = `${x}px`;
+      playerRefs.current[i].style.top = `${y}px`;
     }
   });
 
+  const { size } = useThree();
+
   return (
-    <group ref={groupRef}>
-      <mesh>
-        <planeBufferGeometry args={[MAP_SIZE, MAP_SIZE]} />
-        <meshBasicMaterial color="#000000" transparent opacity={0.5} />
-      </mesh>
+    <Html
+      style={{
+        width: `${MAP_SIZE}px`,
+        height: `${MAP_SIZE}px`,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        position: "relative",
+      }}
+      calculatePosition={() => {
+        return [gap, size.height - MAP_SIZE - gap];
+      }}
+    >
       {players.map((player, index) => {
         return (
-          <mesh
-            visible={false}
+          <div
             key={player.id}
             ref={(ref) => {
-              if (ref instanceof THREE.Mesh) {
-                meshRefs.current[index] = ref;
-              }
+              playerRefs.current[index] = ref;
             }}
-            position={[0, 0, 0.1]}
-          >
-            <planeBufferGeometry
-              args={[MAP_SIZE * PLAYER_SIZE, MAP_SIZE * PLAYER_SIZE]}
-            />
-            <meshBasicMaterial color={player.color} />
-          </mesh>
+            style={{
+              position: "absolute",
+              top: "0px",
+              left: "0px",
+              transform: `translate(calc(${MAP_SIZE / 2}px - 50%), calc(${
+                MAP_SIZE / 2
+              }px - 50%))`,
+              backgroundColor: player.color,
+              width: `${Math.max(MAP_SIZE * PLAYER_SIZE, 4)}px`,
+              height: `${Math.max(MAP_SIZE * PLAYER_SIZE, 4)}px`,
+            }}
+          />
         );
       })}
-    </group>
+    </Html>
   );
 }

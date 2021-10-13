@@ -4,6 +4,7 @@ const gameState: GameState = {
   players: [],
   bullets: [],
   items: [],
+  foods: [],
 };
 
 export default gameState;

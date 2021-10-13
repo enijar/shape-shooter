@@ -5,6 +5,7 @@ import { intersect } from "./utils";
 import Player from "./entities/player";
 import Bullet from "./entities/bullet";
 import Item from "./entities/item";
+import Food from "./entities/food";
 
 export type GameOptions = {
   fps?: number;
@@ -14,6 +15,7 @@ export default class Game {
   players: Player[] = [];
   bullets: Bullet[] = [];
   items: Item[] = [];
+  foods: Food[] = [];
 
   private readonly fps: number = 60;
   private readonly tickInterval: number;
@@ -22,6 +24,7 @@ export default class Game {
   private immediate: NodeJS.Immediate;
 
   private maxItems: number = 0;
+  private maxFoods: number = 0;
 
   constructor(options: GameOptions = {}) {
     this.fps = options.fps ?? this.fps;
@@ -33,6 +36,9 @@ export default class Game {
     this.players.push(player);
     this.maxItems = Math.round(
       Math.sqrt(settings.arena.size * this.players.length)
+    );
+    this.maxFoods = Math.round(
+      Math.sqrt(settings.arena.size * this.players.length) * 0.2
     );
   }
 
@@ -54,7 +60,12 @@ export default class Game {
   }
 
   getState(): GameState {
-    return { players: this.players, bullets: this.bullets, items: this.items };
+    return {
+      players: this.players,
+      bullets: this.bullets,
+      items: this.items,
+      foods: this.foods,
+    };
   }
 
   private tick(onTick: Function) {
@@ -68,6 +79,10 @@ export default class Game {
       this.items.push(new Item());
     }
 
+    for (let i = 0; i < this.maxFoods - this.foods.length; i++) {
+      this.foods.push(new Food());
+    }
+
     // Update players
     for (let p = 0, length = this.players.length; p < length; p++) {
       this.players[p].update(this);
@@ -76,6 +91,11 @@ export default class Game {
     // Update items
     for (let i = 0, length = this.items.length; i < length; i++) {
       this.items[i].update(this);
+    }
+
+    // Update foods
+    for (let i = 0, length = this.foods.length; i < length; i++) {
+      this.foods[i].update(this);
     }
 
     // Update bullets
@@ -152,6 +172,21 @@ export default class Game {
 
       if (removeBullet) {
         this.bullets.splice(b, 1);
+      }
+    }
+
+    // Update player health when they intersect food
+    for (let f = this.foods.length - 1; f >= 0; f--) {
+      for (let p = 0, length = this.players.length; p < length; p++) {
+        if (intersect(this.players[p].box, this.foods[f].box)) {
+          this.foods.splice(f, 1);
+          this.players[p].health = THREE.MathUtils.clamp(
+            this.players[p].health + settings.food.healthIncrement,
+            0,
+            this.players[p].maxHealth
+          );
+          break;
+        }
       }
     }
 

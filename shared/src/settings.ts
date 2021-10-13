@@ -16,8 +16,12 @@ const settings = {
     size: 15,
     maxHealth: 30,
   },
+  food: {
+    size: 8,
+    healthIncrement: 20,
+  },
   arena: {
-    size: 900,
+    size: 1500,
   },
 };
 

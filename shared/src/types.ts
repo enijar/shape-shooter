@@ -1,6 +1,7 @@
 import PlayerEntity from "./game/entities/player-entity";
 import BulletEntity from "./game/entities/bullet-entity";
 import ItemEntity from "./game/entities/item-entity";
+import FoodEntity from "./game/entities/food-entity";
 
 export enum Action {
   up = "up",
@@ -24,4 +25,5 @@ export type GameState = {
   players: PlayerEntity[];
   bullets: BulletEntity[];
   items: ItemEntity[];
+  foods: FoodEntity[];
 };

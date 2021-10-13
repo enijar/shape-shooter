@@ -12,6 +12,7 @@ import Minimap from "./minimap";
 import Leaderboard from "./leaderboard";
 import Actions from "../../globals/actions";
 import gameState from "../../game-state";
+import Foods from "./foods";
 
 export default function PlayScene() {
   const [currentPlayer, setCurrentPlayer] = React.useState<PlayerEntity>(null);
@@ -82,6 +83,7 @@ export default function PlayScene() {
       gameState.players = state.players;
       gameState.bullets = state.bullets;
       gameState.items = state.items;
+      gameState.foods = state.foods;
     });
   }, [connected]);
 
@@ -114,6 +116,7 @@ export default function PlayScene() {
       })}
       <Bullets currentPlayer={currentPlayer} />
       <Items />
+      <Foods />
       <Leaderboard />
       <Minimap players={players} />
       {!currentPlayer?.inGame && (

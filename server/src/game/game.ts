@@ -84,8 +84,13 @@ export default class Game {
     }
 
     // Update players
-    for (let p = 0, length = this.players.length; p < length; p++) {
-      this.players[p].update(this);
+    for (let i = this.players.length - 1; i >= 0; i--) {
+      if (this.players[i].health === 0) {
+        io.emit("player.disconnected", this.players[i], { reliable: true });
+        this.players.splice(i, 1);
+        continue;
+      }
+      this.players[i].update(this);
     }
 
     // Update items

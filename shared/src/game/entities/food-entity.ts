@@ -1,6 +1,6 @@
-import * as THREE from "three";
 import { Box } from "../../types";
 import settings from "../../settings";
+import { generateUUID, randInt } from "../../utils";
 
 export default class FoodEntity {
   id: string;
@@ -11,15 +11,9 @@ export default class FoodEntity {
   box: Box;
 
   constructor() {
-    this.id = THREE.MathUtils.generateUUID();
-    this.x = THREE.MathUtils.randInt(
-      settings.arena.size * -0.5,
-      settings.arena.size * 0.5
-    );
-    this.y = THREE.MathUtils.randInt(
-      settings.arena.size * -0.5,
-      settings.arena.size * 0.5
-    );
+    this.id = generateUUID();
+    this.x = randInt(settings.arena.size * -0.5, settings.arena.size * 0.5);
+    this.y = randInt(settings.arena.size * -0.5, settings.arena.size * 0.5);
     this.box = {
       width: this.size,
       height: this.size,

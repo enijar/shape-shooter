@@ -1,7 +1,7 @@
-import * as THREE from "three";
 import { Box } from "../../types";
 import settings from "../../settings";
 import PlayerEntity from "./player-entity";
+import { generateUUID } from "../../utils";
 
 export default class BulletEntity {
   id: string;
@@ -20,7 +20,7 @@ export default class BulletEntity {
   readonly startY: number = 0;
 
   constructor(player: PlayerEntity) {
-    this.id = THREE.MathUtils.generateUUID();
+    this.id = generateUUID();
     this.playerId = player.id;
     this.color = player.color;
     this.x = player.x;

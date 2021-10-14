@@ -1,4 +1,5 @@
 export * from "./types";
+export * from "./utils";
 
 export { default as settings } from "./settings";
 export { default as PlayerEntity } from "./game/entities/player-entity";

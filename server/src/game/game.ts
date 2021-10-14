@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { GameState, settings } from "@app/shared";
-import { io } from "../services/app";
+import server from "../services/server";
 import { intersect } from "./utils";
 import Player from "./entities/player";
 import Bullet from "./entities/bullet";
@@ -86,7 +86,7 @@ export default class Game {
     // Update players
     for (let i = this.players.length - 1; i >= 0; i--) {
       if (this.players[i].health === 0) {
-        io.emit("player.disconnected", this.players[i]);
+        server.emit("player.disconnected", this.players[i]);
         this.players.splice(i, 1);
         continue;
       }
@@ -126,7 +126,7 @@ export default class Game {
             this.players[p].maxHealth
           );
 
-          io.emit("player.damaged", this.players[p]);
+          server.emit("player.damaged", this.players[p]);
 
           // Remove player when their health runs out
           if (this.players[p].health === 0) {
@@ -138,7 +138,7 @@ export default class Game {
               playerKiller.exp += settings.exp.playerKill;
             }
             this.players[p].inGame = false;
-            io.emit("player.killed", this.players[p]);
+            server.emit("player.killed", this.players[p]);
           }
           break;
         }

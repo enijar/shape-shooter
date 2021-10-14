@@ -67,15 +67,15 @@ server {
     server_name shapeshooter.io;
 
     location /api {
-        proxy_http_version 1.1;
-        proxy_cache_bypass $http_upgrade;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
+        proxy_redirect off;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_pass http://localhost:3000; # 👈 this should match server env
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+        proxy_pass http://localhost:3000;
     }
 
     location / {

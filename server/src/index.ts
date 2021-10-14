@@ -1,24 +1,24 @@
 import config from "./config";
-import { io, server } from "./services/app";
+import server from "./services/server";
 import Game from "./game/game";
 import Player from "./game/entities/player";
 
 const game = new Game();
 game.start(() => {
-  io.emit("tick", game.getState());
+  server.emit("tick", game.getState());
 });
 
-io.on("connection", (socket) => {
+server.on("connection", (socket) => {
   const player = new Player(socket.id);
   game.addPlayer(player);
 
-  io.emit("player.connected", player);
+  server.emit("player.connected", player);
   socket.emit("connected", { player, ...game.getState() });
 
   socket.on("player.update.name", (name: string) => {
     player.name = name ?? "Noob";
     player.inGame = true;
-    io.emit("player.connected", player);
+    server.emit("player.connected", player);
     socket.emit(
       "connected",
       { player, ...game.getState() },
@@ -40,13 +40,13 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     game.removePlayer(player);
-    io.emit("player.disconnected", player);
+    server.emit("player.disconnected", player);
   });
 });
 
-server.listen(config.port, () => {
-  console.log(`Server running: http://localhost:${config.port}`);
-});
+server.listen(config.port);
+
+console.log(`Server running: http://localhost:${config.port}`);
 
 server.on("close", () => {
   console.log("Closing down gracefully...");

@@ -57,7 +57,7 @@ export default function Bullets({ currentPlayer }: Props) {
 
     function shoot() {
       shooting = !shooting;
-      server.emit("shooting", shooting, { reliable: true });
+      server.emit("shooting", shooting);
     }
 
     window.addEventListener("pointerdown", shoot);

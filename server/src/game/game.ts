@@ -86,7 +86,7 @@ export default class Game {
     // Update players
     for (let i = this.players.length - 1; i >= 0; i--) {
       if (this.players[i].health === 0) {
-        io.emit("player.disconnected", this.players[i], { reliable: true });
+        io.emit("player.disconnected", this.players[i]);
         this.players.splice(i, 1);
         continue;
       }
@@ -126,7 +126,7 @@ export default class Game {
             this.players[p].maxHealth
           );
 
-          io.emit("player.damaged", this.players[p], { reliable: true });
+          io.emit("player.damaged", this.players[p]);
 
           // Remove player when their health runs out
           if (this.players[p].health === 0) {
@@ -138,7 +138,7 @@ export default class Game {
               playerKiller.exp += settings.exp.playerKill;
             }
             this.players[p].inGame = false;
-            io.emit("player.killed", this.players[p], { reliable: true });
+            io.emit("player.killed", this.players[p]);
           }
           break;
         }

@@ -1,69 +1,54 @@
 import config from "./config";
-import database from "./services/database";
 import { io, server } from "./services/app";
 import Game from "./game/game";
 import Player from "./game/entities/player";
 
-(async () => {
-  try {
-    await database.sync({ alter: true });
+const game = new Game();
+game.start(() => {
+  io.emit("tick", game.getState());
+});
 
-    const game = new Game();
-    game.start(() => {
-      io.emit("tick", game.getState());
-    });
+io.on("connection", (socket) => {
+  const player = new Player(socket.id);
+  game.addPlayer(player);
 
-    io.onConnection((channel) => {
-      const player = new Player(channel.id);
-      game.addPlayer(player);
+  io.emit("player.connected", player);
+  socket.emit("connected", { player, ...game.getState() });
 
-      io.emit("player.connected", player, { reliable: true });
-      channel.emit(
-        "connected",
-        { player, ...game.getState() },
-        { reliable: true }
-      );
+  socket.on("player.update.name", (name: string) => {
+    player.name = name ?? "Noob";
+    player.inGame = true;
+    io.emit("player.connected", player);
+    socket.emit(
+      "connected",
+      { player, ...game.getState() },
+      { reliable: true }
+    );
+  });
 
-      channel.on("player.update.name", (name: string) => {
-        player.name = name ?? "Noob";
-        player.inGame = true;
-        io.emit("player.connected", player, { reliable: true });
-        channel.emit(
-          "connected",
-          { player, ...game.getState() },
-          { reliable: true }
-        );
-      });
+  socket.on("actions", (actions: any) => {
+    player.actions = actions;
+  });
 
-      channel.on("actions", (actions: any) => {
-        player.actions = actions;
-      });
+  socket.on("rotation", (rotation: number) => {
+    player.rotation = rotation;
+  });
 
-      channel.on("rotation", (rotation: number) => {
-        player.rotation = rotation;
-      });
+  socket.on("shooting", (shooting: boolean) => {
+    player.shooting = shooting;
+  });
 
-      channel.on("shooting", (shooting: boolean) => {
-        player.shooting = shooting;
-      });
+  socket.on("disconnect", () => {
+    game.removePlayer(player);
+    io.emit("player.disconnected", player);
+  });
+});
 
-      channel.on("disconnect", () => {
-        game.removePlayer(player);
-        io.connectionsManager.connections.delete(channel.id);
-        io.emit("player.disconnected", player, { reliable: true });
-      });
-    });
+server.listen(config.port, () => {
+  console.log(`Server running: http://localhost:${config.port}`);
+});
 
-    server.listen(config.port, () => {
-      console.log(`Server running: http://localhost:${config.port}`);
-    });
-
-    server.on("close", () => {
-      console.log("Closing down gracefully...");
-      game.destroy();
-    });
-  } catch (err) {
-    console.error(err);
-    process.exit(1);
-  }
-})();
+server.on("close", () => {
+  console.log("Closing down gracefully...");
+  game.destroy();
+});

@@ -55,7 +55,7 @@ npm run build
 npm add -g pm2
 
 # Run the game server with PM2
-pm2 start --name "game" /var/www/shape-shooterserver/build/src/index.js
+pm2 start --name "game" /var/www/shape-shooter/server/build/index.js
 ```
 
 **NGINX Config**
@@ -67,7 +67,6 @@ server {
     server_name shapeshooter.io;
 
     location /api {
-        listen 3000 udp;
         proxy_http_version 1.1;
         proxy_cache_bypass $http_upgrade;
         proxy_set_header Upgrade $http_upgrade;
@@ -82,7 +81,7 @@ server {
     location / {
         index index.html;
         absolute_redirect off;
-        root /var/www/shape-shooter/client/release;
+        root /var/www/shape-shooter/client/build;
         try_files $uri $uri/ /index.html =404;
     }
 

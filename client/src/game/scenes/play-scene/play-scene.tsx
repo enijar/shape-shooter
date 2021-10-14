@@ -52,7 +52,6 @@ export default function PlayScene() {
     });
 
     server.on("player.killed", (player: PlayerEntity) => {
-      console.log("player.killed->player", currentPlayer, player.id);
       if (player.id === currentPlayer?.id) {
         console.log("p", player);
         setCurrentPlayer({ ...player });
@@ -75,6 +74,14 @@ export default function PlayScene() {
         return players.filter((p) => p.id !== player.id);
       });
     });
+
+    return () => {
+      server.off("connected");
+      server.off("player.connected");
+      server.off("player.killed");
+      server.off("player.damaged");
+      server.off("player.disconnected");
+    };
   }, [currentPlayer, connected]);
 
   React.useEffect(() => {
@@ -85,6 +92,9 @@ export default function PlayScene() {
       gameState.items = state.items;
       gameState.foods = state.foods;
     });
+    return () => {
+      server.off("tick");
+    };
   }, [connected]);
 
   const play = React.useCallback((event: React.FormEvent) => {
@@ -120,7 +130,7 @@ export default function PlayScene() {
       <Leaderboard />
       <Minimap players={players} />
       {!currentPlayer?.inGame && (
-        <Html style={{ transform: "translate(-50%, -50%)" }}>
+        <Html calculatePosition={() => [0, 0]}>
           <PlayerForm onSubmit={play}>
             <label>
               <h3>Enter a Name</h3>

@@ -10,6 +10,7 @@ const app = express();
 
 export const server = http.createServer(app);
 export const io = new Server(server, {
+  path: "/api/socket.io",
   cors: {
     origin: config.appUrl,
   },

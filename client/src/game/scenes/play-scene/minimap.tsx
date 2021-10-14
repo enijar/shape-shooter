@@ -11,19 +11,19 @@ const PLAYER_SIZE = (1 / settings.arena.size) * settings.player.size;
 
 type Props = {
   players: PlayerEntity[];
+  currentPlayer: PlayerEntity;
   gap?: number;
 };
 
-export default function Minimap({ players, gap = 20 }: Props) {
+export default function Minimap({ players, currentPlayer, gap = 20 }: Props) {
   const playerRefs = React.useRef<HTMLDivElement[]>([]);
 
   useFrame(() => {
     for (let i = 0, length = gameState.players.length; i < length; i++) {
       if (!playerRefs.current[i]) continue;
       const player = gameState.players[i];
-      playerRefs.current[i].style.visibility = player.inGame
-        ? "visible"
-        : "hidden";
+      playerRefs.current[i].style.visibility =
+        currentPlayer !== null ? "visible" : "hidden";
       const x = THREE.MathUtils.mapLinear(
         player.x,
         0,

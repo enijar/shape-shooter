@@ -85,11 +85,6 @@ export default class Game {
 
     // Update players
     for (let i = this.players.length - 1; i >= 0; i--) {
-      if (this.players[i].health === 0) {
-        server.emit("player.disconnected", this.players[i]);
-        this.players.splice(i, 1);
-        continue;
-      }
       this.players[i].update(this);
     }
 
@@ -111,10 +106,7 @@ export default class Game {
 
       // @todo how does one optimise this inner player loop?
       // Damage players that get hit by bullets
-      for (let p = 0, length = this.players.length; p < length; p++) {
-        // Ignore players that are not in the game
-        if (!this.players[p].inGame) continue;
-
+      for (let p = this.players.length - 1; p >= 0; p--) {
         // Players own bullet can't hit them
         if (this.players[p].id === this.bullets[b].playerId) continue;
         // Damage player if bullet box intersects with player box
@@ -126,7 +118,7 @@ export default class Game {
             this.players[p].maxHealth
           );
 
-          server.emit("player.damaged", this.players[p]);
+          server.emit("player.update", this.players[p]);
 
           // Remove player when their health runs out
           if (this.players[p].health === 0) {
@@ -137,8 +129,8 @@ export default class Game {
             if (playerKiller) {
               playerKiller.exp += settings.exp.playerKill;
             }
-            this.players[p].inGame = false;
             server.emit("player.killed", this.players[p]);
+            this.players.splice(p, 1);
           }
           break;
         }

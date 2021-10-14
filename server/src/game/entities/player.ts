@@ -6,6 +6,23 @@ import Bullet from "./bullet";
 export default class Player extends PlayerEntity {
   constructor(id: string) {
     super(id);
+    this.fresh();
+  }
+
+  fresh() {
+    this.x = 0;
+    this.y = 0;
+    this.box = {
+      width: this.size,
+      height: this.size,
+      x: this.x,
+      y: this.y,
+    };
+    this.health = this.maxHealth;
+    this.exp = 0;
+    this.dx = 0;
+    this.dy = 0;
+    this.rotation = 0;
   }
 
   update(game: Game) {

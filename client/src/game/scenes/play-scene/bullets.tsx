@@ -52,7 +52,7 @@ export default function Bullets({ currentPlayer }: Props) {
   });
 
   React.useEffect(() => {
-    if (!currentPlayer?.inGame) return;
+    if (currentPlayer === null) return;
     let shooting = false;
 
     function shoot() {

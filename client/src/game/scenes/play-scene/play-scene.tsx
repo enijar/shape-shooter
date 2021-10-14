@@ -1,9 +1,8 @@
 import React from "react";
-import { Action, PlayerEntity, GameState } from "@app/shared";
+import { Action, GameState, PlayerEntity } from "@app/shared";
 import { Html } from "@react-three/drei";
 import styled from "styled-components";
 import server from "../../../services/server";
-import { useAppStore } from "../../../state/use-app-store";
 import Arena from "./arena";
 import Bullets from "./bullets";
 import Items from "./items";
@@ -19,20 +18,25 @@ export default function PlayScene() {
   const [players, setPlayers] = React.useState<PlayerEntity[]>([]);
   const nameInputRef = React.useRef<HTMLInputElement>();
 
-  const { connected } = useAppStore();
-
   React.useEffect(() => {
-    if (!connected) return;
-
-    function addPlayer(player: PlayerEntity) {
+    function removePlayer(player: PlayerEntity) {
       setPlayers((players) => {
-        if (players.find((p) => p.id === player.id)) {
-          return players;
-        }
-        return [...players, player];
+        return players.filter((p) => p.id !== player.id);
       });
+      if (player.id === currentPlayer?.id) {
+        setCurrentPlayer(null);
+      }
     }
 
+    server.on("player.killed", removePlayer);
+    server.on("player.disconnected", removePlayer);
+    return () => {
+      server.off("player.killed");
+      server.off("player.disconnected");
+    };
+  }, [currentPlayer]);
+
+  React.useEffect(() => {
     server.on(
       "connected",
       ({
@@ -46,19 +50,23 @@ export default function PlayScene() {
         setPlayers(players);
       }
     );
+    server.on("tick", (state: GameState) => {
+      gameState.players = state.players;
+      gameState.bullets = state.bullets;
+      gameState.items = state.items;
+      gameState.foods = state.foods;
+    });
 
     server.on("player.connected", (player: PlayerEntity) => {
-      addPlayer(player);
+      setPlayers((players) => {
+        if (players.find((p) => p.id === player.id)) {
+          return players;
+        }
+        return [...players, player];
+      });
     });
 
-    server.on("player.killed", (player: PlayerEntity) => {
-      if (player.id === currentPlayer?.id) {
-        console.log("p", player);
-        setCurrentPlayer({ ...player });
-      }
-    });
-
-    server.on("player.damaged", (player: PlayerEntity) => {
+    server.on("player.update", (player: PlayerEntity) => {
       setPlayers((players) => {
         return players.map((p) => {
           if (p.id === player.id) {
@@ -69,43 +77,25 @@ export default function PlayScene() {
       });
     });
 
-    server.on("player.disconnected", (player: PlayerEntity) => {
-      setPlayers((players) => {
-        return players.filter((p) => p.id !== player.id);
-      });
-    });
-
     return () => {
       server.off("connected");
-      server.off("player.connected");
-      server.off("player.killed");
-      server.off("player.damaged");
-      server.off("player.disconnected");
-    };
-  }, [currentPlayer, connected]);
-
-  React.useEffect(() => {
-    if (!connected) return;
-    server.on("tick", (state: GameState) => {
-      gameState.players = state.players;
-      gameState.bullets = state.bullets;
-      gameState.items = state.items;
-      gameState.foods = state.foods;
-    });
-    return () => {
       server.off("tick");
+      server.off("player.connected");
+      server.off("player.update");
     };
-  }, [connected]);
+  }, []);
 
   const play = React.useCallback((event: React.FormEvent) => {
     event.preventDefault();
-    server.emit("player.update.name", nameInputRef.current.value);
+    server.emit("player.join", {
+      name: nameInputRef.current.value,
+    });
   }, []);
 
   return (
     <group>
       <Arena />
-      {currentPlayer?.inGame && (
+      {currentPlayer !== null && (
         <Actions
           keyMap={{
             w: Action.up,
@@ -128,8 +118,8 @@ export default function PlayScene() {
       <Items />
       <Foods />
       <Leaderboard />
-      <Minimap players={players} />
-      {!currentPlayer?.inGame && (
+      <Minimap players={players} currentPlayer={currentPlayer} />
+      {currentPlayer == null && (
         <Html calculatePosition={() => [0, 0]}>
           <PlayerForm onSubmit={play}>
             <label>

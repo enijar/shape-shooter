@@ -8,22 +8,21 @@ game.start(() => {
   server.emit("tick", game.getState());
 });
 
+type PlayerData = {
+  name: string;
+};
+
 server.on("connection", (socket) => {
   const player = new Player(socket.id);
-  game.addPlayer(player);
 
-  server.emit("player.connected", player);
-  socket.emit("connected", { player, ...game.getState() });
-
-  socket.on("player.update.name", (name: string) => {
-    player.name = name ?? "Noob";
-    player.inGame = true;
+  socket.on("player.join", (playerData: PlayerData) => {
+    if (typeof playerData.name !== "string") return;
+    if (playerData.name.trim().length === 0) return;
+    player.name = playerData.name;
+    player.fresh();
+    game.addPlayer(player);
+    socket.emit("connected", { player, ...game.getState() });
     server.emit("player.connected", player);
-    socket.emit(
-      "connected",
-      { player, ...game.getState() },
-      { reliable: true }
-    );
   });
 
   socket.on("actions", (actions: any) => {
@@ -39,8 +38,8 @@ server.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    game.removePlayer(player);
     server.emit("player.disconnected", player);
+    game.removePlayer(player);
   });
 });
 

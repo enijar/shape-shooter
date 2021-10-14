@@ -19,21 +19,18 @@ export default class PlayerEntity {
   lastShotTime = 0;
   dx: number = 0;
   dy: number = 0;
-  box: Box;
+  box: Box = {
+    width: settings.player.size,
+    height: settings.player.size,
+    x: 0,
+    y: 0,
+  };
   health: number = 0;
   exp: number = 0;
-  inGame: boolean = false;
   name: string = "Noob";
   readonly maxHealth: number = settings.player.maxHealth;
 
   constructor(id: string) {
     this.id = id;
-    this.box = {
-      width: this.size,
-      height: this.size,
-      x: this.x,
-      y: this.y,
-    };
-    this.health = this.maxHealth;
   }
 }

@@ -36,10 +36,7 @@ export default function Player({
     const index = gameState.players.findIndex((player) => player.id === id);
     if (index === -1) return;
     const player = gameState.players[index];
-    rotationControls.enabled = player.inGame;
-    groupRef.current.visible = player.inGame;
-    htmlRef.current.style.visibility = player.inGame ? "visible" : "hidden";
-    if (!player.inGame) return;
+    rotationControls.enabled = current;
 
     // Update position
     groupRef.current.position.x = player.x;
@@ -73,7 +70,7 @@ export default function Player({
   );
 
   return (
-    <group ref={groupRef} visible={false}>
+    <group ref={groupRef}>
       <mesh ref={meshRef}>
         <planeBufferGeometry args={[SIZE, SIZE]} />
         <meshBasicMaterial map={texture} color={color} />

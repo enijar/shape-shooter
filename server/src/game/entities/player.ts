@@ -4,6 +4,8 @@ import Game from "../game";
 import Bullet from "./bullet";
 
 export default class Player extends PlayerEntity {
+  private lerp = 0.05;
+
   constructor(id: string) {
     super(id);
     this.fresh();
@@ -34,23 +36,27 @@ export default class Player extends PlayerEntity {
       }
     }
 
-    this.dx = 0;
-    this.dy = 0;
+    let dx = 0;
+    let dy = 0;
+
     for (const action in this.actions) {
       if (!this.actions[action]) continue;
       if (action === Action.up) {
-        this.dy = 1;
+        dy = 1;
       }
       if (action === Action.down) {
-        this.dy = -1;
+        dy = -1;
       }
       if (action === Action.left) {
-        this.dx = -1;
+        dx = -1;
       }
       if (action === Action.right) {
-        this.dx = 1;
+        dx = 1;
       }
     }
+
+    this.dx = THREE.MathUtils.lerp(this.dx, dx, this.lerp);
+    this.dy = THREE.MathUtils.lerp(this.dy, dy, this.lerp);
 
     const a = settings.arena.size * 0.5;
     const p = this.speed * 0.5;

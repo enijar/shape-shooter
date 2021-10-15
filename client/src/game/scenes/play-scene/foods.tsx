@@ -1,6 +1,6 @@
 import React from "react";
 import { settings } from "@app/shared";
-import * as THREE from "three";
+import { Vector3, MathUtils } from "three";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
 import { useFrame } from "@react-three/fiber";
@@ -11,12 +11,12 @@ const SIZE = settings.food.size;
 
 type FoodState = {
   id?: string;
-  position: THREE.Vector3;
+  position: Vector3;
 };
 
 const foods: FoodState[] = Array.from({ length: 100 }).map(() => {
   return {
-    position: new THREE.Vector3(0, 0, 0),
+    position: new Vector3(0, 0, 0),
   };
 });
 
@@ -33,7 +33,7 @@ export default function Foods() {
 
       const food = gameState.foods[i];
 
-      const s = THREE.MathUtils.mapLinear(
+      const s = MathUtils.mapLinear(
         (1 + Math.sin(clock.getElapsedTime())) / 2,
         0,
         1,

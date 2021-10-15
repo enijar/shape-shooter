@@ -1,6 +1,6 @@
 import React from "react";
 import { PlayerEntity, settings } from "@app/shared";
-import * as THREE from "three";
+import { MathUtils } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import gameState from "../../game-state";
 import { Html } from "@react-three/drei";
@@ -24,14 +24,14 @@ export default function Minimap({ players, currentPlayer, gap = 20 }: Props) {
       const player = gameState.players[i];
       playerRefs.current[i].style.visibility =
         currentPlayer !== null ? "visible" : "hidden";
-      const x = THREE.MathUtils.mapLinear(
+      const x = MathUtils.mapLinear(
         player.x,
         0,
         settings.arena.size,
         0,
         MAP_SIZE
       );
-      const y = THREE.MathUtils.mapLinear(
+      const y = MathUtils.mapLinear(
         player.y,
         0,
         settings.arena.size,

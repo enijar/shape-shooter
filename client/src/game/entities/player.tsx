@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { PlayerEntity, settings } from "@app/shared";
-import * as THREE from "three";
+import { Group, Mesh } from "three";
 import { useFrame } from "@react-three/fiber";
 import { Html, useTexture } from "@react-three/drei";
 import useRotation from "../hooks/use-rotation";
@@ -22,9 +22,9 @@ export default function Player({
   exp,
   current = false,
 }: Props) {
-  const groupRef = React.useRef<THREE.Group>();
+  const groupRef = React.useRef<Group>();
   const htmlRef = React.useRef<HTMLDivElement>();
-  const meshRef = React.useRef<THREE.Mesh>();
+  const meshRef = React.useRef<Mesh>();
   const healthBarRef = React.useRef<HTMLDivElement>();
   const healthTextRef = React.useRef<HTMLDivElement>();
   const expBarRef = React.useRef<HTMLDivElement>();

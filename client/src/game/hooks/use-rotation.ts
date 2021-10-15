@@ -1,12 +1,12 @@
 import React from "react";
-import * as THREE from "three";
+import { Box3, Object3D, MathUtils } from "three";
 import { useThree } from "@react-three/fiber";
 import server from "../../services/server";
 
-const box = new THREE.Box3();
+const box = new Box3();
 
 export default function useRotation(
-  objectRef: React.MutableRefObject<THREE.Object3D>,
+  objectRef: React.MutableRefObject<Object3D>,
   enabled: boolean
 ) {
   const enabledRef = React.useRef(enabled);
@@ -26,7 +26,7 @@ export default function useRotation(
       const cX = (box.max.x + box.min.x) / 2;
       const cY = (box.max.y + box.min.y) / 2;
       const { x: oX, y: oY } = raycaster.ray.origin;
-      const r = Math.atan2(oY - cY, oX - cX) - THREE.MathUtils.degToRad(90);
+      const r = Math.atan2(oY - cY, oX - cX) - MathUtils.degToRad(90);
       server.emit("rotation", r);
     }
 

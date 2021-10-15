@@ -1,6 +1,6 @@
 import React from "react";
 import { PlayerEntity, settings } from "@app/shared";
-import * as THREE from "three";
+import { Color, Vector3, Euler } from "three";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import server from "../../../services/server";
 import { Position } from "@react-three/drei/helpers/Position";
@@ -11,18 +11,18 @@ import { encodeSvg } from "../../utils";
 type BulletState = {
   id?: string;
   playerId?: string;
-  color: THREE.Color;
-  position: THREE.Vector3;
-  rotation: THREE.Euler;
+  color: Color;
+  position: Vector3;
+  rotation: Euler;
 };
 
 const SIZE = settings.bullet.size;
 
 const bullets: BulletState[] = Array.from({ length: 100 }).map(() => {
   return {
-    color: new THREE.Color("#ffffff"),
-    position: new THREE.Vector3(0, 0, 0),
-    rotation: new THREE.Euler(0, 0, 0),
+    color: new Color("#ffffff"),
+    position: new Vector3(0, 0, 0),
+    rotation: new Euler(0, 0, 0),
   };
 });
 

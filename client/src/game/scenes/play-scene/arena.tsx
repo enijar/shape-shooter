@@ -1,6 +1,6 @@
 import React from "react";
 import { settings } from "@app/shared";
-import * as THREE from "three";
+import { CanvasTexture, RepeatWrapping } from "three";
 
 export default function Arena() {
   const texture = React.useMemo(() => {
@@ -11,9 +11,9 @@ export default function Arena() {
     ctx.strokeStyle = "#000000";
     ctx.lineWidth = 1;
     ctx.strokeRect(0, 0, canvas.width, canvas.height);
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.wrapS = THREE.RepeatWrapping;
+    const texture = new CanvasTexture(canvas);
+    texture.wrapT = RepeatWrapping;
+    texture.wrapS = RepeatWrapping;
     texture.repeat.set(
       settings.arena.size / canvas.width,
       settings.arena.size / canvas.height

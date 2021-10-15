@@ -1,6 +1,6 @@
 import React from "react";
 import { settings } from "@app/shared";
-import * as THREE from "three";
+import { Color, Vector3, Mesh } from "three";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
 import { useFrame } from "@react-three/fiber";
@@ -11,20 +11,20 @@ const SIZE = settings.item.size;
 
 type ItemState = {
   id?: string;
-  color: THREE.Color;
-  position: THREE.Vector3;
+  color: Color;
+  position: Vector3;
 };
 
 const items: ItemState[] = Array.from({ length: 100 }).map(() => {
   return {
-    color: new THREE.Color("#ffffff"),
-    position: new THREE.Vector3(0, 0, 0),
+    color: new Color("#ffffff"),
+    position: new Vector3(0, 0, 0),
   };
 });
 
 export default function Items() {
   const instanceRefs = React.useRef<Position[]>([]);
-  const healthBarRefs = React.useRef<THREE.Mesh[]>([]);
+  const healthBarRefs = React.useRef<Mesh[]>([]);
 
   useFrame(() => {
     for (let i = 0, length = items.length; i < length; i++) {
@@ -77,7 +77,7 @@ export default function Items() {
             <mesh
               position={[0, -22, 0]}
               ref={(ref) => {
-                healthBarRefs.current[index] = ref as THREE.Mesh;
+                healthBarRefs.current[index] = ref as Mesh;
               }}
             >
               <planeBufferGeometry args={[settings.item.size * 2, 5]} />

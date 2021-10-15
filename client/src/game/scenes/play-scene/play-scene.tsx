@@ -102,6 +102,10 @@ export default function PlayScene() {
             s: Action.down,
             a: Action.left,
             d: Action.right,
+            ArrowUp: Action.up,
+            ArrowDown: Action.down,
+            ArrowLeft: Action.left,
+            ArrowRight: Action.right,
           }}
         />
       )}

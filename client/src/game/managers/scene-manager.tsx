@@ -1,7 +1,6 @@
 import React from "react";
 import { useStore } from "../store";
 import { Scene } from "../types";
-import SetupScene from "../scenes/setup-scene/setup-scene";
 import PlayScene from "../scenes/play-scene/play-scene";
 
 export default function SceneManager() {
@@ -9,8 +8,6 @@ export default function SceneManager() {
 
   const SceneComponent = React.useMemo(() => {
     switch (scene) {
-      case Scene.setup:
-        return SetupScene;
       case Scene.play:
         return PlayScene;
       default:

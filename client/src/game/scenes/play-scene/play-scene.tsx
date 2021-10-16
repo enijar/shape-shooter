@@ -1,10 +1,10 @@
 import React from "react";
-import { Action, GameState, PlayerEntity } from "@app/shared";
+import { GameState, PlayerEntity } from "@app/shared";
 import { Html } from "@react-three/drei";
 import { PlayerForm } from "./styles";
 import server from "../../../services/server";
 import gameState from "../../game-state";
-import Actions from "../../globals/actions";
+import Controls from "./controls";
 import Arena from "./arena";
 import Player from "../../entities/player";
 import Bullets from "./bullets";
@@ -95,20 +95,7 @@ export default function PlayScene() {
 
   return (
     <group>
-      {currentPlayer !== null && (
-        <Actions
-          keyMap={{
-            w: Action.up,
-            s: Action.down,
-            a: Action.left,
-            d: Action.right,
-            ArrowUp: Action.up,
-            ArrowDown: Action.down,
-            ArrowLeft: Action.left,
-            ArrowRight: Action.right,
-          }}
-        />
-      )}
+      <Controls currentPlayer={currentPlayer} />
       <React.Suspense fallback={<></>}>
         <Arena />
         {players.map((player) => {
@@ -120,7 +107,7 @@ export default function PlayScene() {
             />
           );
         })}
-        <Bullets currentPlayer={currentPlayer} />
+        <Bullets />
         <Items />
         <Foods />
         <Leaderboard />

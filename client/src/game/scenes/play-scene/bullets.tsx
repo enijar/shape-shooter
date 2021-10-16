@@ -1,9 +1,8 @@
 import React from "react";
-import { PlayerEntity, settings } from "@app/shared";
+import { settings } from "@app/shared";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
 import { useFrame } from "@react-three/fiber";
-import server from "../../../services/server";
 import gameState from "../../game-state";
 import { encodeSvg } from "../../utils";
 
@@ -12,49 +11,26 @@ const SIZE = settings.bullet.size;
 const maxBullets = 500;
 const bullets = Array.from({ length: maxBullets });
 
-type Props = {
-  currentPlayer?: PlayerEntity;
-};
-
-function Bullets({ currentPlayer }: Props) {
+function Bullets() {
   const instanceRefs = React.useRef<Position[]>([]);
 
   useFrame(() => {
     for (let i = 0; i < maxBullets; i++) {
       if (!instanceRefs.current[i]) continue;
       if (!gameState.bullets[i]) {
-        instanceRefs.current[i].scale.x = 0;
+        instanceRefs.current[i].scale.setScalar(0);
         continue;
       }
-      instanceRefs.current[i].scale.set(1, 1, 1);
-      instanceRefs.current[i].position.set(0, 0, 0);
-      // instanceRefs.current[i].scale.x = 1;
-      // instanceRefs.current[i].rotateZ(gameState.bullets[i].rotation);
-      // instanceRefs.current[i].color.set(gameState.bullets[i].color);
-      // instanceRefs.current[i].position.set(
-      //   gameState.bullets[i].x,
-      //   gameState.bullets[i].y,
-      //   0
-      // );
+      instanceRefs.current[i].scale.setScalar(1);
+      instanceRefs.current[i].rotateZ(gameState.bullets[i].rotation);
+      instanceRefs.current[i].color.set(gameState.bullets[i].color);
+      instanceRefs.current[i].position.set(
+        gameState.bullets[i].x,
+        gameState.bullets[i].y,
+        0
+      );
     }
   });
-
-  React.useEffect(() => {
-    if (currentPlayer === null) return;
-    let shooting = false;
-
-    function shoot() {
-      shooting = !shooting;
-      server.emit("shooting", shooting);
-    }
-
-    window.addEventListener("pointerdown", shoot);
-    window.addEventListener("pointerup", shoot);
-    return () => {
-      window.removeEventListener("pointerdown", shoot);
-      window.removeEventListener("pointerup", shoot);
-    };
-  }, [currentPlayer]);
 
   const texture = useTexture(
     encodeSvg(
@@ -65,7 +41,7 @@ function Bullets({ currentPlayer }: Props) {
   );
 
   return (
-    <Instances limit={maxBullets}>
+    <Instances limit={maxBullets} range={maxBullets}>
       <circleBufferGeometry args={[SIZE, 32, 32]} />
       <meshBasicMaterial map={texture} />
       {bullets.map((_, index) => {
@@ -74,7 +50,7 @@ function Bullets({ currentPlayer }: Props) {
             ref={(ref) => {
               if (ref instanceof Position) {
                 instanceRefs.current[index] = ref;
-                instanceRefs.current[index].scale.x = 0;
+                instanceRefs.current[index].scale.setScalar(0);
               }
             }}
             key={index}
@@ -85,4 +61,6 @@ function Bullets({ currentPlayer }: Props) {
   );
 }
 
-export default React.memo(Bullets);
+export default React.memo(Bullets, (props) => {
+  return true;
+});

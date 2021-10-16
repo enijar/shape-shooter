@@ -21,7 +21,7 @@ const settings = {
     healthIncrement: 20,
   },
   arena: {
-    size: 500,
+    size: 1500,
   },
 };
 

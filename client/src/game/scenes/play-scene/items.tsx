@@ -20,18 +20,21 @@ function Items() {
     for (let i = 0; i < maxItems; i++) {
       if (!instanceRefs.current[i]) continue;
       if (!gameState.items[i]) {
-        instanceRefs.current[i].scale.x = 0;
+        instanceRefs.current[i].scale.setScalar(0);
         continue;
       }
 
-      const item = gameState.items[i];
-
-      instanceRefs.current[i].scale.x = 1;
-      instanceRefs.current[i].position.set(item.x, item.y, 0);
-      instanceRefs.current[i].color.setStyle(item.color);
+      instanceRefs.current[i].scale.setScalar(1);
+      instanceRefs.current[i].position.set(
+        gameState.items[i].x,
+        gameState.items[i].y,
+        0
+      );
+      instanceRefs.current[i].color.setStyle(gameState.items[i].color);
 
       // Health
-      const health = (1 / item.maxHealth) * item.health;
+      const health =
+        (1 / gameState.items[i].maxHealth) * gameState.items[i].health;
       healthBarRefs.current[i].scale.x = health;
       healthBarRefs.current[i].position.x = SIZE * -2 * (1 - health) * 0.5;
     }
@@ -55,7 +58,7 @@ function Items() {
             ref={(ref) => {
               if (ref instanceof Position) {
                 instanceRefs.current[index] = ref;
-                instanceRefs.current[index].scale.x = 0;
+                instanceRefs.current[index].scale.setScalar(0);
               }
             }}
             key={index}
@@ -80,4 +83,6 @@ function Items() {
   );
 }
 
-export default React.memo(Items);
+export default React.memo(Items, (props) => {
+  return true;
+});

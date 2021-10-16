@@ -19,21 +19,23 @@ function Foods() {
     for (let i = 0, length = foods.length; i < length; i++) {
       if (!instanceRefs.current[i]) continue;
       if (!gameState.foods[i]) {
-        instanceRefs.current[i].scale.x = 0;
+        instanceRefs.current[i].scale.setScalar(0);
         continue;
       }
 
-      const food = gameState.foods[i];
-
-      const s = MathUtils.mapLinear(
+      const scale = MathUtils.mapLinear(
         (1 + Math.sin(clock.getElapsedTime())) / 2,
         0,
         1,
         0.5,
         1
       );
-      instanceRefs.current[i].scale.set(s, s, s);
-      instanceRefs.current[i].position.set(food.x, food.y, 0);
+      instanceRefs.current[i].scale.setScalar(scale);
+      instanceRefs.current[i].position.set(
+        gameState.foods[i].x,
+        gameState.foods[i].y,
+        0
+      );
     }
   });
 
@@ -57,7 +59,7 @@ function Foods() {
             ref={(ref) => {
               if (ref instanceof Position) {
                 instanceRefs.current[index] = ref;
-                instanceRefs.current[index].scale.x = 0;
+                instanceRefs.current[index].scale.setScalar(0);
               }
             }}
             key={index}

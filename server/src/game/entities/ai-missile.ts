@@ -16,8 +16,8 @@ const DEFAULT_ORIGIN: Box = { x: 0, y: 0, width: 0, height: 0 };
 export default class AiMissile extends AiMissileEntity {
   private lerp = 0.05;
   private range = {
-    min: settings.arena.size * 0.2,
-    max: settings.arena.size * 0.125,
+    min: Math.max(Math.min(200, settings.arena.size * 0.05), 200),
+    max: 150,
   };
   private target: Target = {
     box: DEFAULT_ORIGIN,

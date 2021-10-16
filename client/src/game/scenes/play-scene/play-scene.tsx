@@ -5,6 +5,7 @@ import gameState from "../../game-state";
 import Controls from "./controls";
 import Arena from "./arena";
 import Players from "./players";
+import AiMissiles from "./ai-missiles";
 import Bullets from "./bullets";
 import Items from "./items";
 import Foods from "./foods";
@@ -16,6 +17,7 @@ export default function PlayScene() {
   React.useEffect(() => {
     server.on("tick", (state: GameState) => {
       gameState.players = state.players;
+      gameState.aiMissiles = state.aiMissiles;
       gameState.bullets = state.bullets;
       gameState.items = state.items;
       gameState.foods = state.foods;
@@ -31,6 +33,7 @@ export default function PlayScene() {
       <React.Suspense fallback={<></>}>
         <Arena />
         <Players />
+        <AiMissiles />
         <Bullets />
         <Items />
         <Foods />

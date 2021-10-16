@@ -6,27 +6,27 @@ import { useFrame } from "@react-three/fiber";
 import gameState from "../../game-state";
 import { encodeSvg } from "../../utils";
 
-const SIZE = settings.bullet.size;
+const SIZE = settings.ai.missile.size;
 
-const maxBullets = 500;
-const bullets = Array.from({ length: maxBullets });
+const maxAiMissiles = 500;
+const aiMissiles = Array.from({ length: maxAiMissiles });
 
-function Bullets() {
+function AiMissiles() {
   const instanceRefs = React.useRef<Position[]>([]);
 
   useFrame(() => {
-    for (let i = 0; i < maxBullets; i++) {
+    for (let i = 0; i < maxAiMissiles; i++) {
       if (!instanceRefs.current[i]) continue;
-      if (!gameState.bullets[i]) {
+      if (!gameState.aiMissiles[i]) {
         instanceRefs.current[i].scale.setScalar(0);
         continue;
       }
       instanceRefs.current[i].scale.setScalar(1);
-      instanceRefs.current[i].rotateZ(gameState.bullets[i].rotation);
-      instanceRefs.current[i].color.set(gameState.bullets[i].color);
+      instanceRefs.current[i].rotation.z = gameState.aiMissiles[i].rotation;
+      instanceRefs.current[i].color.set(gameState.aiMissiles[i].color);
       instanceRefs.current[i].position.set(
-        gameState.bullets[i].x,
-        gameState.bullets[i].y,
+        gameState.aiMissiles[i].x,
+        gameState.aiMissiles[i].y,
         0
       );
     }
@@ -35,16 +35,16 @@ function Bullets() {
   const texture = useTexture(
     encodeSvg(
       `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SIZE} ${SIZE}" width="${SIZE}" height="${SIZE}">
-<circle cx="${SIZE * 0.5}" cy="${SIZE * 0.5}" r="${SIZE * 0.5}" fill="white"/>
+  <polygon points="${SIZE * 0.5},0 0,${SIZE} ${SIZE},${SIZE}" fill="white"/>
 </svg>`
     )
   );
 
   return (
-    <Instances limit={maxBullets} range={maxBullets}>
-      <circleBufferGeometry args={[SIZE, 32, 32]} />
+    <Instances limit={maxAiMissiles} range={maxAiMissiles}>
+      <planeBufferGeometry args={[SIZE, SIZE]} />
       <meshBasicMaterial map={texture} transparent />
-      {bullets.map((_, index) => {
+      {aiMissiles.map((_, index) => {
         return (
           <Instance
             ref={(ref) => {
@@ -61,4 +61,4 @@ function Bullets() {
   );
 }
 
-export default React.memo(Bullets);
+export default React.memo(AiMissiles);

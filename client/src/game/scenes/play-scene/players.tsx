@@ -21,7 +21,6 @@ function Players() {
     server.on("player.killed", removePlayer);
     server.on("player.disconnected", removePlayer);
     server.on("connected", (data: ConnectedData) => {
-      console.log(data);
       const { setCurrentPlayer, setPlayers } = useStore.getState();
       setCurrentPlayer(data.player);
       setPlayers(data.players);

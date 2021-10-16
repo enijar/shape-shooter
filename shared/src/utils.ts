@@ -1,3 +1,5 @@
+import { Box } from "./types";
+
 const _lut: string[] = [];
 for (let i = 0; i < 256; i++) {
   _lut[i] = (i < 16 ? "0" : "") + i.toString(16);
@@ -36,4 +38,10 @@ export function generateUUID(): string {
 // https://github.com/mrdoob/three.js/blob/dev/src/math/MathUtils.js#L124
 export function randInt(low: number, high: number): number {
   return low + Math.floor(Math.random() * (high - low + 1));
+}
+
+export function dist(boxA: Box, boxB: Box): number {
+  const a = boxA.x - boxB.x;
+  const b = boxA.y - boxB.y;
+  return Math.sqrt(a * a + b * b);
 }

@@ -3,10 +3,15 @@ import { GameState, settings } from "@app/shared";
 import server from "../services/server";
 import { intersect } from "./utils";
 import Player from "./entities/player";
+import AiMissile from "./entities/ai-missile";
 import Bullet from "./entities/bullet";
 import Item from "./entities/item";
 import Food from "./entities/food";
 import config from "../config";
+
+type Events = {
+  [event: string]: (...args: any[]) => void;
+};
 
 export type GameOptions = {
   fps?: number;
@@ -14,6 +19,7 @@ export type GameOptions = {
 
 export default class Game {
   players: Player[] = [];
+  aiMissiles: AiMissile[] = [];
   bullets: Bullet[] = [];
   items: Item[] = [];
   foods: Food[] = [];
@@ -23,12 +29,31 @@ export default class Game {
 
   private interval: NodeJS.Timeout;
 
+  private maxAiMissiles: number = 0;
   private maxItems: number = 0;
   private maxFoods: number = 0;
+
+  private events: Events = {};
 
   constructor(options: GameOptions = {}) {
     this.fps = options.fps ?? this.fps;
     this.tickInterval = 1000 / this.fps;
+  }
+
+  on(event: string, fn: (...args: any[]) => void) {
+    this.events[event] = fn;
+  }
+
+  emit(event: string, ...data: any[]) {
+    if (this.events.hasOwnProperty(event)) {
+      this.events[event](...data);
+    }
+  }
+
+  off(event: string) {
+    if (this.events.hasOwnProperty(event)) {
+      delete this.events[event];
+    }
   }
 
   addPlayer(player: Player) {
@@ -36,6 +61,9 @@ export default class Game {
     player.x = THREE.MathUtils.randInt(-a, a);
     player.y = THREE.MathUtils.randInt(-a, a);
     this.players.push(player);
+    this.maxAiMissiles = Math.round(
+      Math.sqrt(settings.arena.size * this.players.length * 0.1)
+    );
     this.maxItems = Math.round(
       Math.sqrt(settings.arena.size * this.players.length * 0.5)
     );
@@ -47,6 +75,7 @@ export default class Game {
   removePlayer(player: Player) {
     for (let i = 0, length = this.players.length; i < length; i++) {
       if (this.players[i].id === player.id) {
+        this.emit("player.removed", this.players[i]);
         this.players.splice(i, 1);
         break;
       }
@@ -71,6 +100,7 @@ export default class Game {
   getState(): GameState {
     return {
       players: this.players,
+      aiMissiles: this.aiMissiles,
       bullets: this.bullets,
       items: this.items,
       foods: this.foods,
@@ -78,6 +108,11 @@ export default class Game {
   }
 
   private tick(onTick: Function) {
+    // Add new ai missiles
+    for (let i = 0; i < this.maxAiMissiles - this.aiMissiles.length; i++) {
+      this.aiMissiles.push(new AiMissile(this));
+    }
+
     // Add new items
     for (let i = 0; i < this.maxItems - this.items.length; i++) {
       this.items.push(new Item());
@@ -91,6 +126,11 @@ export default class Game {
     // Update players
     for (let i = this.players.length - 1; i >= 0; i--) {
       this.players[i].update(this);
+    }
+
+    // Update ai missiles
+    for (let i = 0, length = this.aiMissiles.length; i < length; i++) {
+      this.aiMissiles[i].update(this);
     }
 
     // Update items
@@ -135,6 +175,7 @@ export default class Game {
               playerKiller.exp += settings.exp.playerKill;
             }
             server.emit("player.killed", this.players[p]);
+            this.emit("player.killed", this.players[p]);
             this.players.splice(p, 1);
           }
           break;

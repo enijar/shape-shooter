@@ -23,6 +23,12 @@ const settings = {
   arena: {
     size: 1500,
   },
+  ai: {
+    missile: {
+      size: 20,
+      maxHealth: 15,
+    },
+  },
 };
 
 export default settings;

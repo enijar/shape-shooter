@@ -52,7 +52,7 @@ function Foods() {
   return (
     <Instances limit={maxFoods}>
       <circleBufferGeometry args={[SIZE, 32, 32]} />
-      <meshBasicMaterial map={texture} />
+      <meshBasicMaterial map={texture} transparent />
       {foods.map((food, index) => {
         return (
           <Instance

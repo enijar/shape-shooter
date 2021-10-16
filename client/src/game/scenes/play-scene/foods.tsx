@@ -1,6 +1,6 @@
 import React from "react";
 import { settings } from "@app/shared";
-import { Vector3, MathUtils } from "three";
+import { MathUtils } from "three";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
 import { useFrame } from "@react-three/fiber";
@@ -9,18 +9,10 @@ import { encodeSvg } from "../../utils";
 
 const SIZE = settings.food.size;
 
-type FoodState = {
-  id?: string;
-  position: Vector3;
-};
+const maxFoods = 500;
+const foods = Array.from({ length: maxFoods });
 
-const foods: FoodState[] = Array.from({ length: 100 }).map(() => {
-  return {
-    position: new Vector3(0, 0, 0),
-  };
-});
-
-export default function Foods() {
+function Foods() {
   const instanceRefs = React.useRef<Position[]>([]);
 
   useFrame(({ clock }) => {
@@ -56,8 +48,8 @@ export default function Foods() {
   );
 
   return (
-    <Instances limit={foods.length}>
-      <circleBufferGeometry args={[settings.food.size, 32]} />
+    <Instances limit={maxFoods}>
+      <circleBufferGeometry args={[SIZE, 32, 32]} />
       <meshBasicMaterial map={texture} />
       {foods.map((food, index) => {
         return (
@@ -75,3 +67,5 @@ export default function Foods() {
     </Instances>
   );
 }
+
+export default React.memo(Foods);

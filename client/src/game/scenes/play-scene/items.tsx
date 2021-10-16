@@ -1,6 +1,6 @@
 import React from "react";
 import { settings } from "@app/shared";
-import { Color, Vector3, Mesh } from "three";
+import { Mesh } from "three";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
 import { useFrame } from "@react-three/fiber";
@@ -9,25 +9,15 @@ import { encodeSvg } from "../../utils";
 
 const SIZE = settings.item.size;
 
-type ItemState = {
-  id?: string;
-  color: Color;
-  position: Vector3;
-};
+const maxItems = 500;
+const items = Array.from({ length: maxItems });
 
-const items: ItemState[] = Array.from({ length: 100 }).map(() => {
-  return {
-    color: new Color("#ffffff"),
-    position: new Vector3(0, 0, 0),
-  };
-});
-
-export default function Items() {
+function Items() {
   const instanceRefs = React.useRef<Position[]>([]);
   const healthBarRefs = React.useRef<Mesh[]>([]);
 
   useFrame(() => {
-    for (let i = 0, length = items.length; i < length; i++) {
+    for (let i = 0; i < maxItems; i++) {
       if (!instanceRefs.current[i]) continue;
       if (!gameState.items[i]) {
         instanceRefs.current[i].scale.x = 0;
@@ -56,10 +46,10 @@ export default function Items() {
   );
 
   return (
-    <Instances limit={items.length}>
-      <circleBufferGeometry args={[settings.item.size, 32]} />
+    <Instances limit={maxItems}>
+      <circleBufferGeometry args={[SIZE, 32, 32]} />
       <meshBasicMaterial map={texture} />
-      {items.map((item, index) => {
+      {items.map((_, index) => {
         return (
           <Instance
             ref={(ref) => {
@@ -71,7 +61,7 @@ export default function Items() {
             key={index}
           >
             <mesh position={[0, -22, -0.01]}>
-              <planeBufferGeometry args={[settings.item.size * 2, 5]} />
+              <planeBufferGeometry args={[SIZE * 2, 5]} />
               <meshBasicMaterial color="#000000" />
             </mesh>
             <mesh
@@ -80,7 +70,7 @@ export default function Items() {
                 healthBarRefs.current[index] = ref as Mesh;
               }}
             >
-              <planeBufferGeometry args={[settings.item.size * 2, 5]} />
+              <planeBufferGeometry args={[SIZE * 2, 5]} />
               <meshBasicMaterial color="hsl(120, 83%, 37%)" />
             </mesh>
           </Instance>
@@ -89,3 +79,5 @@ export default function Items() {
     </Instances>
   );
 }
+
+export default React.memo(Items);

@@ -3,15 +3,15 @@ import { Action, GameState, PlayerEntity } from "@app/shared";
 import { Html } from "@react-three/drei";
 import { PlayerForm } from "./styles";
 import server from "../../../services/server";
+import gameState from "../../game-state";
+import Actions from "../../globals/actions";
 import Arena from "./arena";
+import Player from "../../entities/player";
 import Bullets from "./bullets";
 import Items from "./items";
-import Player from "../../entities/player";
-import Minimap from "./minimap";
-import Leaderboard from "./leaderboard";
-import Actions from "../../globals/actions";
-import gameState from "../../game-state";
 import Foods from "./foods";
+import Leaderboard from "./leaderboard";
+import Minimap from "./minimap";
 
 export default function PlayScene() {
   const [currentPlayer, setCurrentPlayer] = React.useState<PlayerEntity>(null);
@@ -50,6 +50,7 @@ export default function PlayScene() {
         setPlayers(players);
       }
     );
+
     server.on("tick", (state: GameState) => {
       gameState.players = state.players;
       gameState.bullets = state.bullets;
@@ -94,7 +95,6 @@ export default function PlayScene() {
 
   return (
     <group>
-      <Arena />
       {currentPlayer !== null && (
         <Actions
           keyMap={{
@@ -109,37 +109,40 @@ export default function PlayScene() {
           }}
         />
       )}
-      {players.map((player) => {
-        return (
-          <Player
-            key={player.id}
-            {...player}
-            current={player.id === currentPlayer?.id}
-          />
-        );
-      })}
-      <Bullets currentPlayer={currentPlayer} />
-      <Items />
-      <Foods />
-      <Leaderboard />
-      <Minimap players={players} currentPlayer={currentPlayer} />
-      {currentPlayer == null && (
-        <Html calculatePosition={() => [0, 0]}>
-          <PlayerForm onSubmit={play}>
-            <label>
-              <h3>Enter a Name</h3>
-              <input
-                ref={nameInputRef}
-                defaultValue="Noob"
-                onChange={(event) => {
-                  nameInputRef.current.value = event.target.value;
-                }}
-              />
-            </label>
-            <button>Play</button>
-          </PlayerForm>
-        </Html>
-      )}
+      <React.Suspense fallback={<></>}>
+        <Arena />
+        {players.map((player) => {
+          return (
+            <Player
+              key={player.id}
+              {...player}
+              current={player.id === currentPlayer?.id}
+            />
+          );
+        })}
+        <Bullets currentPlayer={currentPlayer} />
+        <Items />
+        <Foods />
+        <Leaderboard />
+        <Minimap players={players} currentPlayer={currentPlayer} />
+        {currentPlayer == null && (
+          <Html calculatePosition={() => [0, 0]}>
+            <PlayerForm onSubmit={play}>
+              <label>
+                <h3>Enter a Name</h3>
+                <input
+                  ref={nameInputRef}
+                  defaultValue="Noob"
+                  onChange={(event) => {
+                    nameInputRef.current.value = event.target.value;
+                  }}
+                />
+              </label>
+              <button>Play</button>
+            </PlayerForm>
+          </Html>
+        )}
+      </React.Suspense>
     </group>
   );
 }

@@ -35,7 +35,7 @@ export default class Game {
     player.color = `hsl(${THREE.MathUtils.randInt(1, 360)}, 50%, 50%)`;
     this.players.push(player);
     this.maxItems = Math.round(
-      Math.sqrt(settings.arena.size * this.players.length)
+      Math.sqrt(settings.arena.size * this.players.length * 0.5)
     );
     this.maxFoods = Math.round(
       Math.sqrt(settings.arena.size * this.players.length) * 0.2
@@ -79,6 +79,7 @@ export default class Game {
       this.items.push(new Item());
     }
 
+    // Add new foods
     for (let i = 0; i < this.maxFoods - this.foods.length; i++) {
       this.foods.push(new Food());
     }

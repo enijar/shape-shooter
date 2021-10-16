@@ -1,53 +1,41 @@
 import React from "react";
 import { PlayerEntity, settings } from "@app/shared";
-import { Color, Vector3, Euler } from "three";
 import { Instance, Instances, useTexture } from "@react-three/drei";
-import server from "../../../services/server";
 import { Position } from "@react-three/drei/helpers/Position";
 import { useFrame } from "@react-three/fiber";
+import server from "../../../services/server";
 import gameState from "../../game-state";
 import { encodeSvg } from "../../utils";
 
-type BulletState = {
-  id?: string;
-  playerId?: string;
-  color: Color;
-  position: Vector3;
-  rotation: Euler;
-};
-
 const SIZE = settings.bullet.size;
 
-const bullets: BulletState[] = Array.from({ length: 100 }).map(() => {
-  return {
-    color: new Color("#ffffff"),
-    position: new Vector3(0, 0, 0),
-    rotation: new Euler(0, 0, 0),
-  };
-});
+const maxBullets = 500;
+const bullets = Array.from({ length: maxBullets });
 
 type Props = {
   currentPlayer?: PlayerEntity;
 };
 
-export default function Bullets({ currentPlayer }: Props) {
+function Bullets({ currentPlayer }: Props) {
   const instanceRefs = React.useRef<Position[]>([]);
 
   useFrame(() => {
-    for (let i = 0, length = bullets.length; i < length; i++) {
+    for (let i = 0; i < maxBullets; i++) {
       if (!instanceRefs.current[i]) continue;
       if (!gameState.bullets[i]) {
         instanceRefs.current[i].scale.x = 0;
         continue;
       }
-      instanceRefs.current[i].scale.x = 1;
-      instanceRefs.current[i].rotateZ(gameState.bullets[i].rotation);
-      instanceRefs.current[i].color.set(gameState.bullets[i].color);
-      instanceRefs.current[i].position.set(
-        gameState.bullets[i].x,
-        gameState.bullets[i].y,
-        0
-      );
+      instanceRefs.current[i].scale.set(1, 1, 1);
+      instanceRefs.current[i].position.set(0, 0, 0);
+      // instanceRefs.current[i].scale.x = 1;
+      // instanceRefs.current[i].rotateZ(gameState.bullets[i].rotation);
+      // instanceRefs.current[i].color.set(gameState.bullets[i].color);
+      // instanceRefs.current[i].position.set(
+      //   gameState.bullets[i].x,
+      //   gameState.bullets[i].y,
+      //   0
+      // );
     }
   });
 
@@ -77,10 +65,10 @@ export default function Bullets({ currentPlayer }: Props) {
   );
 
   return (
-    <Instances limit={bullets.length}>
-      <circleBufferGeometry args={[settings.bullet.size, 32]} />
+    <Instances limit={maxBullets}>
+      <circleBufferGeometry args={[SIZE, 32, 32]} />
       <meshBasicMaterial map={texture} />
-      {bullets.map((bullet, index) => {
+      {bullets.map((_, index) => {
         return (
           <Instance
             ref={(ref) => {
@@ -96,3 +84,5 @@ export default function Bullets({ currentPlayer }: Props) {
     </Instances>
   );
 }
+
+export default React.memo(Bullets);

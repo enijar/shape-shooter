@@ -20,8 +20,11 @@ export default class Game {
   private readonly fps: number = 60;
   private readonly tickInterval: number;
   private lastTickTime = 0;
+  private prevTickTime = Date.now();
+  private ticks = 0;
 
   private immediate: NodeJS.Immediate;
+  private timeout: NodeJS.Timeout;
 
   private maxItems: number = 0;
   private maxFoods: number = 0;
@@ -57,6 +60,7 @@ export default class Game {
 
   destroy() {
     clearImmediate(this.immediate);
+    clearTimeout(this.timeout);
   }
 
   getState(): GameState {
@@ -69,11 +73,24 @@ export default class Game {
   }
 
   private tick(onTick: Function) {
-    this.immediate = setImmediate(() => this.tick(onTick));
-    const now = Date.now();
-    if (now - this.lastTickTime < this.tickInterval) return;
-    this.lastTickTime = now;
+    let time = Date.now();
+    this.ticks++;
+    if (this.prevTickTime + this.tickInterval <= time) {
+      this.prevTickTime = time;
+      this.processTick(onTick);
+      this.ticks = 0;
+    }
 
+    time = Date.now();
+
+    if (time - this.prevTickTime < this.tickInterval - 16) {
+      this.timeout = setTimeout(() => this.tick(onTick));
+    } else {
+      this.immediate = setImmediate(() => this.tick(onTick));
+    }
+  }
+
+  private processTick(onTick: Function) {
     // Add new items
     for (let i = 0; i < this.maxItems - this.items.length; i++) {
       this.items.push(new Item());

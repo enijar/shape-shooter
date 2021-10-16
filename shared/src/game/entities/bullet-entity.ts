@@ -29,8 +29,8 @@ export default class BulletEntity {
     this.startY = this.y;
     this.rotation = player.rotation;
     this.box = {
-      width: this.size,
-      height: this.size,
+      width: this.size * 2,
+      height: this.size * 2,
       x: this.x,
       y: this.y,
     };

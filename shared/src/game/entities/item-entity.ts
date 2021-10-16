@@ -18,8 +18,8 @@ export default class ItemEntity {
     this.x = randInt(settings.arena.size * -0.5, settings.arena.size * 0.5);
     this.y = randInt(settings.arena.size * -0.5, settings.arena.size * 0.5);
     this.box = {
-      width: this.size,
-      height: this.size,
+      width: this.size * 2,
+      height: this.size * 2,
       x: this.x,
       y: this.y,
     };

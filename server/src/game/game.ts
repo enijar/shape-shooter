@@ -32,6 +32,9 @@ export default class Game {
   }
 
   addPlayer(player: Player) {
+    const a = settings.arena.size * 0.5;
+    player.x = THREE.MathUtils.randInt(-a, a);
+    player.y = THREE.MathUtils.randInt(-a, a);
     this.players.push(player);
     this.maxItems = Math.round(
       Math.sqrt(settings.arena.size * this.players.length * 0.5)

@@ -29,7 +29,7 @@ If you want to self-host this game, follow the following installation instructio
 
 - Ubuntu 20.04 (or a similar Debian Linux distro)
 - NGINX 1.17
-- Node.JS 15
+- Node.JS 16.10
 - NPM 7
 - PM2 4.5
 

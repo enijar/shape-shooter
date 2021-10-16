@@ -55,5 +55,16 @@ export default function Actions({ keyMap }: Props) {
     server.emit("actions", actions);
   }, [actions]);
 
+  React.useEffect(() => {
+    function onBlur() {
+      setActions({});
+    }
+
+    window.addEventListener("blur", onBlur);
+    return () => {
+      window.removeEventListener("blur", onBlur);
+    };
+  }, []);
+
   return <></>;
 }

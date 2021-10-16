@@ -45,9 +45,7 @@ server.on("connection", (socket) => {
 
 server.listen(config.port);
 
-console.log(`Server running: http://localhost:${config.port}`);
-
 server.on("close", () => {
-  console.log("Closing down gracefully...");
+  console.info("Closing down gracefully...");
   game.destroy();
 });

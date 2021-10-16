@@ -6,6 +6,7 @@ import Player from "./entities/player";
 import Bullet from "./entities/bullet";
 import Item from "./entities/item";
 import Food from "./entities/food";
+import config from "../config";
 
 export type GameOptions = {
   fps?: number;
@@ -53,6 +54,12 @@ export default class Game {
   start(onTick: Function) {
     this.tick(onTick);
     this.interval = setInterval(() => this.tick(onTick), this.tickInterval);
+
+    console.info(`Game server started`);
+    console.table({
+      port: config.port,
+      fps: this.fps,
+    });
   }
 
   destroy() {

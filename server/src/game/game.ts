@@ -19,11 +19,8 @@ export default class Game {
 
   private readonly fps: number = 60;
   private readonly tickInterval: number;
-  private lastTickTime = 0;
   private prevTickTime = Date.now();
-  private ticks = 0;
 
-  private immediate: NodeJS.Immediate;
   private timeout: NodeJS.Timeout;
 
   private maxItems: number = 0;
@@ -59,7 +56,6 @@ export default class Game {
   }
 
   destroy() {
-    clearImmediate(this.immediate);
     clearTimeout(this.timeout);
   }
 
@@ -73,21 +69,15 @@ export default class Game {
   }
 
   private tick(onTick: Function) {
-    let time = Date.now();
-    this.ticks++;
-    if (this.prevTickTime + this.tickInterval <= time) {
+    const time = Date.now();
+    if (time - this.prevTickTime >= this.tickInterval) {
       this.prevTickTime = time;
       this.processTick(onTick);
-      this.ticks = 0;
     }
 
-    time = Date.now();
-
-    if (time - this.prevTickTime < this.tickInterval - 16) {
-      this.timeout = setTimeout(() => this.tick(onTick));
-    } else {
-      this.immediate = setImmediate(() => this.tick(onTick));
-    }
+    const interval = Date.now() - this.prevTickTime;
+    clearTimeout(this.timeout);
+    this.timeout = setTimeout(() => this.tick(onTick), interval);
   }
 
   private processTick(onTick: Function) {

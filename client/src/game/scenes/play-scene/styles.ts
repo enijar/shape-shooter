@@ -8,10 +8,10 @@ export const PlayerForm = styled.form`
   padding: 1em;
   backdrop-filter: blur(1em);
   user-select: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 20em;
+  grid-auto-rows: max-content;
+  place-content: center;
 
   input,
   button {
@@ -19,5 +19,25 @@ export const PlayerForm = styled.form`
     color: black;
     display: block;
     margin-top: 0.5em;
+  }
+
+  input {
+    width: 100%;
+
+    &[type="color"] {
+      padding: 0;
+      background-color: transparent;
+      height: 2em;
+      border: none;
+    }
+  }
+
+  label {
+    margin-bottom: 0.5em;
+    text-align: left;
+
+    :last-child {
+      margin-bottom: 0;
+    }
   }
 `;

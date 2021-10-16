@@ -34,10 +34,11 @@ export default function JoinForm() {
           />
         </label>
         <label>
-          <h3>Pick a Colo</h3>
+          <h3>Pick a Color</h3>
           <input
             ref={colorInputRef}
-            defaultValue="crimson"
+            defaultValue="#ff0000"
+            type="color"
             onChange={(event) => {
               colorInputRef.current.value = event.target.value;
             }}

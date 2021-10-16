@@ -1,3 +1,4 @@
+import * as THREE from "three";
 import config from "./config";
 import server from "./services/server";
 import Game from "./game/game";
@@ -10,6 +11,7 @@ game.start(() => {
 
 type PlayerData = {
   name: string;
+  color: string;
 };
 
 server.on("connection", (socket) => {
@@ -18,7 +20,13 @@ server.on("connection", (socket) => {
   socket.on("player.join", (playerData: PlayerData) => {
     if (typeof playerData.name !== "string") return;
     if (playerData.name.trim().length === 0) return;
+    if (typeof playerData.color !== "string") return;
+    if (playerData.color.trim().length === 0) return;
+    const color = new THREE.Color(playerData.color);
     player.name = playerData.name;
+    if (color.isColor) {
+      player.color = color.getStyle();
+    }
     player.fresh();
     game.addPlayer(player);
     socket.emit("connected", { player, ...game.getState() });

@@ -1,13 +1,12 @@
 import React from "react";
-import { Action, PlayerEntity } from "@app/shared";
+import { Action } from "@app/shared";
 import Actions from "../../globals/actions";
 import server from "../../../services/server";
+import { useStore } from "../../store";
 
-type Props = {
-  currentPlayer?: PlayerEntity;
-};
+export default function Controls() {
+  const { currentPlayer } = useStore();
 
-export default function Controls({ currentPlayer }: Props) {
   React.useEffect(() => {
     if (currentPlayer === null) return;
     let shooting = false;

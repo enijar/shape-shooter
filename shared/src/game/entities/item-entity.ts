@@ -23,7 +23,7 @@ export default class ItemEntity {
       x: this.x,
       y: this.y,
     };
-    this.color = `hsl(${randInt(1, 360)}, 50%, 65%)`;
+    this.color = `hsl(${randInt(1, 360)}, 50%, 50%)`;
     this.health = this.maxHealth;
   }
 }

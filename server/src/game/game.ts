@@ -32,7 +32,6 @@ export default class Game {
   }
 
   addPlayer(player: Player) {
-    player.color = `hsl(${THREE.MathUtils.randInt(1, 360)}, 50%, 50%)`;
     this.players.push(player);
     this.maxItems = Math.round(
       Math.sqrt(settings.arena.size * this.players.length * 0.5)

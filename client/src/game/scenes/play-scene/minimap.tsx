@@ -1,21 +1,22 @@
 import React from "react";
-import { PlayerEntity, settings } from "@app/shared";
+import { settings } from "@app/shared";
 import { MathUtils } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import gameState from "../../game-state";
 import { Html } from "@react-three/drei";
+import { useStore } from "../../store";
 
 const MAP_SIZE = 200;
 
 const PLAYER_SIZE = (1 / settings.arena.size) * settings.player.size;
 
 type Props = {
-  players: PlayerEntity[];
-  currentPlayer: PlayerEntity;
   gap?: number;
 };
 
-export default function Minimap({ players, currentPlayer, gap = 20 }: Props) {
+export default function Minimap({ gap = 20 }: Props) {
+  const { currentPlayer, players } = useStore();
+
   const playerRefs = React.useRef<HTMLDivElement[]>([]);
 
   useFrame(() => {

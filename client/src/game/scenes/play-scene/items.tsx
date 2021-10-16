@@ -83,6 +83,4 @@ function Items() {
   );
 }
 
-export default React.memo(Items, (props) => {
-  return true;
-});
+export default React.memo(Items);

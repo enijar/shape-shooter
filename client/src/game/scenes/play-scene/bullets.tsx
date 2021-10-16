@@ -61,6 +61,4 @@ function Bullets() {
   );
 }
 
-export default React.memo(Bullets, (props) => {
-  return true;
-});
+export default React.memo(Bullets);

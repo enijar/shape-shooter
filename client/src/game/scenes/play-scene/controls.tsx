@@ -8,7 +8,11 @@ export default function Controls() {
   const { currentPlayer } = useStore();
 
   React.useEffect(() => {
-    if (currentPlayer === null) return;
+    if (currentPlayer === null) {
+      server.emit("shooting", false);
+      return;
+    }
+
     let shooting = false;
 
     function shoot() {

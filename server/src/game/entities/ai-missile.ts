@@ -1,12 +1,14 @@
 import * as THREE from "three";
 import { MathUtils } from "three";
-import { AiMissileEntity, dist, settings } from "@app/shared";
+import { AiMissileEntity, dist, PlayerEntity, settings } from "@app/shared";
 import Game from "../game";
 import { Box } from "../types";
+import { intersect } from "../utils";
 
 type Target = {
   box: Box;
   type: "player" | "origin";
+  entity?: PlayerEntity;
 };
 
 const DEFAULT_ORIGIN: Box = { x: 0, y: 0, width: 0, height: 0 };
@@ -20,8 +22,11 @@ export default class AiMissile extends AiMissileEntity {
   private target: Target = {
     box: DEFAULT_ORIGIN,
     type: "origin",
+    entity: null,
   };
   private origin: Box = DEFAULT_ORIGIN;
+  private damageInterval = 400;
+  private lastDamageTime = 0;
 
   constructor(game: Game) {
     super();
@@ -41,10 +46,12 @@ export default class AiMissile extends AiMissileEntity {
     game.on("player.removed", () => {
       this.target.box = this.origin;
       this.target.type = "origin";
+      this.target.entity = null;
     });
     game.on("player.killed", () => {
       this.target.box = this.origin;
       this.target.type = "origin";
+      this.target.entity = null;
     });
   }
 
@@ -55,16 +62,9 @@ export default class AiMissile extends AiMissileEntity {
         if (dist(this.box, game.players[p].box) <= this.range.min) {
           this.target.box = game.players[p].box;
           this.target.type = "player";
+          this.target.entity = game.players[p];
           break;
         }
-      }
-    }
-
-    // Go back to origin when player is out of range
-    if (this.target.type === "player") {
-      if (dist(this.box, this.target.box) > this.range.max) {
-        this.target.box = this.origin;
-        this.target.type = "origin";
       }
     }
 
@@ -98,5 +98,28 @@ export default class AiMissile extends AiMissileEntity {
     );
     this.box.x = this.x;
     this.box.y = this.y;
+
+    // Go back to origin when player is out of range
+    if (this.target.type === "player") {
+      if (dist(this.box, this.target.box) > this.range.max) {
+        this.target.box = this.origin;
+        this.target.type = "origin";
+        this.target.entity = null;
+      }
+    }
+
+    const now = Date.now();
+
+    // Damage player if hit boxes intersect
+    if (this.target.entity !== null && intersect(this.box, this.target.box)) {
+      if (now - this.lastDamageTime > this.damageInterval) {
+        this.lastDamageTime = now;
+        this.target.entity.health = THREE.MathUtils.clamp(
+          this.target.entity.health - this.damage,
+          0,
+          this.target.entity.maxHealth
+        );
+      }
+    }
   }
 }

@@ -27,6 +27,7 @@ const settings = {
     missile: {
       size: 20,
       maxHealth: 15,
+      damage: 3,
     },
   },
 };

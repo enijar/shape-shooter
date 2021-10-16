@@ -10,6 +10,7 @@ export default class AiMissileEntity {
   size = settings.ai.missile.size;
   color: string = "";
   rotation: number = 0;
+  damage: number = settings.ai.missile.damage;
   dx: number = 0;
   dy: number = 0;
   box: Box = {

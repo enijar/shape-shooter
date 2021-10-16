@@ -242,6 +242,15 @@ export default class Game {
       }
     }
 
+    // Remove killed players
+    for (let p = this.players.length - 1; p >= 0; p--) {
+      if (this.players[p].health === 0) {
+        this.emit("player.killed", this.players[p]);
+        server.emit("player.killed", this.players[p]);
+        this.players.splice(p, 1);
+      }
+    }
+
     onTick();
   }
 }

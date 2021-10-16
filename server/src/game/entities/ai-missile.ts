@@ -13,7 +13,10 @@ const DEFAULT_ORIGIN: Box = { x: 0, y: 0, width: 0, height: 0 };
 
 export default class AiMissile extends AiMissileEntity {
   private lerp = 0.05;
-  private range = 200;
+  private range = {
+    min: settings.arena.size * 0.2,
+    max: settings.arena.size * 0.125,
+  };
   private target: Target = {
     box: DEFAULT_ORIGIN,
     type: "origin",
@@ -49,11 +52,19 @@ export default class AiMissile extends AiMissileEntity {
     // Find player target
     if (this.target.type !== "player") {
       for (let p = 0, length = game.players.length; p < length; p++) {
-        if (dist(this.box, game.players[p].box) <= this.range) {
+        if (dist(this.box, game.players[p].box) <= this.range.min) {
           this.target.box = game.players[p].box;
           this.target.type = "player";
           break;
         }
+      }
+    }
+
+    // Go back to origin when player is out of range
+    if (this.target.type === "player") {
+      if (dist(this.box, this.target.box) > this.range.max) {
+        this.target.box = this.origin;
+        this.target.type = "origin";
       }
     }
 

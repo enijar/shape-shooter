@@ -191,6 +191,32 @@ export default class Game {
         }
       }
 
+      // Damage ai missiles that get hit by bullets
+      for (let i = 0, length = this.aiMissiles.length; i < length; i++) {
+        // Damage ai missile if bullet box intersects with item box
+        if (intersect(this.aiMissiles[i].box, this.bullets[b].box)) {
+          removeBullet = true;
+          this.aiMissiles[i].health = THREE.MathUtils.clamp(
+            this.aiMissiles[i].health - this.bullets[b].damage,
+            0,
+            this.aiMissiles[i].maxHealth
+          );
+
+          // Remove ai missile when its health runs out
+          if (this.aiMissiles[i].health === 0) {
+            // Increase exp for player who shot the bullet that killed this ai missile
+            const playerKiller = this.players.find((player) => {
+              return player.id === this.bullets[b].playerId;
+            });
+            if (playerKiller) {
+              playerKiller.exp += settings.exp.aiMissileKill;
+            }
+            this.aiMissiles.splice(i, 1);
+          }
+          break;
+        }
+      }
+
       // Damage items that get hit by bullets
       for (let i = 0, length = this.items.length; i < length; i++) {
         // Damage item if bullet box intersects with item box

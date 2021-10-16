@@ -2,6 +2,7 @@ const settings = {
   exp: {
     playerKill: 25,
     itemKill: 5,
+    aiMissileKill: 3,
     perLevel: 50,
   },
   player: {
@@ -26,7 +27,7 @@ const settings = {
   ai: {
     missile: {
       size: 20,
-      maxHealth: 15,
+      maxHealth: 30,
       damage: 3,
     },
   },

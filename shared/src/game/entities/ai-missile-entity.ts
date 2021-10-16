@@ -24,5 +24,6 @@ export default class AiMissileEntity {
 
   constructor() {
     this.id = generateUUID();
+    this.health = this.maxHealth;
   }
 }

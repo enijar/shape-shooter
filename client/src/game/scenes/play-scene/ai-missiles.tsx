@@ -5,6 +5,7 @@ import { Position } from "@react-three/drei/helpers/Position";
 import { useFrame } from "@react-three/fiber";
 import gameState from "../../game-state";
 import { encodeSvg } from "../../utils";
+import { Mesh } from "three";
 
 const SIZE = settings.ai.missile.size;
 
@@ -13,6 +14,7 @@ const aiMissiles = Array.from({ length: maxAiMissiles });
 
 function AiMissiles() {
   const instanceRefs = React.useRef<Position[]>([]);
+  const healthBarRefs = React.useRef<Mesh[]>([]);
 
   useFrame(() => {
     for (let i = 0; i < maxAiMissiles; i++) {
@@ -29,6 +31,13 @@ function AiMissiles() {
         gameState.aiMissiles[i].y,
         0
       );
+
+      // Health
+      const health =
+        (1 / gameState.aiMissiles[i].maxHealth) *
+        gameState.aiMissiles[i].health;
+      healthBarRefs.current[i].scale.x = health;
+      healthBarRefs.current[i].position.x = -SIZE * (1 - health) * 0.5;
     }
   });
 
@@ -54,7 +63,21 @@ function AiMissiles() {
               }
             }}
             key={index}
-          />
+          >
+            <mesh position={[0, -SIZE, -0.01]}>
+              <planeBufferGeometry args={[SIZE, 2.5]} />
+              <meshBasicMaterial color="#000000" />
+            </mesh>
+            <mesh
+              position={[0, -SIZE, 0]}
+              ref={(ref) => {
+                healthBarRefs.current[index] = ref as Mesh;
+              }}
+            >
+              <planeBufferGeometry args={[SIZE, 2.5]} />
+              <meshBasicMaterial color="hsl(120, 83%, 37%)" />
+            </mesh>
+          </Instance>
         );
       })}
     </Instances>

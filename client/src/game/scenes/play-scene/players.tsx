@@ -6,11 +6,12 @@ import Player from "../../entities/player";
 import { ConnectedData } from "../../types";
 
 function Players() {
-  const { currentPlayer, players } = useStore();
+  const { players, currentPlayer } = useStore();
 
   React.useEffect(() => {
     function removePlayer(player: PlayerEntity) {
-      const { players, setPlayers, setCurrentPlayer } = useStore.getState();
+      const { players, setPlayers, currentPlayer, setCurrentPlayer } =
+        useStore.getState();
       setPlayers(players.filter((p) => p.id !== player.id));
       if (player.id === currentPlayer?.id) {
         setCurrentPlayer(null);

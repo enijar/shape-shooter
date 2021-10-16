@@ -1,42 +1,57 @@
 import * as THREE from "three";
-import { AiMissileEntity, dist, PlayerEntity, settings } from "@app/shared";
-import Game from "../game";
 import { MathUtils } from "three";
+import { AiMissileEntity, dist, settings } from "@app/shared";
+import Game from "../game";
+import { Box } from "../types";
+
+type Target = {
+  box: Box;
+  type: "player" | "origin";
+};
+
+const DEFAULT_ORIGIN: Box = { x: 0, y: 0, width: 0, height: 0 };
 
 export default class AiMissile extends AiMissileEntity {
   private lerp = 0.05;
   private range = 200;
-  private targetPlayer: PlayerEntity = null;
-  private patrolArea = { x: 0, y: 0 };
+  private target: Target = {
+    box: DEFAULT_ORIGIN,
+    type: "origin",
+  };
+  private origin: Box = DEFAULT_ORIGIN;
 
   constructor(game: Game) {
     super();
     const r = settings.arena.size * 0.1;
-    this.patrolArea = {
+    this.origin = {
       x: THREE.MathUtils.randInt(-r, r),
       y: THREE.MathUtils.randInt(-r, r),
+      width: 0,
+      height: 0,
     };
-    this.x = this.patrolArea.x;
-    this.y = this.patrolArea.y;
-    this.box.x = this.patrolArea.x;
-    this.box.y = this.patrolArea.y;
+    this.target.box = this.origin;
+    this.x = this.origin.x - THREE.MathUtils.randInt(-5, 5);
+    this.y = this.origin.y - THREE.MathUtils.randInt(-5, 5);
+    this.box.x = this.x;
+    this.box.y = this.y;
 
     game.on("player.removed", () => {
-      this.targetPlayer = null;
-      console.log("[0] removed target player");
+      this.target.box = this.origin;
+      this.target.type = "origin";
     });
     game.on("player.killed", () => {
-      this.targetPlayer = null;
-      console.log("[1] removed target player");
+      this.target.box = this.origin;
+      this.target.type = "origin";
     });
   }
 
   update(game: Game) {
     // Find player target
-    if (this.targetPlayer === null) {
+    if (this.target.type !== "player") {
       for (let p = 0, length = game.players.length; p < length; p++) {
         if (dist(this.box, game.players[p].box) <= this.range) {
-          this.targetPlayer = game.players[p];
+          this.target.box = game.players[p].box;
+          this.target.type = "player";
           break;
         }
       }
@@ -45,30 +60,32 @@ export default class AiMissile extends AiMissileEntity {
     const a = settings.arena.size * 0.5;
     const p = this.speed * 0.5;
 
-    if (this.targetPlayer !== null) {
-      const dx = Math.sign(this.targetPlayer.x - this.x);
-      const dy = Math.sign(this.targetPlayer.y - this.y);
-      this.dx = THREE.MathUtils.lerp(this.dx, dx, this.lerp);
-      this.dy = THREE.MathUtils.lerp(this.dy, dy, this.lerp);
-      this.rotation =
-        Math.atan2(this.y - this.targetPlayer.y, this.x - this.targetPlayer.x) +
-        MathUtils.degToRad(90);
-      this.x = THREE.MathUtils.clamp(
-        this.x + this.speed * this.dx,
-        -a + p,
-        a - p
-      );
-      this.y = THREE.MathUtils.clamp(
-        this.y + this.speed * this.dy,
-        -a + p,
-        a - p
-      );
-      this.box.x = this.x;
-      this.box.y = this.y;
-      return;
-    }
+    const dx = Math.sign(this.target.box.x - this.x);
+    const dy = Math.sign(this.target.box.y - this.y);
 
-    this.dx = 0;
-    this.dy = 0;
+    this.dx = THREE.MathUtils.lerp(this.dx, dx, this.lerp);
+    this.dy = THREE.MathUtils.lerp(this.dy, dy, this.lerp);
+    const ox = this.x + this.box.width / 2;
+    const oy = this.y + this.box.height / 2;
+    const tx = this.target.box.x + this.target.box.width / 2;
+    const ty = this.target.box.y + this.target.box.height / 2;
+    const atan = Math.atan2(oy - ty, ox - tx);
+    if (atan === 0) {
+      this.rotation = 0;
+    } else {
+      this.rotation = atan + MathUtils.degToRad(90);
+    }
+    this.x = THREE.MathUtils.clamp(
+      this.x + this.speed * this.dx,
+      -a + p,
+      a - p
+    );
+    this.y = THREE.MathUtils.clamp(
+      this.y + this.speed * this.dy,
+      -a + p,
+      a - p
+    );
+    this.box.x = this.x;
+    this.box.y = this.y;
   }
 }

@@ -9,8 +9,10 @@ import Item from "./entities/item";
 import Food from "./entities/food";
 import config from "../config";
 
+type EventFn = (...args: any[]) => void;
+
 type Events = {
-  [event: string]: (...args: any[]) => void;
+  [event: string]: EventFn[];
 };
 
 export type GameOptions = {
@@ -40,19 +42,26 @@ export default class Game {
     this.tickInterval = 1000 / this.fps;
   }
 
-  on(event: string, fn: (...args: any[]) => void) {
-    this.events[event] = fn;
+  on(event: string, fn: EventFn) {
+    if (!this.events.hasOwnProperty(event)) {
+      this.events[event] = [];
+    }
+    this.events[event].push(fn);
   }
 
   emit(event: string, ...data: any[]) {
     if (this.events.hasOwnProperty(event)) {
-      this.events[event](...data);
+      for (let i = this.events[event].length - 1; i >= 0; i--) {
+        this.events[event][i](...data);
+      }
     }
   }
 
   off(event: string) {
     if (this.events.hasOwnProperty(event)) {
-      delete this.events[event];
+      for (let i = this.events[event].length - 1; i >= 0; i--) {
+        this.events[event].slice(i, 1);
+      }
     }
   }
 

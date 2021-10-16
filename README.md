@@ -37,7 +37,7 @@ If you want to self-host this game, follow the following installation instructio
 
 ```shell
 # Clone the latest stable code into /var/www/shape-shooter
-git clone https://github.com/Enijar/shape-shooter /var/www/shape-shooter
+git clone https://github.com/enijar/shape-shooter /var/www/shape-shooter
 
 # Enter the git directory
 cd /var/www/shape-shooter
@@ -55,7 +55,7 @@ npm run build
 npm add -g pm2
 
 # Run the game server with PM2
-pm2 start --name "game" /var/www/shape-shooter/server/build/index.js
+pm2 start --name "shape-shooter" /var/www/shape-shooter/server/build/index.js
 ```
 
 **NGINX Config**

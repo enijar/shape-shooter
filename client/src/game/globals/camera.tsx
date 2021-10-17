@@ -1,12 +1,10 @@
 import React from "react";
-import { OrthographicCamera, TrackballControls } from "@react-three/drei";
-import config from "../../config";
+import { OrthographicCamera } from "@react-three/drei";
 
 export default function Camera() {
   return (
     <>
       <OrthographicCamera makeDefault />
-      {config.debug && <TrackballControls />}
     </>
   );
 }

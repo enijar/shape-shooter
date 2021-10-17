@@ -39,7 +39,7 @@ export default function PlayScene() {
         <Foods />
         <Leaderboard />
         <Minimap />
-        {/*<JoinForm />*/}
+        <JoinForm />
       </React.Suspense>
     </group>
   );

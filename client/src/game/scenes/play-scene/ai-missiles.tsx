@@ -1,11 +1,11 @@
 import React from "react";
 import { settings } from "@app/shared";
+import { InstancedMesh, Mesh } from "three";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
 import { useFrame } from "@react-three/fiber";
 import gameState from "../../game-state";
 import { encodeSvg } from "../../utils";
-import { Mesh } from "three";
 
 const SIZE = settings.ai.missile.size;
 
@@ -13,12 +13,13 @@ const maxAiMissiles = 500;
 const aiMissiles = Array.from({ length: maxAiMissiles });
 
 function AiMissiles() {
+  const instancesRef = React.useRef<InstancedMesh>();
   const instanceRefs = React.useRef<Position[]>([]);
   const healthBarRefs = React.useRef<Mesh[]>([]);
 
   useFrame(() => {
+    instancesRef.current.count = gameState.aiMissiles.length;
     for (let i = 0; i < maxAiMissiles; i++) {
-      if (!instanceRefs.current[i]) continue;
       if (!gameState.aiMissiles[i]) {
         instanceRefs.current[i].scale.setScalar(0);
         continue;
@@ -50,7 +51,7 @@ function AiMissiles() {
   );
 
   return (
-    <Instances limit={maxAiMissiles} range={maxAiMissiles}>
+    <Instances limit={maxAiMissiles} range={0} ref={instancesRef}>
       <planeBufferGeometry args={[SIZE, SIZE]} />
       <meshBasicMaterial map={texture} transparent />
       {aiMissiles.map((_, index) => {

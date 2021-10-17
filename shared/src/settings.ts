@@ -22,7 +22,11 @@ const settings = {
     healthIncrement: 20,
   },
   arena: {
-    size: 1600,
+    size: 2000,
+    cell: {
+      size: 20,
+      gap: 1,
+    }
   },
   ai: {
     missile: {

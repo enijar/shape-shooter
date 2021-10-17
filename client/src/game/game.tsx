@@ -6,7 +6,7 @@ import SceneManager from "./managers/scene-manager";
 
 export default function Game() {
   return (
-    <Canvas>
+    <Canvas flat>
       <Lights />
       <Camera />
       <SceneManager />

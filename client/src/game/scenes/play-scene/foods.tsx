@@ -1,6 +1,6 @@
 import React from "react";
 import { settings } from "@app/shared";
-import { MathUtils } from "three";
+import { InstancedMesh, MathUtils } from "three";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
 import { useFrame } from "@react-three/fiber";
@@ -13,11 +13,12 @@ const maxFoods = 500;
 const foods = Array.from({ length: maxFoods });
 
 function Foods() {
+  const instancesRef = React.useRef<InstancedMesh>();
   const instanceRefs = React.useRef<Position[]>([]);
 
   useFrame(({ clock }) => {
-    for (let i = 0, length = foods.length; i < length; i++) {
-      if (!instanceRefs.current[i]) continue;
+    instancesRef.current.count = gameState.foods.length;
+    for (let i = 0; i < maxFoods; i++) {
       if (!gameState.foods[i]) {
         instanceRefs.current[i].scale.setScalar(0);
         continue;
@@ -50,7 +51,7 @@ function Foods() {
   );
 
   return (
-    <Instances limit={maxFoods}>
+    <Instances limit={maxFoods} range={0} ref={instancesRef}>
       <circleBufferGeometry args={[SIZE, 32, 32]} />
       <meshBasicMaterial map={texture} transparent />
       {foods.map((food, index) => {

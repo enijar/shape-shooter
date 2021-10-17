@@ -1,6 +1,6 @@
 import React from "react";
 import { settings } from "@app/shared";
-import { Mesh } from "three";
+import { InstancedMesh, Mesh } from "three";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
 import { useFrame } from "@react-three/fiber";
@@ -13,17 +13,17 @@ const maxItems = 500;
 const items = Array.from({ length: maxItems });
 
 function Items() {
+  const instancesRef = React.useRef<InstancedMesh>();
   const instanceRefs = React.useRef<Position[]>([]);
   const healthBarRefs = React.useRef<Mesh[]>([]);
 
   useFrame(() => {
+    instancesRef.current.count = gameState.items.length;
     for (let i = 0; i < maxItems; i++) {
-      if (!instanceRefs.current[i]) continue;
       if (!gameState.items[i]) {
         instanceRefs.current[i].scale.setScalar(0);
         continue;
       }
-
       instanceRefs.current[i].scale.setScalar(1);
       instanceRefs.current[i].position.set(
         gameState.items[i].x,
@@ -49,7 +49,7 @@ function Items() {
   );
 
   return (
-    <Instances limit={maxItems}>
+    <Instances limit={maxItems} range={0} ref={instancesRef}>
       <circleBufferGeometry args={[SIZE, 32, 32]} />
       <meshBasicMaterial map={texture} />
       {items.map((_, index) => {

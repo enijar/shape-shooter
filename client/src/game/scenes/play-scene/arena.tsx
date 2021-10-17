@@ -3,30 +3,28 @@ import { settings } from "@app/shared";
 import { Instance, Instances } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
 
-// const SIZE = settings.arena.size;
-const SIZE = 25;
+const SIZE = settings.arena.size;
+const CELL = settings.arena.cell;
 
-const cell = {
-  size: Math.sqrt(SIZE),
-  gap: 0,
-};
+const maxTiles = (SIZE / CELL.size) ** 2;
+const tiles: null[] = [];
+for (let i = 0; i < maxTiles; i++) {
+  tiles.push(null);
+}
 
-const maxTiles = SIZE * SIZE;
-const tiles = Array.from({ length: maxTiles });
-
-export default function Arena() {
+function Arena() {
   const cellRefs = React.useRef<Position[]>([]);
 
   return (
-    <group position={[0, 0, -1]}>
+    <group position={[SIZE * -0.5, SIZE * -0.5, -1]}>
       <Instances limit={maxTiles} range={maxTiles}>
-        <planeBufferGeometry args={[cell.size, cell.size]} />
-        <meshBasicMaterial color="crimson" />
+        <planeBufferGeometry args={[CELL.size, CELL.size]} />
+        <meshBasicMaterial color="#333333" />
         {tiles.map((_, index) => {
-          const col = index % cell.size;
-          const row = Math.floor(index / cell.size);
-          const x = (cell.size + cell.gap) * col;
-          const y = (cell.size + cell.gap) * row;
+          const col = Math.floor(index % (SIZE / CELL.size));
+          const row = Math.floor(index / (SIZE / CELL.size));
+          const x = (CELL.size + CELL.gap) * col;
+          const y = (CELL.size + CELL.gap) * row;
           return (
             <Instance
               key={index}
@@ -43,3 +41,5 @@ export default function Arena() {
     </group>
   );
 }
+
+export default React.memo(Arena);

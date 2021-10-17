@@ -1,5 +1,6 @@
 import React from "react";
 import { settings } from "@app/shared";
+import { InstancedMesh } from "three";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
 import { useFrame } from "@react-three/fiber";
@@ -12,11 +13,12 @@ const maxBullets = 500;
 const bullets = Array.from({ length: maxBullets });
 
 function Bullets() {
+  const instancesRef = React.useRef<InstancedMesh>();
   const instanceRefs = React.useRef<Position[]>([]);
 
   useFrame(() => {
+    instancesRef.current.count = gameState.bullets.length;
     for (let i = 0; i < maxBullets; i++) {
-      if (!instanceRefs.current[i]) continue;
       if (!gameState.bullets[i]) {
         instanceRefs.current[i].scale.setScalar(0);
         continue;
@@ -41,7 +43,7 @@ function Bullets() {
   );
 
   return (
-    <Instances limit={maxBullets} range={maxBullets}>
+    <Instances limit={maxBullets} range={0} ref={instancesRef}>
       <circleBufferGeometry args={[SIZE, 32, 32]} />
       <meshBasicMaterial map={texture} transparent />
       {bullets.map((_, index) => {

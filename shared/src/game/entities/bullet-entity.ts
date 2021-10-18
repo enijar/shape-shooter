@@ -1,16 +1,19 @@
 import { Box } from "../../types";
 import settings from "../../settings";
 import PlayerEntity from "./player-entity";
-import { generateUUID } from "../../utils";
+import { fixDecimal, generateUUID } from "../../utils";
 
-export default class BulletEntity {
-  id: string;
-  playerId: string;
-  color: string;
+export class BulletEntityData {
+  color: string = "";
   x = 0;
   y = 0;
-  speed = settings.bullet.size;
   rotation = 0;
+}
+
+export default class BulletEntity extends BulletEntityData {
+  id: string;
+  playerId: string;
+  speed = settings.bullet.size;
   distance = 0;
   size = 10;
   box: Box;
@@ -20,6 +23,7 @@ export default class BulletEntity {
   readonly startY: number = 0;
 
   constructor(player: PlayerEntity) {
+    super();
     this.id = generateUUID();
     this.playerId = player.id;
     this.color = player.color;
@@ -33,6 +37,15 @@ export default class BulletEntity {
       height: this.size * 2,
       x: this.x,
       y: this.y,
+    };
+  }
+
+  getData(): BulletEntityData {
+    return {
+      color: this.color,
+      x: fixDecimal(this.x),
+      y: fixDecimal(this.y),
+      rotation: fixDecimal(this.rotation),
     };
   }
 }

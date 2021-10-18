@@ -108,11 +108,11 @@ export default class Game {
 
   getState(): GameState {
     return {
-      players: this.players,
-      aiMissiles: this.aiMissiles,
-      bullets: this.bullets,
-      items: this.items,
-      foods: this.foods,
+      players: this.players.map((player) => player.getData()),
+      aiMissiles: this.aiMissiles.map((aiMissile) => aiMissile.getData()),
+      bullets: this.bullets.map((bullet) => bullet.getData()),
+      items: this.items.map((item) => item.getData()),
+      foods: this.foods.map((food) => food.getData()),
     };
   }
 

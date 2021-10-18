@@ -45,3 +45,8 @@ export function dist(boxA: Box, boxB: Box): number {
   const b = boxA.y - boxB.y;
   return Math.sqrt(a * a + b * b);
 }
+
+export function fixDecimal(decimal: number, places = 2): number {
+  const fix = Math.pow(10, places);
+  return Math.round(decimal * fix) / fix;
+}

@@ -1,8 +1,8 @@
-import PlayerEntity from "./game/entities/player-entity";
-import AiMissileEntity from "./game/entities/ai-missile-entity";
-import BulletEntity from "./game/entities/bullet-entity";
-import ItemEntity from "./game/entities/item-entity";
-import FoodEntity from "./game/entities/food-entity";
+import { PlayerEntityData } from "./game/entities/player-entity";
+import { AiMissileEntityData } from "./game/entities/ai-missile-entity";
+import { BulletEntityData } from "./game/entities/bullet-entity";
+import { ItemEntityData } from "./game/entities/item-entity";
+import { FoodEntityData } from "./game/entities/food-entity";
 
 export enum Action {
   up = "up",
@@ -23,9 +23,9 @@ export type Game = {
 };
 
 export type GameState = {
-  players: PlayerEntity[];
-  aiMissiles: AiMissileEntity[];
-  bullets: BulletEntity[];
-  items: ItemEntity[];
-  foods: FoodEntity[];
+  players: PlayerEntityData[];
+  aiMissiles: AiMissileEntityData[];
+  bullets: BulletEntityData[];
+  items: ItemEntityData[];
+  foods: FoodEntityData[];
 };

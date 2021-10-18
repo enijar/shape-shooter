@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { PlayerEntity, settings } from "@app/shared";
+import { PlayerEntityData, settings } from "@app/shared";
 import { Group, Mesh } from "three";
 import { useFrame } from "@react-three/fiber";
 import { Html, useTexture } from "@react-three/drei";
@@ -11,7 +11,7 @@ import { encodeSvg } from "../utils";
 
 const SIZE = settings.player.size;
 
-type Props = PlayerEntity & {
+type Props = PlayerEntityData & {
   current?: boolean;
 };
 

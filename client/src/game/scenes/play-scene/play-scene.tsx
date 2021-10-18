@@ -15,8 +15,7 @@ import { Subscription } from "../../types";
 import Bullets from "./bullets";
 import AiMissiles from "./ai-missiles";
 import Foods from "./foods";
-
-const MAX_ENTITIES = 500;
+import { MAX_ENTITIES } from "../../consts";
 
 export default function PlayScene() {
   React.useEffect(() => {

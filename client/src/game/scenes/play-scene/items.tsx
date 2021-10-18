@@ -3,41 +3,38 @@ import { settings } from "@app/shared";
 import { InstancedMesh, Mesh } from "three";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
-import { useFrame } from "@react-three/fiber";
 import gameState from "../../game-state";
 import { encodeSvg } from "../../utils";
+import { ENTITIES, MAX_ENTITIES } from "../../consts";
+import useSubscription from "../../hooks/use-subscription";
+import { Subscription } from "../../types";
 
 const SIZE = settings.item.size;
-
-const maxItems = 500;
-const items = Array.from({ length: maxItems });
 
 function Items() {
   const instancesRef = React.useRef<InstancedMesh>();
   const instanceRefs = React.useRef<Position[]>([]);
   const healthBarRefs = React.useRef<Mesh[]>([]);
 
-  useFrame(() => {
+  useSubscription(Subscription.tick, (i: number) => {
     instancesRef.current.count = gameState.items.length;
-    for (let i = 0; i < maxItems; i++) {
-      if (!gameState.items[i]) {
-        instanceRefs.current[i].scale.setScalar(0);
-        continue;
-      }
-      instanceRefs.current[i].scale.setScalar(1);
-      instanceRefs.current[i].position.set(
-        gameState.items[i].x,
-        gameState.items[i].y,
-        0
-      );
-      instanceRefs.current[i].color.setStyle(gameState.items[i].color);
-
-      // Health
-      const health =
-        (1 / gameState.items[i].maxHealth) * gameState.items[i].health;
-      healthBarRefs.current[i].scale.x = health;
-      healthBarRefs.current[i].position.x = SIZE * -2 * (1 - health) * 0.5;
+    if (!instanceRefs.current[i]) return;
+    if (!gameState.items[i]) {
+      return instanceRefs.current[i].scale.setScalar(0);
     }
+    instanceRefs.current[i].scale.setScalar(1);
+    instanceRefs.current[i].position.set(
+      gameState.items[i].x,
+      gameState.items[i].y,
+      0
+    );
+    instanceRefs.current[i].color.setStyle(gameState.items[i].color);
+
+    // Health
+    const health =
+      (1 / gameState.items[i].maxHealth) * gameState.items[i].health;
+    healthBarRefs.current[i].scale.x = health;
+    healthBarRefs.current[i].position.x = SIZE * -2 * (1 - health) * 0.5;
   });
 
   const texture = useTexture(
@@ -49,10 +46,10 @@ function Items() {
   );
 
   return (
-    <Instances limit={maxItems} range={0} ref={instancesRef}>
+    <Instances ref={instancesRef} limit={MAX_ENTITIES} range={0}>
       <circleBufferGeometry args={[SIZE, 32, 32]} />
       <meshBasicMaterial map={texture} />
-      {items.map((_, index) => {
+      {ENTITIES.map((_, index) => {
         return (
           <Instance
             ref={(ref) => {

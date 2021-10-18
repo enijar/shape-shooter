@@ -1,43 +1,40 @@
 import React from "react";
 import { settings } from "@app/shared";
-import { InstancedMesh, MathUtils } from "three";
+import { Clock, InstancedMesh, MathUtils } from "three";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
-import { useFrame } from "@react-three/fiber";
-import gameState from "../../game-state";
 import { encodeSvg } from "../../utils";
+import { ENTITIES, MAX_ENTITIES } from "../../consts";
+import useSubscription from "../../hooks/use-subscription";
+import { Subscription } from "../../types";
+import gameState from "../../game-state";
 
 const SIZE = settings.food.size;
-
-const maxFoods = 500;
-const foods = Array.from({ length: maxFoods });
 
 function Foods() {
   const instancesRef = React.useRef<InstancedMesh>();
   const instanceRefs = React.useRef<Position[]>([]);
 
-  useFrame(({ clock }) => {
+  useSubscription(Subscription.tick, (i: number, clock: Clock) => {
     instancesRef.current.count = gameState.foods.length;
-    for (let i = 0; i < maxFoods; i++) {
-      if (!gameState.foods[i]) {
-        instanceRefs.current[i].scale.setScalar(0);
-        continue;
-      }
-
-      const scale = MathUtils.mapLinear(
-        (1 + Math.sin(clock.getElapsedTime())) / 2,
-        0,
-        1,
-        0.5,
-        1
-      );
-      instanceRefs.current[i].scale.setScalar(scale);
-      instanceRefs.current[i].position.set(
-        gameState.foods[i].x,
-        gameState.foods[i].y,
-        0
-      );
+    if (!instanceRefs.current[i]) return;
+    if (!gameState.foods[i]) {
+      return instanceRefs.current[i].scale.setScalar(0);
     }
+
+    const scale = MathUtils.mapLinear(
+      (1 + Math.sin(clock.getElapsedTime())) / 2,
+      0,
+      1,
+      0.5,
+      1
+    );
+    instanceRefs.current[i].scale.setScalar(scale);
+    instanceRefs.current[i].position.set(
+      gameState.foods[i].x,
+      gameState.foods[i].y,
+      0
+    );
   });
 
   const texture = useTexture(
@@ -51,10 +48,10 @@ function Foods() {
   );
 
   return (
-    <Instances limit={maxFoods} range={0} ref={instancesRef}>
+    <Instances ref={instancesRef} limit={MAX_ENTITIES} range={0}>
       <circleBufferGeometry args={[SIZE, 32, 32]} />
       <meshBasicMaterial map={texture} transparent />
-      {foods.map((food, index) => {
+      {ENTITIES.map((food, index) => {
         return (
           <Instance
             ref={(ref) => {

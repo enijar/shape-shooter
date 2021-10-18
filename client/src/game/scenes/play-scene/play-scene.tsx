@@ -1,17 +1,22 @@
 import React from "react";
 import { GameState } from "@app/shared";
+import { useFrame } from "@react-three/fiber";
 import server from "../../../services/server";
 import gameState from "../../game-state";
 import Controls from "./controls";
 import Arena from "./arena";
 import Players from "./players";
-import AiMissiles from "./ai-missiles";
-import Bullets from "./bullets";
 import Items from "./items";
-import Foods from "./foods";
 import Leaderboard from "./leaderboard";
 import Minimap from "./minimap";
 import JoinForm from "./join-form";
+import useSubscription from "../../hooks/use-subscription";
+import { Subscription } from "../../types";
+import Bullets from "./bullets";
+import AiMissiles from "./ai-missiles";
+import Foods from "./foods";
+
+const MAX_ENTITIES = 500;
 
 export default function PlayScene() {
   React.useEffect(() => {
@@ -26,6 +31,12 @@ export default function PlayScene() {
       server.off("tick");
     };
   }, []);
+
+  useFrame(({ clock }) => {
+    for (let i = 0; i < MAX_ENTITIES; i++) {
+      useSubscription.emit(Subscription.tick, i, clock);
+    }
+  });
 
   return (
     <group>

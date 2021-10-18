@@ -3,43 +3,39 @@ import { settings } from "@app/shared";
 import { InstancedMesh, Mesh } from "three";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
-import { useFrame } from "@react-three/fiber";
 import gameState from "../../game-state";
 import { encodeSvg } from "../../utils";
+import useSubscription from "../../hooks/use-subscription";
+import { Subscription } from "../../types";
+import { ENTITIES, MAX_ENTITIES } from "../../consts";
 
 const SIZE = settings.ai.missile.size;
-
-const maxAiMissiles = 500;
-const aiMissiles = Array.from({ length: maxAiMissiles });
 
 function AiMissiles() {
   const instancesRef = React.useRef<InstancedMesh>();
   const instanceRefs = React.useRef<Position[]>([]);
   const healthBarRefs = React.useRef<Mesh[]>([]);
 
-  useFrame(() => {
+  useSubscription(Subscription.tick, (i: number) => {
     instancesRef.current.count = gameState.aiMissiles.length;
-    for (let i = 0; i < maxAiMissiles; i++) {
-      if (!gameState.aiMissiles[i]) {
-        instanceRefs.current[i].scale.setScalar(0);
-        continue;
-      }
-      instanceRefs.current[i].scale.setScalar(1);
-      instanceRefs.current[i].rotation.z = gameState.aiMissiles[i].rotation;
-      instanceRefs.current[i].color.set(gameState.aiMissiles[i].color);
-      instanceRefs.current[i].position.set(
-        gameState.aiMissiles[i].x,
-        gameState.aiMissiles[i].y,
-        0
-      );
-
-      // Health
-      const health =
-        (1 / gameState.aiMissiles[i].maxHealth) *
-        gameState.aiMissiles[i].health;
-      healthBarRefs.current[i].scale.x = health;
-      healthBarRefs.current[i].position.x = -SIZE * (1 - health) * 0.5;
+    if (!instanceRefs.current[i]) return;
+    if (!gameState.aiMissiles[i]) {
+      return instanceRefs.current[i].scale.setScalar(0);
     }
+    instanceRefs.current[i].scale.setScalar(1);
+    instanceRefs.current[i].rotation.z = gameState.aiMissiles[i].rotation;
+    instanceRefs.current[i].color.set(gameState.aiMissiles[i].color);
+    instanceRefs.current[i].position.set(
+      gameState.aiMissiles[i].x,
+      gameState.aiMissiles[i].y,
+      0
+    );
+
+    // Health
+    const health =
+      (1 / gameState.aiMissiles[i].maxHealth) * gameState.aiMissiles[i].health;
+    healthBarRefs.current[i].scale.x = health;
+    healthBarRefs.current[i].position.x = -SIZE * (1 - health) * 0.5;
   });
 
   const texture = useTexture(
@@ -51,10 +47,10 @@ function AiMissiles() {
   );
 
   return (
-    <Instances limit={maxAiMissiles} range={0} ref={instancesRef}>
+    <Instances ref={instancesRef} limit={MAX_ENTITIES} range={0}>
       <planeBufferGeometry args={[SIZE, SIZE]} />
       <meshBasicMaterial map={texture} transparent />
-      {aiMissiles.map((_, index) => {
+      {ENTITIES.map((_, index) => {
         return (
           <Instance
             ref={(ref) => {

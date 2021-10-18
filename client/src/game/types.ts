@@ -8,3 +8,7 @@ export type ConnectedData = {
   player: PlayerEntity;
   players: PlayerEntity[];
 };
+
+export enum Subscription {
+  tick = "tick",
+}

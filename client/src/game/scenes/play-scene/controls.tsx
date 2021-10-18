@@ -37,10 +37,10 @@ export default function Controls() {
         s: Action.down,
         a: Action.left,
         d: Action.right,
-        ArrowUp: Action.up,
-        ArrowDown: Action.down,
-        ArrowLeft: Action.left,
-        ArrowRight: Action.right,
+        arrowup: Action.up,
+        arrowdown: Action.down,
+        arrowleft: Action.left,
+        arrowright: Action.right,
       }}
     />
   );

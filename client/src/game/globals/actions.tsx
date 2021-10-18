@@ -26,7 +26,7 @@ export default function Actions({ keyMap }: Props) {
   React.useEffect(() => {
     function onKeydown(event: KeyboardEvent) {
       if (event.repeat) return;
-      const key = event.key;
+      const key = event.key.toLowerCase();
       if (keyMap.hasOwnProperty(key)) {
         setActions((actions) => {
           return { ...actions, [keyMap[key]]: true };

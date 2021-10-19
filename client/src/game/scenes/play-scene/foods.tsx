@@ -1,6 +1,7 @@
 import React from "react";
 import { settings } from "@app/shared";
-import { Clock, InstancedMesh, MathUtils } from "three";
+import { InstancedMesh, MathUtils } from "three";
+import { RootState } from "@react-three/fiber";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
 import { encodeSvg } from "../../utils";
@@ -15,7 +16,7 @@ function Foods() {
   const instancesRef = React.useRef<InstancedMesh>();
   const instanceRefs = React.useRef<Position[]>([]);
 
-  useSubscription(Subscription.tick, (i: number, clock: Clock) => {
+  useSubscription(Subscription.tick, (i: number, state: RootState) => {
     instancesRef.current.count = gameState.foods.length;
     if (!instanceRefs.current[i]) return;
     if (!gameState.foods[i]) {
@@ -23,7 +24,7 @@ function Foods() {
     }
 
     const scale = MathUtils.mapLinear(
-      (1 + Math.sin(clock.getElapsedTime())) / 2,
+      (1 + Math.sin(state.clock.getElapsedTime())) / 2,
       0,
       1,
       0.5,

@@ -31,9 +31,9 @@ export default function PlayScene() {
     };
   }, []);
 
-  useFrame(({ clock }) => {
+  useFrame((state) => {
     for (let i = 0; i < MAX_ENTITIES; i++) {
-      useSubscription.emit(Subscription.tick, i, clock);
+      useSubscription.emit(Subscription.tick, i, state);
     }
   });
 

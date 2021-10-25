@@ -10,5 +10,6 @@ export type ConnectedData = {
 };
 
 export enum Subscription {
+  entityTick = "entityTick",
   tick = "tick",
 }

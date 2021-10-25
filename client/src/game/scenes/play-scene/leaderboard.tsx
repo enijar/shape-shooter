@@ -1,8 +1,10 @@
 import React from "react";
 import styled from "styled-components";
-import { useFrame, useThree } from "@react-three/fiber";
+import { useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
-import gameState from "../../game-state";
+import { GameState } from "@app/shared";
+import useSubscription from "../../hooks/use-subscription";
+import { Subscription } from "../../types";
 
 const LEADERBOARD_SIZE = {
   x: 200,
@@ -18,7 +20,7 @@ export default function Leaderboard({ gap = 20 }: Props) {
 
   const { size } = useThree();
 
-  useFrame(() => {
+  useSubscription(Subscription.tick, (gameState: GameState) => {
     const topPlayers = gameState.players
       .sort((a, b) => b[5] - a[5])
       .slice(0, 10);

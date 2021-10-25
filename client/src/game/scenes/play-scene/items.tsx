@@ -1,9 +1,8 @@
 import React from "react";
-import { settings } from "@app/shared";
+import { GameState, settings } from "@app/shared";
 import { InstancedMesh, Mesh } from "three";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
-import gameState from "../../game-state";
 import { encodeSvg } from "../../utils";
 import { ENTITIES, MAX_ENTITIES } from "../../consts";
 import useSubscription from "../../hooks/use-subscription";
@@ -16,25 +15,30 @@ function Items() {
   const instanceRefs = React.useRef<Position[]>([]);
   const healthBarRefs = React.useRef<Mesh[]>([]);
 
-  useSubscription(Subscription.tick, (i: number) => {
-    instancesRef.current.count = gameState.items.length;
-    if (!instanceRefs.current[i]) return;
-    if (!gameState.items[i]) {
-      return instanceRefs.current[i].scale.setScalar(0);
-    }
-    instanceRefs.current[i].scale.setScalar(1);
-    instanceRefs.current[i].position.set(
-      gameState.items[i][0],
-      gameState.items[i][1],
-      0
-    );
-    instanceRefs.current[i].color.setStyle(gameState.items[i][3]);
+  useSubscription(
+    Subscription.entityTick,
+    (i: number, gameState: GameState) => {
+      instancesRef.current.count = gameState.items.length;
+      if (!instanceRefs.current[i]) return;
+      if (!gameState.items[i]) {
+        return instanceRefs.current[i].scale.setScalar(0);
+      }
+      instanceRefs.current[i].scale.setScalar(1);
+      instanceRefs.current[i].position.set(
+        gameState.items[i][0],
+        gameState.items[i][1],
+        0
+      );
+      instanceRefs.current[i].color.setStyle(gameState.items[i][3]);
 
-    // Health
-    const updatedHealth = (1 / settings.item.maxHealth) * gameState.items[i][2];
-    healthBarRefs.current[i].scale.x = updatedHealth;
-    healthBarRefs.current[i].position.x = SIZE * -2 * (1 - updatedHealth) * 0.5;
-  });
+      // Health
+      const updatedHealth =
+        (1 / settings.item.maxHealth) * gameState.items[i][2];
+      healthBarRefs.current[i].scale.x = updatedHealth;
+      healthBarRefs.current[i].position.x =
+        SIZE * -2 * (1 - updatedHealth) * 0.5;
+    }
+  );
 
   const texture = useTexture(
     encodeSvg(

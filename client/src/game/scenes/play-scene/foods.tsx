@@ -1,14 +1,13 @@
 import React from "react";
-import { settings } from "@app/shared";
+import { GameState, settings } from "@app/shared";
 import { InstancedMesh, MathUtils } from "three";
-import { RootState } from "@react-three/fiber";
+import { useThree } from "@react-three/fiber";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
 import { encodeSvg } from "../../utils";
 import { ENTITIES, MAX_ENTITIES } from "../../consts";
 import useSubscription from "../../hooks/use-subscription";
 import { Subscription } from "../../types";
-import gameState from "../../game-state";
 
 const SIZE = settings.food.size;
 
@@ -16,27 +15,32 @@ function Foods() {
   const instancesRef = React.useRef<InstancedMesh>();
   const instanceRefs = React.useRef<Position[]>([]);
 
-  useSubscription(Subscription.tick, (i: number, state: RootState) => {
-    instancesRef.current.count = gameState.foods.length;
-    if (!instanceRefs.current[i]) return;
-    if (!gameState.foods[i]) {
-      return instanceRefs.current[i].scale.setScalar(0);
-    }
+  const { clock } = useThree();
 
-    const scale = MathUtils.mapLinear(
-      (1 + Math.sin(state.clock.getElapsedTime())) / 2,
-      0,
-      1,
-      0.5,
-      1
-    );
-    instanceRefs.current[i].scale.setScalar(scale);
-    instanceRefs.current[i].position.set(
-      gameState.foods[i][0],
-      gameState.foods[i][1],
-      0
-    );
-  });
+  useSubscription(
+    Subscription.entityTick,
+    (i: number, gameState: GameState) => {
+      instancesRef.current.count = gameState.foods.length;
+      if (!instanceRefs.current[i]) return;
+      if (!gameState.foods[i]) {
+        return instanceRefs.current[i].scale.setScalar(0);
+      }
+
+      const scale = MathUtils.mapLinear(
+        (1 + Math.sin(clock.getElapsedTime())) / 2,
+        0,
+        1,
+        0.5,
+        1
+      );
+      instanceRefs.current[i].scale.setScalar(scale);
+      instanceRefs.current[i].position.set(
+        gameState.foods[i][0],
+        gameState.foods[i][1],
+        0
+      );
+    }
+  );
 
   const texture = useTexture(
     encodeSvg(

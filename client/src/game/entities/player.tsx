@@ -1,13 +1,14 @@
 import React from "react";
 import styled from "styled-components";
-import { PlayerEntityState, settings } from "@app/shared";
+import { GameState, PlayerEntityState, settings } from "@app/shared";
 import { Group, Mesh } from "three";
-import { useFrame } from "@react-three/fiber";
+import { useThree } from "@react-three/fiber";
 import { Html, useTexture } from "@react-three/drei";
 import useRotation from "../hooks/use-rotation";
 import { Bar, BarFill } from "../styles";
-import gameState from "../game-state";
 import { encodeSvg } from "../utils";
+import useSubscription from "../hooks/use-subscription";
+import { Subscription } from "../types";
 
 const SIZE = settings.player.size;
 
@@ -32,7 +33,9 @@ export default function Player({
 
   const rotationControls = useRotation(meshRef, current);
 
-  useFrame(({ camera }) => {
+  const { camera } = useThree();
+
+  useSubscription(Subscription.tick, (gameState: GameState) => {
     const index = gameState.players.findIndex((player) => player[0] === id);
     if (index === -1) return;
     const player = gameState.players[index];

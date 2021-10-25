@@ -1,8 +1,6 @@
 import React from "react";
 import { GameState } from "@app/shared";
-import { useFrame } from "@react-three/fiber";
 import server from "../../../services/server";
-import gameState from "../../game-state";
 import Controls from "./controls";
 import Arena from "./arena";
 import Players from "./players";
@@ -19,23 +17,16 @@ import { MAX_ENTITIES } from "../../consts";
 
 export default function PlayScene() {
   React.useEffect(() => {
-    server.on("tick", (state: GameState) => {
-      gameState.players = state.players;
-      gameState.aiMissiles = state.aiMissiles;
-      gameState.bullets = state.bullets;
-      gameState.items = state.items;
-      gameState.foods = state.foods;
+    server.on("tick", (gameState: GameState) => {
+      useSubscription.emit(Subscription.tick, gameState);
+      for (let i = 0; i < MAX_ENTITIES; i++) {
+        useSubscription.emit(Subscription.entityTick, i, gameState);
+      }
     });
     return () => {
       server.off("tick");
     };
   }, []);
-
-  useFrame((state) => {
-    for (let i = 0; i < MAX_ENTITIES; i++) {
-      useSubscription.emit(Subscription.tick, i, state);
-    }
-  });
 
   return (
     <group>

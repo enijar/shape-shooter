@@ -1,9 +1,8 @@
 import React from "react";
-import { settings } from "@app/shared";
+import { GameState, settings } from "@app/shared";
 import { InstancedMesh } from "three";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
-import gameState from "../../game-state";
 import { encodeSvg } from "../../utils";
 import useSubscription from "../../hooks/use-subscription";
 import { Subscription } from "../../types";
@@ -15,21 +14,24 @@ function Bullets() {
   const instancesRef = React.useRef<InstancedMesh>();
   const instanceRefs = React.useRef<Position[]>([]);
 
-  useSubscription(Subscription.tick, (i: number) => {
-    instancesRef.current.count = gameState.bullets.length;
-    if (!instanceRefs.current[i]) return;
-    if (!gameState.bullets[i]) {
-      return instanceRefs.current[i].scale.setScalar(0);
+  useSubscription(
+    Subscription.entityTick,
+    (i: number, gameState: GameState) => {
+      instancesRef.current.count = gameState.bullets.length;
+      if (!instanceRefs.current[i]) return;
+      if (!gameState.bullets[i]) {
+        return instanceRefs.current[i].scale.setScalar(0);
+      }
+      instanceRefs.current[i].scale.setScalar(1);
+      instanceRefs.current[i].rotateZ(gameState.bullets[i][3]);
+      instanceRefs.current[i].color.set(gameState.bullets[i][0]);
+      instanceRefs.current[i].position.set(
+        gameState.bullets[i][1],
+        gameState.bullets[i][2],
+        0
+      );
     }
-    instanceRefs.current[i].scale.setScalar(1);
-    instanceRefs.current[i].rotateZ(gameState.bullets[i][3]);
-    instanceRefs.current[i].color.set(gameState.bullets[i][0]);
-    instanceRefs.current[i].position.set(
-      gameState.bullets[i][1],
-      gameState.bullets[i][2],
-      0
-    );
-  });
+  );
 
   const texture = useTexture(
     encodeSvg(

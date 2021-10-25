@@ -1,9 +1,8 @@
 import React from "react";
-import { settings } from "@app/shared";
+import { GameState, settings } from "@app/shared";
 import { InstancedMesh, Mesh } from "three";
 import { Instance, Instances, useTexture } from "@react-three/drei";
 import { Position } from "@react-three/drei/helpers/Position";
-import gameState from "../../game-state";
 import { encodeSvg } from "../../utils";
 import useSubscription from "../../hooks/use-subscription";
 import { Subscription } from "../../types";
@@ -16,27 +15,30 @@ function AiMissiles() {
   const instanceRefs = React.useRef<Position[]>([]);
   const healthBarRefs = React.useRef<Mesh[]>([]);
 
-  useSubscription(Subscription.tick, (i: number) => {
-    instancesRef.current.count = gameState.aiMissiles.length;
-    if (!instanceRefs.current[i]) return;
-    if (!gameState.aiMissiles[i]) {
-      return instanceRefs.current[i].scale.setScalar(0);
-    }
-    instanceRefs.current[i].scale.setScalar(1);
-    instanceRefs.current[i].rotation.z = gameState.aiMissiles[i][2];
-    instanceRefs.current[i].color.set(settings.ai.missile.color);
-    instanceRefs.current[i].position.set(
-      gameState.aiMissiles[i][0],
-      gameState.aiMissiles[i][1],
-      0
-    );
+  useSubscription(
+    Subscription.entityTick,
+    (i: number, gameState: GameState) => {
+      instancesRef.current.count = gameState.aiMissiles.length;
+      if (!instanceRefs.current[i]) return;
+      if (!gameState.aiMissiles[i]) {
+        return instanceRefs.current[i].scale.setScalar(0);
+      }
+      instanceRefs.current[i].scale.setScalar(1);
+      instanceRefs.current[i].rotation.z = gameState.aiMissiles[i][2];
+      instanceRefs.current[i].color.set(settings.ai.missile.color);
+      instanceRefs.current[i].position.set(
+        gameState.aiMissiles[i][0],
+        gameState.aiMissiles[i][1],
+        0
+      );
 
-    // Health
-    const updatedHealth =
-      (1 / settings.ai.missile.maxHealth) * gameState.aiMissiles[i][3];
-    healthBarRefs.current[i].scale.x = updatedHealth;
-    healthBarRefs.current[i].position.x = -SIZE * (1 - updatedHealth) * 0.5;
-  });
+      // Health
+      const updatedHealth =
+        (1 / settings.ai.missile.maxHealth) * gameState.aiMissiles[i][3];
+      healthBarRefs.current[i].scale.x = updatedHealth;
+      healthBarRefs.current[i].position.x = -SIZE * (1 - updatedHealth) * 0.5;
+    }
+  );
 
   const texture = useTexture(
     encodeSvg(

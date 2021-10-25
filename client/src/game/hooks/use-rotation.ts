@@ -1,5 +1,5 @@
 import React from "react";
-import { Box3, Object3D, MathUtils } from "three";
+import { Box3, MathUtils, Object3D } from "three";
 import { useThree } from "@react-three/fiber";
 import server from "../../services/server";
 

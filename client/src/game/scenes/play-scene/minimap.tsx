@@ -1,10 +1,11 @@
 import React from "react";
-import { settings } from "@app/shared";
+import { GameState, settings } from "@app/shared";
 import { MathUtils } from "three";
-import { useFrame, useThree } from "@react-three/fiber";
-import gameState from "../../game-state";
+import { useThree } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import { useStore } from "../../store";
+import useSubscription from "../../hooks/use-subscription";
+import { Subscription } from "../../types";
 
 const MAP_SIZE = 200;
 
@@ -19,9 +20,10 @@ export default function Minimap({ gap = 20 }: Props) {
 
   const playerRefs = React.useRef<HTMLDivElement[]>([]);
 
-  useFrame(() => {
-    for (let i = 0, length = gameState.players.length; i < length; i++) {
-      if (!playerRefs.current[i]) continue;
+  useSubscription(
+    Subscription.entityTick,
+    (i: number, gameState: GameState) => {
+      if (!playerRefs.current[i]) return;
       const player = gameState.players[i];
       playerRefs.current[i].style.visibility =
         currentPlayer !== null ? "visible" : "hidden";
@@ -44,7 +46,7 @@ export default function Minimap({ gap = 20 }: Props) {
       }px + ${x}px) - 50%), calc((${MAP_SIZE / 2}px + ${y}px) - 50%), 0px)`;
       playerRefs.current[i].style.top = `${y}px`;
     }
-  });
+  );
 
   const { size } = useThree();
 

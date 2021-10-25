@@ -33,6 +33,7 @@ export default function Leaderboard({ gap = 20 }: Props) {
         width: `${LEADERBOARD_SIZE.x}px`,
         padding: "0.25em 0.5em",
         backgroundColor: "rgba(0, 0, 0, 0.5)",
+        pointerEvents: "none",
       }}
       calculatePosition={() => {
         return [size.width - LEADERBOARD_SIZE.x - gap, gap];

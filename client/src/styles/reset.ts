@@ -38,6 +38,7 @@ export default createGlobalStyle`
     background-color: #1e1e1e;
     color: #fefefe;
     text-rendering: geometricPrecision;
+    user-select: none;
   }
 
   main {

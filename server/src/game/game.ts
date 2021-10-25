@@ -26,6 +26,14 @@ export default class Game {
   items: Item[] = [];
   foods: Food[] = [];
 
+  gameState: GameState = {
+    players: [],
+    aiMissiles: [],
+    bullets: [],
+    items: [],
+    foods: [],
+  };
+
   private readonly fps: number = 60;
   private readonly tickInterval: number;
 
@@ -106,14 +114,49 @@ export default class Game {
     clearInterval(this.interval);
   }
 
-  getState(): GameState {
-    return {
-      players: this.players.map((player) => player.getData()),
-      aiMissiles: this.aiMissiles.map((aiMissile) => aiMissile.getData()),
-      bullets: this.bullets.map((bullet) => bullet.getData()),
-      items: this.items.map((item) => item.getData()),
-      foods: this.foods.map((food) => food.getData()),
+  setGameState() {
+    this.gameState = {
+      players: this.players.map((i) => i.getData()),
+      aiMissiles: this.aiMissiles.map((i) => i.getData()),
+      bullets: this.bullets.map((i) => i.getData()),
+      items: this.items.map((i) => i.getData()),
+      foods: this.foods.map((i) => i.getData()),
     };
+  }
+
+  getState(player: Player): GameState {
+    const state: GameState = {
+      players: [],
+      aiMissiles: [],
+      bullets: [],
+      items: [],
+      foods: [],
+    };
+    for (let i = 0, length = this.gameState.players.length; i < length; i++) {
+      if (!intersect(player.aoe, this.players[i].box)) continue;
+      state.players.push(this.gameState.players[i]);
+    }
+    for (
+      let i = 0, length = this.gameState.aiMissiles.length;
+      i < length;
+      i++
+    ) {
+      if (!intersect(player.aoe, this.aiMissiles[i].box)) continue;
+      state.aiMissiles.push(this.gameState.aiMissiles[i]);
+    }
+    for (let i = 0, length = this.gameState.bullets.length; i < length; i++) {
+      if (!intersect(player.aoe, this.bullets[i].box)) continue;
+      state.bullets.push(this.gameState.bullets[i]);
+    }
+    for (let i = 0, length = this.gameState.items.length; i < length; i++) {
+      if (!intersect(player.aoe, this.items[i].box)) continue;
+      state.items.push(this.gameState.items[i]);
+    }
+    for (let i = 0, length = this.gameState.foods.length; i < length; i++) {
+      if (!intersect(player.aoe, this.foods[i].box)) continue;
+      state.foods.push(this.gameState.foods[i]);
+    }
+    return state;
   }
 
   private tick(onTick: Function) {
@@ -275,6 +318,12 @@ export default class Game {
         server.emit("player.killed", this.players[p]);
         this.players.splice(p, 1);
       }
+    }
+
+    this.setGameState();
+
+    for (let i = 0, length = this.players.length; i < length; i++) {
+      this.players[i].socket.emit("tick", this.getState(this.players[i]));
     }
 
     onTick();

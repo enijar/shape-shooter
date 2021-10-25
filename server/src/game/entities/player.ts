@@ -1,10 +1,15 @@
 import * as THREE from "three";
-import { Action, PlayerEntity, settings } from "@app/shared";
+import { Socket } from "socket.io";
+import { Action, Box, PlayerEntity, settings } from "@app/shared";
 import Game from "../game";
 import Bullet from "./bullet";
 
 export default class Player extends PlayerEntity {
   private lerp = 0.05;
+
+  aoe: Box;
+
+  socket: Socket;
 
   constructor(id: string) {
     super(id);
@@ -17,6 +22,12 @@ export default class Player extends PlayerEntity {
     this.box = {
       width: this.size,
       height: this.size,
+      x: this.x,
+      y: this.y,
+    };
+    this.aoe = {
+      width: 1500,
+      height: 1000,
       x: this.x,
       y: this.y,
     };
@@ -72,5 +83,7 @@ export default class Player extends PlayerEntity {
     );
     this.box.x = this.x;
     this.box.y = this.y;
+    this.aoe.x = this.x;
+    this.aoe.y = this.y;
   }
 }

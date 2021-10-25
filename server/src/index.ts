@@ -6,7 +6,7 @@ import Player from "./game/entities/player";
 
 const game = new Game();
 game.start(() => {
-  server.emit("tick", game.getState());
+  // Do something every tick
 });
 
 type PlayerData = {
@@ -16,6 +16,7 @@ type PlayerData = {
 
 server.on("connection", (socket) => {
   const player = new Player(socket.id);
+  player.socket = socket;
 
   socket.on("player.join", (playerData: PlayerData) => {
     if (typeof playerData.name !== "string") return;
@@ -29,7 +30,10 @@ server.on("connection", (socket) => {
     }
     player.fresh();
     game.addPlayer(player);
-    socket.emit("connected", { player: player.getData(), ...game.getState() });
+    socket.emit("connected", {
+      player: player.getData(),
+      ...game.getState(player),
+    });
     server.emit("player.connected", player.getData());
   });
 

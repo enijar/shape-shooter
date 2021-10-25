@@ -32,8 +32,8 @@ function Foods() {
     );
     instanceRefs.current[i].scale.setScalar(scale);
     instanceRefs.current[i].position.set(
-      gameState.foods[i].x,
-      gameState.foods[i].y,
+      gameState.foods[i][0],
+      gameState.foods[i][1],
       0
     );
   });

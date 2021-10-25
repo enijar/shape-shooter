@@ -23,19 +23,19 @@ function AiMissiles() {
       return instanceRefs.current[i].scale.setScalar(0);
     }
     instanceRefs.current[i].scale.setScalar(1);
-    instanceRefs.current[i].rotation.z = gameState.aiMissiles[i].rotation;
-    instanceRefs.current[i].color.set(gameState.aiMissiles[i].color);
+    instanceRefs.current[i].rotation.z = gameState.aiMissiles[i][2];
+    instanceRefs.current[i].color.set(settings.ai.missile.color);
     instanceRefs.current[i].position.set(
-      gameState.aiMissiles[i].x,
-      gameState.aiMissiles[i].y,
+      gameState.aiMissiles[i][0],
+      gameState.aiMissiles[i][1],
       0
     );
 
     // Health
-    const health =
-      (1 / gameState.aiMissiles[i].maxHealth) * gameState.aiMissiles[i].health;
-    healthBarRefs.current[i].scale.x = health;
-    healthBarRefs.current[i].position.x = -SIZE * (1 - health) * 0.5;
+    const updatedHealth =
+      (1 / settings.ai.missile.maxHealth) * gameState.aiMissiles[i][3];
+    healthBarRefs.current[i].scale.x = updatedHealth;
+    healthBarRefs.current[i].position.x = -SIZE * (1 - updatedHealth) * 0.5;
   });
 
   const texture = useTexture(

@@ -26,13 +26,14 @@ const settings = {
     cell: {
       size: 20,
       gap: 1,
-    }
+    },
   },
   ai: {
     missile: {
       size: 20,
       maxHealth: 30,
       damage: 3,
+      color: "#ffffff",
     },
   },
 };

@@ -2,13 +2,14 @@ import { Box } from "../../types";
 import settings from "../../settings";
 import { fixDecimal, generateUUID, randInt } from "../../utils";
 
-export class FoodEntityData {
+export class FoodEntityState {
   x: number = 0;
   y: number = 0;
-  rotation = 0;
 }
 
-export default class FoodEntity extends FoodEntityData {
+export type FoodEntityData = [x: number, y: number];
+
+export default class FoodEntity extends FoodEntityState {
   id: string;
   size: number = settings.food.size;
   box: Box;
@@ -27,10 +28,6 @@ export default class FoodEntity extends FoodEntityData {
   }
 
   getData(): FoodEntityData {
-    return {
-      x: fixDecimal(this.x),
-      y: fixDecimal(this.y),
-      rotation: fixDecimal(this.rotation),
-    };
+    return [fixDecimal(this.x), fixDecimal(this.y)];
   }
 }

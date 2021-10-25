@@ -29,8 +29,8 @@ server.on("connection", (socket) => {
     }
     player.fresh();
     game.addPlayer(player);
-    socket.emit("connected", { player, ...game.getState() });
-    server.emit("player.connected", player);
+    socket.emit("connected", { player: player.getData(), ...game.getState() });
+    server.emit("player.connected", player.getData());
   });
 
   socket.on("actions", (actions: any) => {

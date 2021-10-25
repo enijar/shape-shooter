@@ -1,12 +1,12 @@
-import { PlayerEntity } from "@app/shared";
+import { PlayerEntityData } from "@app/shared";
 
 export enum Scene {
   play = "play",
 }
 
 export type ConnectedData = {
-  player: PlayerEntity;
-  players: PlayerEntity[];
+  player: PlayerEntityData;
+  players: PlayerEntityData[];
 };
 
 export enum Subscription {

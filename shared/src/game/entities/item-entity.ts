@@ -2,19 +2,25 @@ import { Box } from "../../types";
 import settings from "../../settings";
 import { fixDecimal, generateUUID, randInt } from "../../utils";
 
-export class ItemEntityData {
+export class ItemEntityState {
   x: number = 0;
   y: number = 0;
-  rotation = 0;
   health: number = 0;
   color: string = "";
-  maxHealth: number = settings.item.maxHealth;
 }
 
-export default class ItemEntity extends ItemEntityData {
+export type ItemEntityData = [
+  x: number,
+  y: number,
+  health: number,
+  color: string
+];
+
+export default class ItemEntity extends ItemEntityState {
   id: string;
   size: number = settings.item.size;
   box: Box;
+  maxHealth: number = settings.item.maxHealth;
 
   constructor() {
     super();
@@ -32,13 +38,11 @@ export default class ItemEntity extends ItemEntityData {
   }
 
   getData(): ItemEntityData {
-    return {
-      x: fixDecimal(this.x),
-      y: fixDecimal(this.y),
-      rotation: fixDecimal(this.rotation),
-      health: fixDecimal(this.health),
-      color: this.color,
-      maxHealth: this.maxHealth,
-    };
+    return [
+      fixDecimal(this.x),
+      fixDecimal(this.y),
+      fixDecimal(this.health),
+      this.color,
+    ];
   }
 }

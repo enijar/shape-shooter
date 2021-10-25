@@ -24,17 +24,16 @@ function Items() {
     }
     instanceRefs.current[i].scale.setScalar(1);
     instanceRefs.current[i].position.set(
-      gameState.items[i].x,
-      gameState.items[i].y,
+      gameState.items[i][0],
+      gameState.items[i][1],
       0
     );
-    instanceRefs.current[i].color.setStyle(gameState.items[i].color);
+    instanceRefs.current[i].color.setStyle(gameState.items[i][3]);
 
     // Health
-    const health =
-      (1 / gameState.items[i].maxHealth) * gameState.items[i].health;
-    healthBarRefs.current[i].scale.x = health;
-    healthBarRefs.current[i].position.x = SIZE * -2 * (1 - health) * 0.5;
+    const updatedHealth = (1 / settings.item.maxHealth) * gameState.items[i][2];
+    healthBarRefs.current[i].scale.x = updatedHealth;
+    healthBarRefs.current[i].position.x = SIZE * -2 * (1 - updatedHealth) * 0.5;
   });
 
   const texture = useTexture(

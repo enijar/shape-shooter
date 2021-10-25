@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { PlayerEntityData, settings } from "@app/shared";
+import { PlayerEntityState, settings } from "@app/shared";
 import { Group, Mesh } from "three";
 import { useFrame } from "@react-three/fiber";
 import { Html, useTexture } from "@react-three/drei";
@@ -11,7 +11,7 @@ import { encodeSvg } from "../utils";
 
 const SIZE = settings.player.size;
 
-type Props = PlayerEntityData & {
+type Props = PlayerEntityState & {
   current?: boolean;
 };
 
@@ -33,24 +33,24 @@ export default function Player({
   const rotationControls = useRotation(meshRef, current);
 
   useFrame(({ camera }) => {
-    const index = gameState.players.findIndex((player) => player.id === id);
+    const index = gameState.players.findIndex((player) => player[0] === id);
     if (index === -1) return;
     const player = gameState.players[index];
     rotationControls.enabled = current;
 
     // Update position
-    groupRef.current.position.x = player.x;
-    groupRef.current.position.y = player.y;
-    meshRef.current.rotation.z = player.rotation;
+    groupRef.current.position.x = player[1];
+    groupRef.current.position.y = player[2];
+    meshRef.current.rotation.z = player[4];
 
     // Health
-    const health = (100 / player.maxHealth) * player.health;
+    const health = (100 / player[7]) * player[6];
     healthBarRef.current.style.width = `${health}%`;
     healthTextRef.current.innerText = `${health}%`;
 
     // Exp/level
-    const level = Math.floor(player.exp / settings.exp.perLevel);
-    const levelExp = player.exp - level * settings.exp.perLevel;
+    const level = Math.floor(player[5] / settings.exp.perLevel);
+    const levelExp = player[5] - level * settings.exp.perLevel;
     const exp = (100 / settings.exp.perLevel) * levelExp;
     expBarRef.current.style.width = `${exp}%`;
     expTextRef.current.innerText = `lvl. ${level}`;

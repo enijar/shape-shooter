@@ -20,7 +20,7 @@ export default function Leaderboard({ gap = 20 }: Props) {
 
   useFrame(() => {
     const topPlayers = gameState.players
-      .sort((a, b) => b.exp - a.exp)
+      .sort((a, b) => b[5] - a[5])
       .slice(0, 10);
     setTopPlayers(topPlayers);
   });
@@ -39,8 +39,8 @@ export default function Leaderboard({ gap = 20 }: Props) {
       <h3>Leaderboard</h3>
       {topPlayers.map((player) => {
         return (
-          <Item key={player.id}>
-            {player.name ?? "Noob"} – {player.exp}
+          <Item key={player[0]}>
+            {player[8] ?? "Noob"} – {player[5]}
           </Item>
         );
       })}

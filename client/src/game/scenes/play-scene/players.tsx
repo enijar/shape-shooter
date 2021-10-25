@@ -1,5 +1,5 @@
 import React from "react";
-import { PlayerEntity } from "@app/shared";
+import { PlayerEntityData } from "@app/shared";
 import server from "../../../services/server";
 import { useStore } from "../../store";
 import Player from "../../entities/player";
@@ -9,11 +9,11 @@ function Players() {
   const { players, currentPlayer } = useStore();
 
   React.useEffect(() => {
-    function removePlayer(player: PlayerEntity) {
+    function removePlayer(player: PlayerEntityData) {
       const { players, setPlayers, currentPlayer, setCurrentPlayer } =
         useStore.getState();
-      setPlayers(players.filter((p) => p.id !== player.id));
-      if (player.id === currentPlayer?.id) {
+      setPlayers(players.filter((p) => p[0] !== player[0]));
+      if (player[0] === currentPlayer?.[0]) {
         setCurrentPlayer(null);
       }
     }
@@ -25,17 +25,17 @@ function Players() {
       setCurrentPlayer(data.player);
       setPlayers(data.players);
     });
-    server.on("player.connected", (player: PlayerEntity) => {
+    server.on("player.connected", (player: PlayerEntityData) => {
       const { players, setPlayers } = useStore.getState();
-      if (players.find((p) => p.id === player.id) === undefined) {
+      if (players.find((p) => p[0] === player[0]) === undefined) {
         setPlayers([...players, player]);
       }
     });
-    server.on("player.update", (player: PlayerEntity) => {
+    server.on("player.update", (player: PlayerEntityData) => {
       const { players, setPlayers } = useStore.getState();
       setPlayers(
         players.map((p) => {
-          if (p.id === player.id) {
+          if (p[0] === player[0]) {
             return player;
           }
           return p;
@@ -56,9 +56,17 @@ function Players() {
       {players.map((player) => {
         return (
           <Player
-            key={player.id}
-            {...player}
-            current={player.id === currentPlayer?.id}
+            key={player[0]}
+            id={player[0]}
+            x={player[1]}
+            y={player[2]}
+            color={player[3]}
+            rotation={player[4]}
+            exp={player[5]}
+            health={player[6]}
+            maxHealth={player[7]}
+            name={player[8]}
+            current={player[0] === currentPlayer?.[0]}
           />
         );
       })}

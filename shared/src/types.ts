@@ -1,8 +1,8 @@
 import { PlayerEntityData } from "./game/entities/player-entity";
-import { AiMissileEntityData } from "./game/entities/ai-missile-entity";
 import { BulletEntityData } from "./game/entities/bullet-entity";
 import { ItemEntityData } from "./game/entities/item-entity";
 import { FoodEntityData } from "./game/entities/food-entity";
+import { AiMissileEntityData } from "./game/entities/ai-missile-entity";
 
 export enum Action {
   up = "up",

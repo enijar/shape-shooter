@@ -2,16 +2,21 @@ import { Box } from "../../types";
 import settings from "../../settings";
 import { fixDecimal, generateUUID } from "../../utils";
 
-export class AiMissileEntityData {
+export class AiMissileEntityState {
   x: number = 0;
   y: number = 0;
   rotation: number = 0;
   health: number = 0;
-  color: string = "";
-  maxHealth: number = settings.ai.missile.maxHealth;
 }
 
-export default class AiMissileEntity extends AiMissileEntityData {
+export type AiMissileEntityData = [
+  x: number,
+  y: number,
+  rotation: number,
+  health: number
+];
+
+export default class AiMissileEntity extends AiMissileEntityState {
   id: string;
   speed = 4;
   size = settings.ai.missile.size;
@@ -24,6 +29,7 @@ export default class AiMissileEntity extends AiMissileEntityData {
     x: 0,
     y: 0,
   };
+  maxHealth: number = settings.ai.missile.maxHealth;
 
   constructor() {
     super();
@@ -32,13 +38,11 @@ export default class AiMissileEntity extends AiMissileEntityData {
   }
 
   getData(): AiMissileEntityData {
-    return {
-      x: fixDecimal(this.x),
-      y: fixDecimal(this.y),
-      rotation: fixDecimal(this.rotation),
-      health: fixDecimal(this.health),
-      color: this.color,
-      maxHealth: this.maxHealth,
-    };
+    return [
+      fixDecimal(this.x),
+      fixDecimal(this.y),
+      fixDecimal(this.rotation),
+      fixDecimal(this.health),
+    ];
   }
 }

@@ -172,7 +172,7 @@ export default class Game {
             this.players[p].maxHealth
           );
 
-          server.emit("player.update", this.players[p]);
+          server.emit("player.update", this.players[p].getData());
 
           // Remove player when their health runs out
           if (this.players[p].health === 0) {

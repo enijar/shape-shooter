@@ -28,14 +28,14 @@ export default function Minimap({ gap = 20 }: Props) {
       playerRefs.current[i].style.visibility =
         currentPlayer !== null ? "visible" : "hidden";
       const x = MathUtils.mapLinear(
-        player[1],
+        player.x,
         0,
         settings.arena.size,
         0,
         MAP_SIZE
       );
       const y = MathUtils.mapLinear(
-        player[2],
+        player.y,
         0,
         settings.arena.size,
         0,
@@ -65,7 +65,7 @@ export default function Minimap({ gap = 20 }: Props) {
       {players.map((player, index) => {
         return (
           <div
-            key={player[0]}
+            key={player.id}
             ref={(ref) => {
               playerRefs.current[index] = ref;
             }}
@@ -76,7 +76,7 @@ export default function Minimap({ gap = 20 }: Props) {
               transform: `translate3d(calc(${MAP_SIZE / 2}px - 50%), calc(${
                 MAP_SIZE / 2
               }px - 50%), 0px)`,
-              backgroundColor: player[3],
+              backgroundColor: player.color,
               width: `${Math.max(MAP_SIZE * PLAYER_SIZE, 4)}px`,
               height: `${Math.max(MAP_SIZE * PLAYER_SIZE, 4)}px`,
             }}

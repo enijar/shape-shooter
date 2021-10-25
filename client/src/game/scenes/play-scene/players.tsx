@@ -12,8 +12,8 @@ function Players() {
     function removePlayer(player: PlayerEntityData) {
       const { players, setPlayers, currentPlayer, setCurrentPlayer } =
         useStore.getState();
-      setPlayers(players.filter((p) => p[0] !== player[0]));
-      if (player[0] === currentPlayer?.[0]) {
+      setPlayers(players.filter((p) => p.id !== player.id));
+      if (player.id === currentPlayer?.id) {
         setCurrentPlayer(null);
       }
     }
@@ -27,7 +27,7 @@ function Players() {
     });
     server.on("player.connected", (player: PlayerEntityData) => {
       const { players, setPlayers } = useStore.getState();
-      if (players.find((p) => p[0] === player[0]) === undefined) {
+      if (players.find((p) => p.id === player.id) === undefined) {
         setPlayers([...players, player]);
       }
     });
@@ -35,7 +35,7 @@ function Players() {
       const { players, setPlayers } = useStore.getState();
       setPlayers(
         players.map((p) => {
-          if (p[0] === player[0]) {
+          if (p.id === player.id) {
             return player;
           }
           return p;
@@ -56,17 +56,9 @@ function Players() {
       {players.map((player) => {
         return (
           <Player
-            key={player[0]}
-            id={player[0]}
-            x={player[1]}
-            y={player[2]}
-            color={player[3]}
-            rotation={player[4]}
-            exp={player[5]}
-            health={player[6]}
-            maxHealth={player[7]}
-            name={player[8]}
-            current={player[0] === currentPlayer?.[0]}
+            key={player.id}
+            {...player}
+            current={player.id === currentPlayer?.id}
           />
         );
       })}

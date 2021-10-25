@@ -2,21 +2,14 @@ import { Box } from "../../types";
 import settings from "../../settings";
 import { fixDecimal, generateUUID, randInt } from "../../utils";
 
-export class ItemEntityState {
+export class ItemEntityData {
   x: number = 0;
   y: number = 0;
   health: number = 0;
   color: string = "";
 }
 
-export type ItemEntityData = [
-  x: number,
-  y: number,
-  health: number,
-  color: string
-];
-
-export default class ItemEntity extends ItemEntityState {
+export default class ItemEntity extends ItemEntityData {
   id: string;
   size: number = settings.item.size;
   box: Box;
@@ -38,11 +31,11 @@ export default class ItemEntity extends ItemEntityState {
   }
 
   getData(): ItemEntityData {
-    return [
-      fixDecimal(this.x),
-      fixDecimal(this.y),
-      fixDecimal(this.health),
-      this.color,
-    ];
+    return {
+      x: fixDecimal(this.x),
+      y: fixDecimal(this.y),
+      health: fixDecimal(this.health),
+      color: this.color,
+    };
   }
 }

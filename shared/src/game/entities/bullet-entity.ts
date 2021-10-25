@@ -3,21 +3,14 @@ import settings from "../../settings";
 import PlayerEntity from "./player-entity";
 import { fixDecimal, generateUUID } from "../../utils";
 
-export class BulletEntityState {
+export class BulletEntityData {
   color: string = "";
   x = 0;
   y = 0;
   rotation = 0;
 }
 
-export type BulletEntityData = [
-  color: string,
-  x: number,
-  y: number,
-  rotation: number
-];
-
-export default class BulletEntity extends BulletEntityState {
+export default class BulletEntity extends BulletEntityData {
   id: string;
   playerId: string;
   speed = settings.bullet.size;
@@ -48,11 +41,11 @@ export default class BulletEntity extends BulletEntityState {
   }
 
   getData(): BulletEntityData {
-    return [
-      this.color,
-      fixDecimal(this.x),
-      fixDecimal(this.y),
-      fixDecimal(this.rotation),
-    ];
+    return {
+      color: this.color,
+      x: fixDecimal(this.x),
+      y: fixDecimal(this.y),
+      rotation: fixDecimal(this.rotation),
+    };
   }
 }

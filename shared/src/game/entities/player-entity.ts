@@ -6,7 +6,7 @@ type Actions = {
   [action: string]: boolean;
 };
 
-export class PlayerEntityState {
+export class PlayerEntityData {
   id: string = "";
   x: number = 0;
   y: number = 0;
@@ -18,19 +18,7 @@ export class PlayerEntityState {
   name: string = "Noob";
 }
 
-export type PlayerEntityData = [
-  id: string,
-  x: number,
-  y: number,
-  color: string,
-  rotation: number,
-  exp: number,
-  health: number,
-  maxHealth: number,
-  name: string
-];
-
-export default class PlayerEntity extends PlayerEntityState {
+export default class PlayerEntity extends PlayerEntityData {
   actions: Actions = {};
   speed = 5;
   size = settings.player.size;
@@ -52,16 +40,16 @@ export default class PlayerEntity extends PlayerEntityState {
   }
 
   getData(): PlayerEntityData {
-    return [
-      this.id,
-      fixDecimal(this.x),
-      fixDecimal(this.y),
-      this.color,
-      fixDecimal(this.rotation),
-      this.exp,
-      fixDecimal(this.health),
-      this.maxHealth,
-      this.name,
-    ];
+    return {
+      id: this.id,
+      x: fixDecimal(this.x),
+      y: fixDecimal(this.y),
+      color: this.color,
+      rotation: fixDecimal(this.rotation),
+      exp: this.exp,
+      health: fixDecimal(this.health),
+      maxHealth: this.maxHealth,
+      name: this.name,
+    };
   }
 }

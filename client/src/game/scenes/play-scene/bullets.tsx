@@ -23,11 +23,11 @@ function Bullets() {
         return instanceRefs.current[i].scale.setScalar(0);
       }
       instanceRefs.current[i].scale.setScalar(1);
-      instanceRefs.current[i].rotateZ(gameState.bullets[i][3]);
-      instanceRefs.current[i].color.set(gameState.bullets[i][0]);
+      instanceRefs.current[i].rotateZ(gameState.bullets[i].rotation);
+      instanceRefs.current[i].color.set(gameState.bullets[i].color);
       instanceRefs.current[i].position.set(
-        gameState.bullets[i][1],
-        gameState.bullets[i][2],
+        gameState.bullets[i].x,
+        gameState.bullets[i].y,
         0
       );
     }

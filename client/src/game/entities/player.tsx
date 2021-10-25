@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { GameState, PlayerEntityState, settings } from "@app/shared";
+import { GameState, PlayerEntityData, settings } from "@app/shared";
 import { Group, Mesh } from "three";
 import { useThree } from "@react-three/fiber";
 import { Html, useTexture } from "@react-three/drei";
@@ -12,7 +12,7 @@ import { Subscription } from "../types";
 
 const SIZE = settings.player.size;
 
-type Props = PlayerEntityState & {
+type Props = PlayerEntityData & {
   current?: boolean;
 };
 
@@ -36,24 +36,24 @@ export default function Player({
   const { camera } = useThree();
 
   useSubscription(Subscription.tick, (gameState: GameState) => {
-    const index = gameState.players.findIndex((player) => player[0] === id);
+    const index = gameState.players.findIndex((player) => player.id === id);
     if (index === -1) return;
     const player = gameState.players[index];
     rotationControls.enabled = current;
 
     // Update position
-    groupRef.current.position.x = player[1];
-    groupRef.current.position.y = player[2];
-    meshRef.current.rotation.z = player[4];
+    groupRef.current.position.x = player.x;
+    groupRef.current.position.y = player.y;
+    meshRef.current.rotation.z = player.rotation;
 
     // Health
-    const health = (100 / player[7]) * player[6];
+    const health = (100 / player.maxHealth) * player.health;
     healthBarRef.current.style.width = `${health}%`;
     healthTextRef.current.innerText = `${health}%`;
 
     // Exp/level
-    const level = Math.floor(player[5] / settings.exp.perLevel);
-    const levelExp = player[5] - level * settings.exp.perLevel;
+    const level = Math.floor(player.exp / settings.exp.perLevel);
+    const levelExp = player.exp - level * settings.exp.perLevel;
     const exp = (100 / settings.exp.perLevel) * levelExp;
     expBarRef.current.style.width = `${exp}%`;
     expTextRef.current.innerText = `lvl. ${level}`;

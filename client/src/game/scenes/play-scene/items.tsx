@@ -25,15 +25,15 @@ function Items() {
       }
       instanceRefs.current[i].scale.setScalar(1);
       instanceRefs.current[i].position.set(
-        gameState.items[i][0],
-        gameState.items[i][1],
+        gameState.items[i].x,
+        gameState.items[i].y,
         0
       );
-      instanceRefs.current[i].color.setStyle(gameState.items[i][3]);
+      instanceRefs.current[i].color.setStyle(gameState.items[i].color);
 
       // Health
       const updatedHealth =
-        (1 / settings.item.maxHealth) * gameState.items[i][2];
+        (1 / settings.item.maxHealth) * gameState.items[i].health;
       healthBarRefs.current[i].scale.x = updatedHealth;
       healthBarRefs.current[i].position.x =
         SIZE * -2 * (1 - updatedHealth) * 0.5;
